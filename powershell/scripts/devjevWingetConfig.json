@@ -1,0 +1,38 @@
+[
+    {
+        "appId": "7zip.7zip",
+        "overrideArguments": ""
+    },
+    {
+        "appId": "DominikReichl.KeePass",
+        "overrideArguments": ""
+    },
+    {
+        "appId": "Microsoft.WindowsTerminal",
+        "overrideArguments": ""
+    },
+    {
+        "appId": "Google.Chrome",
+        "overrideArguments": ""
+    },
+    {
+        "appId": "Microsoft.PowerToys",
+        "overrideArguments": ""
+    },
+    {
+        "appId": "Microsoft.AzureStorageExplorer",
+        "overrideArguments": ""
+    },
+    {
+        "appId": "Git.Git",
+        "overrideArguments": "/SILENT /LOADINF=###{RootPathPlaceholder}###gitSetupParams.inf"
+    },
+    {
+        "appId": "Microsoft.VisualStudioCode",
+        "overrideArguments": "/SILENT /LOADINF=###{RootPathPlaceholder}###vscodeSetupParams.inf"
+    },
+    {
+        "appId": "Docker.DockerDesktop",
+        "overrideArguments": ""
+    }
+]
