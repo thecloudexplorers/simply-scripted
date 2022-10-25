@@ -1,38 +1,72 @@
-[
-    {
-        "appId": "7zip.7zip",
-        "overrideArguments": ""
-    },
-    {
-        "appId": "DominikReichl.KeePass",
-        "overrideArguments": ""
-    },
-    {
-        "appId": "Microsoft.WindowsTerminal",
-        "overrideArguments": ""
-    },
-    {
-        "appId": "Google.Chrome",
-        "overrideArguments": ""
-    },
-    {
-        "appId": "Microsoft.PowerToys",
-        "overrideArguments": ""
-    },
-    {
-        "appId": "Microsoft.AzureStorageExplorer",
-        "overrideArguments": ""
-    },
-    {
-        "appId": "Git.Git",
-        "overrideArguments": "/SILENT /LOADINF=###{RootPathPlaceholder}###gitSetupParams.inf"
-    },
-    {
-        "appId": "Microsoft.VisualStudioCode",
-        "overrideArguments": "/SILENT /LOADINF=###{RootPathPlaceholder}###vscodeSetupParams.inf"
-    },
-    {
-        "appId": "Docker.DockerDesktop",
-        "overrideArguments": ""
-    }
-]
+{
+	"$schema" : "https://aka.ms/winget-packages.schema.2.0.json",
+	"CreationDate" : "2022-10-25T22:15:37.372-00:00",
+	"Sources" :
+	[
+		{
+			"Packages" :
+			[
+				{
+					"PackageIdentifier" : "7zip.7zip",
+					"overrideArguments": ""
+				},
+				{
+					"PackageIdentifier" : "DominikReichl.KeePass",
+					"overrideArguments": ""
+				},
+				{
+					"PackageIdentifier" : "Microsoft.WindowsTerminal",
+					"overrideArguments": ""
+				},
+				{
+					"PackageIdentifier" : "Google.Chrome",
+					"overrideArguments": ""
+				},
+				{
+					"PackageIdentifier" : "Microsoft.PowerToys",
+					"overrideArguments": ""
+				},
+				{
+					"PackageIdentifier" : "Microsoft.AzureStorageExplorer",
+					"overrideArguments": ""
+				},
+				{
+					"PackageIdentifier" : "Git.Git",
+					"overrideArguments": "/SILENT /LOADINF=###{RootPathPlaceholder}###gitSetupParams.inf"
+				},
+				{
+					"PackageIdentifier" : "Microsoft.VisualStudioCode",
+					"overrideArguments": "/SILENT /LOADINF=###{RootPathPlaceholder}###vscodeSetupParams.inf"
+				},
+				{
+					"PackageIdentifier" : "Postman.Postman",
+					"overrideArguments": ""
+				},
+				{
+					"PackageIdentifier" : "Zoom.Zoom",
+					"overrideArguments": ""
+				},
+				{
+					"PackageIdentifier" : "Microsoft.Bicep",
+					"overrideArguments": ""
+				},
+				{
+					"PackageIdentifier" : "SlackTechnologies.Slack",
+					"overrideArguments": ""
+				},
+				{
+					"PackageIdentifier" : "Microsoft.PowerShell",
+					"overrideArguments": ""
+				}
+			],
+			"SourceDetails" :
+			{
+				"Argument" : "https://cdn.winget.microsoft.com/cache",
+				"Identifier" : "Microsoft.Winget.Source_8wekyb3d8bbwe",
+				"Name" : "winget",
+				"Type" : "Microsoft.PreIndexed.Package"
+			}
+		}
+	],
+	"WinGetVersion" : "1.3.2691"
+}
