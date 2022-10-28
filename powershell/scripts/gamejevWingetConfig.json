@@ -71,6 +71,10 @@
         {
           "PackageIdentifier": "Microsoft.PowerShell",
           "overrideArguments": ""
+        },
+        {
+          "PackageIdentifier": "Learnpulse.Screenpresso",
+          "overrideArguments": ""
         }
       ],
       "SourceDetails": {
