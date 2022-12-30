@@ -21,10 +21,6 @@
           "overrideArguments": ""
         },
         {
-          "PackageIdentifier": "Microsoft.PowerToys",
-          "overrideArguments": ""
-        },
-        {
           "PackageIdentifier": "Microsoft.AzureStorageExplorer",
           "overrideArguments": ""
         },
