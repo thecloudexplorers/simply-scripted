@@ -59,7 +59,7 @@ winget source update --name winget
 Write-Information " source update complete"
 
 if ($null -ne $wingetInstalled) {
-    Write-Information -MessageData "Parsing config file at:"
+    Write-Information -MessageData "`n Parsing config file at:"
     Write-Information -MessageData "[$WingetConfigFilePath]`n"
     [string]$configContent = Get-Content -Path $WingetConfigFilePath
 
@@ -72,7 +72,7 @@ if ($null -ne $wingetInstalled) {
         $wgApp = $_
 
         Write-Information "Checking package [$($wgApp.PackageIdentifier)]"
-        $installedPackage = winget list --exact --id $wgApp.PackageIdentifier
+        $installedPackage = winget list --exact --id $wgApp.PackageIdentifier --accept-source-agreements
         [System.String]$installedPackageString = $installedPackage
         # check if package has NOT been installed
         if ($installedPackageString.Contains('No installed package found matching input criteria.')) {
@@ -108,7 +108,7 @@ if ($null -ne $wingetInstalled) {
                 $installedPackageLine = $installedPackage[$headerLineNr + 2]
                 [System.Double]$installedPackageVersion = $installedPackageLine.Substring($versionColumnIndex, $sourceColumnIndex - $versionColumnIndex).TrimEnd()
 
-                $searchedPackageResult = winget search --exact --id $wgApp.PackageIdentifier
+                $searchedPackageResult = winget search --exact --id $wgApp.PackageIdentifier --accept-source-agreements --accept-package-agreements
                 $searchedPackageLine = $searchedPackageResult[$headerLineNr + 2]
 
                 # since the result from the search command is in the smame format the index values for the columns aare reused
@@ -120,12 +120,12 @@ if ($null -ne $wingetInstalled) {
                     switch ([string]::IsNullOrEmpty($wgApp.overrideArguments)) {
                         True {
                             Write-Information "Upgrading package [$($wgApp.PackageIdentifier)] from version [$installedPackageVersion] to [$searchedPackageVersion]"
-                            winget upgrade --exact --id $wgApp.PackageIdentifier --accept-package-agreements --accept-source-agreements
+                            winget upgrade --exact --id $wgApp.PackageIdentifier --accept-source-agreements --accept-package-agreements
                             Write-Information -MessageData " installation completed"
                         }
                         False {
                             Write-Information "Installing package [$($wgApp.PackageIdentifier)] from version [$installedPackageVersion] to [$searchedPackageVersion] with override arguments"
-                            winget upgrade --exact --id $wgApp.PackageIdentifier --override $wgApp.overrideArguments --accept-package-agreements --accept-source-agreements
+                            winget upgrade --exact --id $wgApp.PackageIdentifier --override $wgApp.overrideArguments --accept-source-agreements --accept-package-agreements
                             Write-Information -MessageData " installation completed"
                         }
                         Default {
@@ -138,9 +138,8 @@ if ($null -ne $wingetInstalled) {
 
 
             } else {
-                Write-Information -MessageData "Skipping upgrade as UpgradeIfAvailable switch has not been passed"
+                Write-Information -MessageData "Skipping upgrade check as UpgradeIfAvailable switch has not been passed"
             }
-            Write-Information -MessageData " All done!!!"
         }
     }
     Write-Information -MessageData " All done!!!"
