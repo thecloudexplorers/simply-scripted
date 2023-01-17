@@ -8,9 +8,19 @@
     it's soft-deleted and recoverable during a retention period. This function calls the API Management Purge operation
     to permanently delete the concerned soft-deleted instance.
 
+    .PARAMETER SubscriptionId
+    Subscription Id of the concerning Api Management Instance
+
+    .PARAMETER Location
+    Azure location/region of the concerning Api Management Instance
+
+    .PARAMETER ApiManagementInstanceName
+    Name of the concerning Api Management Instance
+
     .EXAMPLE
     $apimArgs = @{
         SubscriptionId              = "d8852164-1d48-4887-82d2-022294a5b912"
+        Location                    = "West Europe"
         ApiManagementInstanceName   = "my-apim"
     }
     Remove-SoftDeletedApiManagementInstance @apimArgs
