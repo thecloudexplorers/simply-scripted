@@ -22,7 +22,7 @@
     Source      : https://github.com/thecloudexplorers/simply-scripted
 #>
 
-function Add-NewApplicationOwnerInBulk {
+function Add-AzAdNewApplicationOwnerInBulk {
     [CmdLetBinding()]
     param (
         [Parameter(Mandatory)]
