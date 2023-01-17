@@ -7,8 +7,8 @@
 
     .DESCRIPTION
     This script checks if there is a context already present with the provided app identity if so
-    the context is set to that specific identity, if not a new connection is made using the supplied app identity. In the case of an existing context is found,
-    that specific context is hen set to active, istaed of reconnectiing again.
+    the context is set to that specific identity, if not a new connection is made using the supplied app identity.
+    In the case of an existing context is found, that specific context is hen set to active, istaed of reconnectiing again.
     This is particularly useful for development purposses when using multiple identities is required.
 
     Limitation: multitenant identities are currently not supported
@@ -60,7 +60,7 @@ function Connect-InAppRegistrationContext {
     # verify that all contexts originate from the same tenant
     $uniqueTenantsCount = $contextExists.Tenants | Group-Object -NoElement
     if ($null -ne $contextExists -and $uniqueTenantsCount.Values.Count -ne 1) {
-        Write-Error -Message "Multiple tenants detected, please ensure the app registration is not a multitenant one" -ErrorAction Stop
+        Write-Error -Message "Multiple tenants detected, please ensure the App Registration is not a multitenant one" -ErrorAction Stop
     }
 
     if ($null -eq $contextExists) {
@@ -68,14 +68,14 @@ function Connect-InAppRegistrationContext {
         $appCredential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $ApplicationId, $secureSecret
         Connect-AzAccount -ServicePrincipal -TenantId $TenantId -Credential $appCredential
     } else {
-        Write-Information -MessageData "A context for the concerning app registration is already active"
+        Write-Information -MessageData "A context for the concerning App Registration is already active"
 
         if ($contextExists.ExtendedProperties.Keys.Contains("Subscriptions")) {
             Write-Information -MessageData "Setting current context to"
             $firstSubscription = $contextExists.ExtendedProperties.Subscriptions.split(',')[0]
             Set-AzContext -SubscriptionId $firstSubscription
         } else {
-            Write-Information -MessageData "Current app registration does not have permissions to any resorces, skipping setting of context to a specific subscription"
+            Write-Information -MessageData "Current app registration does not have any resource permissions, skipping this context"
         }
     }
 }
