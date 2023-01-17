@@ -28,9 +28,7 @@
         ApplicationSecret       = 'Iru8Q~srAAAQtLLbSBsYuWGKpcVwUT35cPBdIdpI'
         TenantId                = "633e9d70-5551-400b-902a-baf94940f6ec"
     }
-    $graphToken = Get-MgGraphToken @authArgs
-    Connect-MgGraph -AccessToken $graphToken
-    $header = @{authorization = "Basic $graphToken"}
+    Connect-AzInAppRegistrationContext @authArgs
 
     .NOTES
     Author      : Jev - @devjevnl | https://www.devjev.nl
