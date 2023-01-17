@@ -37,7 +37,7 @@
     Source      : https://github.com/thecloudexplorers/simply-scripted
 #>
 
-function Connect-InAppRegistrationContext {
+function Connect-AzInAppRegistrationContext {
     [CmdletBinding()]
     param (
         [Parameter(Mandatory)]
