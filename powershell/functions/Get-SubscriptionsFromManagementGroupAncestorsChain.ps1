@@ -24,6 +24,7 @@
     .LINK
     https://learn.microsoft.com/en-us/dotnet/api/microsoft.azure.management.managementgroups.models.managementgroupdetails.managementgroupancestorschain?view=azure-dotnet-preview
     https://learn.microsoft.com/en-us/azure/governance/management-groups/resource-graph-samples?tabs=azure-cli
+    https://www.codeisahighway.com/list-all-subscriptions-under-a-management-group-with-azure-resource-graph/
 #>
 
 function Get-SubscriptionsFromManagementGroupAncestorsChain {
