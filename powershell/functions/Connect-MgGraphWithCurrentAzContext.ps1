@@ -24,12 +24,11 @@ function Connect-MgGrapWithCurrentAzContext {
         Write-Information -MessageData "`nEnsuring proper connection `nChecking AzContext..."
         $currentAzContext = Get-AzContext
         if ($null -ne $currentAzContext ) {
-            # use the current az context. graphToken is using in header building and should be a string
+
             Write-Information -MessageData "An active azure context was found. Using the current context for MgGraph authorization"
-
             $currentMgContext = Get-MgContext
-            Write-Information -MessageData "Verifying MgContext ClientId with AzContext AccountId"
 
+            Write-Information -MessageData "Verifying MgContext ClientId with AzContext AccountId"
             if ($currentMgContext.ClientId -ne $currentAzContext.Account.Id) {
                 Write-Information -MessageData "MgContext ClientId does NOT match with AzContext AccountId `n reconnecting to MgGraph using application [$currentAzContext.Account.Id]"
 
