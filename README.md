@@ -1,2 +1,3 @@
 # simply-scripted
-This repo contains all kind of handy scripts
+
+This repo is a collection of various scripts and functions that support automation of Azure, Azure DevOps and related tooling.

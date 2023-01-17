@@ -1,6 +1,7 @@
+#Requires -Modules Az
 <#
     .SYNOPSIS
-    Purges a soft deleted API management instance
+    Use this function to purge a soft deleted API management instance
 
     .DESCRIPTION
     When you use the Azure portal or REST API version 2020-06-01-preview or later to delete an API Management instance,
@@ -9,20 +10,20 @@
 
     .EXAMPLE
     $apimArgs = @{
-    SubscriptionId = "26ca7489-072f-4213-ba79-b898fc3fc123"
-    ApiManagementInstanceName = "my-apim"
+        SubscriptionId              = "d8852164-1d48-4887-82d2-022294a5b912"
+        ApiManagementInstanceName   = "my-apim"
     }
-
     Remove-SoftDeletedApiManagementInstance @apimArgs
 
     .NOTES
-    Author: Jev - @devjevnl | https://www.devjev.nl
+    Author      : Jev - @devjevnl | https://www.devjev.nl
+    Source      : https://github.com/thecloudexplorers/simply-scripted
 
     .LINK
     https://docs.microsoft.com/en-us/azure/api-management/soft-delete
 #>
 
-#Requires -Modules Az
+
 function Remove-SoftDeletedApiManagementInstance {
     [CmdLetBinding()]
     param (
@@ -31,8 +32,9 @@ function Remove-SoftDeletedApiManagementInstance {
         [System.String] $SubscriptionId,
 
 
+        [Parameter(Mandatory)]
         [ValidateNotNullOrEmpty()]
-        [System.String] $Location = "westeurope",
+        [System.String] $Location,
 
         [Parameter(Mandatory)]
         [ValidateNotNullOrEmpty()]
