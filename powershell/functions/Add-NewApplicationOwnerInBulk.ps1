@@ -2,24 +2,24 @@
 #Requires -Modules Az
 <#
     .SYNOPSIS
-    Adds an application owner ot the supplied Azure AD Applications collection
+    This function add the specified user as owner of the specified App Registrations
 
     .DESCRIPTION
-    Add an additional (if additional owners are already present) Azure AD application owner
-    to each of the Azure AD Applicaiton that is part of the supplied collection
+    This function adds the specified user (as additional) as owner to
+    all App registration part of the supplied collection. The email of the user in question is used.
 
     .EXAMPLE
     $currentApps = Get-AzADApplication -DisplayNameStartWith "MyPurposeApps"
 
     $newOwnerArgs = @{
-    AzAdApplicationCollection = $currentApps
-    NewOwnerEmail = "devjev@demojev.nl"
+        AzAdApplicationCollection   = $currentApps
+        NewOwnerEmail               = "devjev@demojev.nl"
     }
-
     Add-NewApplicationOwnerInBulk @newOwnerArgs
 
     .NOTES
     Author: Jev - @devjevnl | https://www.devjev.nl
+    Source      : https://github.com/thecloudexplorers/simply-scripted
 #>
 
 function Add-NewApplicationOwnerInBulk {
@@ -42,7 +42,6 @@ function Add-NewApplicationOwnerInBulk {
     }
 
     Process {
-
         if ($newOwner) {
             $AzAdApplicationCollection.ForEach{
                 $AzAdApp = $_
@@ -62,14 +61,12 @@ function Add-NewApplicationOwnerInBulk {
                         Write-Information -MessageData "  User has been added"
                     }
                 } else {
-                    Write-Information -MessageData " Current session user [$($currentUser.Account.Id)] is not an owner of [$($AzAdApp.DisplayName)], skipping"
+                    Write-Information -MessageData " Current context identity [$($currentUser.Account.Id)] is not an owner of [$($AzAdApp.DisplayName)], skipping"
                 }
             }
 
-        }
-        else {
+        } else {
             Write-Warning "Unable to add new Application owner as no user has been found with email [$NewOwnerEmail]"
         }
-
     }
 }
