@@ -5,7 +5,7 @@
 
     .DESCRIPTION
     This function tests an Azure Resource Management type service connection. This is the same functionality
-    as avalable via the verify button in the user interface.
+    as available via the verify button in the user interface.
 
     .PARAMETER AdoApiUri
     Ado Api uri of Azure DevOps, unless modified by Microsoft this should be https://dev.azure.com/
@@ -16,7 +16,7 @@
     .PARAMETER AdoProjectName
     Name of the concerning project
 
-    .PARAMETER ServiceConncetionObject
+    .PARAMETER ServiceConnectionObject
     Full service connection object, returned via get or new service connection function
 
     .PARAMETER AdoAuthenticationHeader
@@ -33,7 +33,7 @@
         AdoApiUri = "https://dev.azure.com/"
         AdoOrganizationName = "my-organization"
         AdoProjectName = "My-AdoProject"
-        ServiceConncetionObject = $scObject
+        ServiceConnectionObject = $scObject
         AdoAuthenticationHeader = $authHeader
     }
 
@@ -62,7 +62,7 @@ function Test-AdoServiceConnection {
 
         [Parameter(Mandatory)]
         [ValidateNotNullOrEmpty()]
-        [PSCustomObject] $ServiceConncetionObject,
+        [PSCustomObject] $ServiceConnectionObject,
 
         [Parameter(Mandatory)]
         [ValidateNotNullOrEmpty()]
@@ -86,14 +86,14 @@ function Test-AdoServiceConnection {
             callbackRequiredTemplate = ""
             resultTemplate           = ""
         }
-        serviceEndpointDetails      = $ServiceConncetionObject
+        serviceEndpointDetails      = $ServiceConnectionObject
     }
 
     $serviceEndpointJsonObject = $serviceEndpointRequestObject | ConvertTo-Json -Depth 10
 
     # https://docs.microsoft.com/en-us/rest/api/azure/devops/serviceendpoint/endpointproxy/execute%20service%20endpoint%20request
     # POST https://dev.azure.com/{organization}/{project}/_apis/serviceendpoint/endpointproxy?endpointId={endpointId}&api-version=6.1-preview.1
-    $serviceConnectionApiUr = $AdoApiUri + $AdoOrganizationName + "/" + $AdoProjectName + "/_apis/serviceendpoint/endpointproxy?endpointId=" + $ServiceConncetionObject.Id + "&api-version=6.1-preview.1"
+    $serviceConnectionApiUr = $AdoApiUri + $AdoOrganizationName + "/" + $AdoProjectName + "/_apis/serviceendpoint/endpointproxy?endpointId=" + $ServiceConnectionObject.Id + "&api-version=6.1-preview.1"
     try {
         $serviceConnectionApiResponse = Invoke-RestMethod -Uri $serviceConnectionApiUr -Method 'Post' -Headers $AdoAuthenticationHeader -Body $serviceEndpointJsonObject
 

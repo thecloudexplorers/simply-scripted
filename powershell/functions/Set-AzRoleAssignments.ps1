@@ -9,13 +9,13 @@
     if this does not match with the input RBAC role for that principal, this function corrects it.
 
     Limitations:
-    Only Azure AD Security groups and Service Principals (Etenrprise Applications) are currently supported
+    Only Azure AD Security groups and Service Principals (Enterprise Applications) are currently supported
 
     .PARAMETER RoleAssignmentScope
     Scope for the role assignment
 
     .PARAMETER ResourceGroupName
-    Name of the target resoruce group
+    Name of the target resource group
 
     .PARAMETER AzAdIdentityName
     DisplayName of either an AzADServicePrincipal or AzADGroup
@@ -24,13 +24,13 @@
     Array of Role Assignment names
 
     .PARAMETER AzAdObjectType
-    Specify the type identity object, acceptable vlaues are: azAdApplication, azAdSecurityGroup
+    Specify the type identity object, acceptable values are: azAdApplication, azAdSecurityGroup
 
     .EXAMPLE
     $inputArgs = @{
         RoleAssignmentScope = "/subscriptions/a61asf7f-12b6-4c13-b5d2-4302e728c57a/resourceGroups/My-Solution-RG"
         AzAdIdentityName = "my-security-group"
-        RoleAssignments = Object[]$RoleAssingMentsArray
+        RoleAssignments = Object[]$RoleAssignmentsArray
     }
 
     .NOTES
@@ -103,7 +103,7 @@ function Set-AzRoleAssignments {
                     Write-Information -MessageData "   UPDATED: Missing role assignment added"
                 }
                 Default {
-                    Write-Error -Message "Something went wrong compairing role assingments, unsupported side indicator [$($delta.SideIndicator)]" -ErrorAction Stop
+                    Write-Error -Message "Something went wrong compairing role Assignments, unsupported side indicator [$($delta.SideIndicator)]" -ErrorAction Stop
                 }
             }
         }

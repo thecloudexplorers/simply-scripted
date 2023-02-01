@@ -110,7 +110,7 @@ function New-AdoProject {
 
     try {
 
-        # project creation is processed by Microsoft via a queue, query the queue url retrned from the creation Api call
+        # project creation is processed by Microsoft via a queue, query the queue url returned from the creation Api call
         # to query the queue status and create a while loop waiting for the queue to be processed
         $projectCreationStatus = Invoke-RestMethod -Uri $projectsApiResponse.url -Method 'Get' -Headers $AdoAuthenticationHeader
 
