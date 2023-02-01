@@ -6,7 +6,7 @@
     .DESCRIPTION
     This function creates an Azure Resource Manager in the specified project based on the specified App registration and a corresponding
     app secret. The secret hint is stored in the description field of the created service connection to allow matching of the secret
-    for mantenance tasks
+    for maintenance tasks
 
     .PARAMETER AdoApiUri
     Ado Api uri of Azure DevOps, unless modified by microsoft this should be https://dev.azure.com/
