@@ -3,13 +3,13 @@
 
 <#
     .SYNOPSIS
-    This script connects to an Azure tenant using an application identity (App registration) and sets the context to the concernign App Registration
+    This script connects to an Azure tenant using an application identity (App registration) and sets the context to the concerning App Registration
 
     .DESCRIPTION
     This script checks if there is a context already present with the provided app identity if so
     the context is set to that specific identity, if not a new connection is made using the supplied app identity.
-    In the case of an existing context is found, that specific context is hen set to active, istaed of reconnectiing again.
-    This is particularly useful for development purposses when using multiple identities is required.
+    In the case of an existing context is found, that specific context is hen set to active, instead of reconnecting again.
+    This is particularly useful for development purposes when using multiple identities is required.
 
     Limitation: multitenant identities are currently not supported
 
@@ -51,7 +51,7 @@ function Connect-AzInAppRegistrationContext {
         [System.String] $TenantId
     )
 
-    # get all alavailable az contexts and verify if one exists for current Aapp Registration
+    # get all available az contexts and verify if one exists for current App Registration
     $myContextCollection = Get-AzContext -ListAvailable
     $contextExists = $myContextCollection.Account | Where-Object { $_.Id -eq $ApplicationId -and $_.Type -eq 'ServicePrincipal' }
 
