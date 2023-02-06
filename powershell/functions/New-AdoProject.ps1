@@ -78,7 +78,7 @@ function New-AdoProject {
         [System.Collections.Hashtable] $AdoAuthenticationHeader
     )
 
-    # getting all avalable process templates, a process template id is required for creating projects
+    # getting all available process templates, a process template id is required for creating projects
     # https://docs.microsoft.com/en-us/rest/api/azure/devops/core/processes/get
     # GET https://dev.azure.com/{organization}/_apis/process/processes/{processId}?api-version=7.1-preview.1
     $processesApiUri = $AdoApiUri + $AdoOrganizationName + "/_apis/process/processes?api-version=7.1-preview.1"
