@@ -33,7 +33,8 @@
     New-AzAdApps @azAdAppsArgs
 
     .NOTES
-    Author  : Jev - @devjevnl | https://www.devjev.nl
+    Author      : Jev - @devjevnl | https://www.devjev.nl
+    Source      : https://github.com/thecloudexplorers/simply-scripted
 
     .LINK
     https://learn.microsoft.com/en-us/powershell/module/az.resources/new-azadapplication?view=azps-9.3.0

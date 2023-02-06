@@ -19,7 +19,8 @@
     Add-NewApplicationOwnerInBulk @newOwnerArgs
 
     .NOTES
-    Author: Jev - @devjevnl | https://www.devjev.nl
+    Author      : Jev - @devjevnl | https://www.devjev.nl
+    Source      : https://github.com/thecloudexplorers/simply-scripted
 #>
 
 function Add-NewApplicationOwnerInBulk {
@@ -66,8 +67,7 @@ function Add-NewApplicationOwnerInBulk {
                 }
             }
 
-        }
-        else {
+        } else {
             Write-Warning "Unable to add new Application owner as no user has been found with email [$NewOwnerEmail]"
         }
 

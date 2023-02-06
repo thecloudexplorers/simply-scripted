@@ -18,7 +18,7 @@
     Add-NewApplicationOwnerInBulk @newOwnerArgs
 
     .NOTES
-    Author: Jev - @devjevnl | https://www.devjev.nl
+    Author      : Jev - @devjevnl | https://www.devjev.nl
     Source      : https://github.com/thecloudexplorers/simply-scripted
 #>
 
