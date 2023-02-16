@@ -1,75 +1,52 @@
-#Requires -PSEdition Desktop
-#Requires -Modules Az
+#Requires -PSEdition Core
 <#
     .SYNOPSIS
-    Adds an application owner ot the supplied Azure AD Applications collection
+    This function returns a well formatted Azure DevOps authentication token
 
     .DESCRIPTION
-    Add an additional (if additional owners are already present) Azure AD application owner
-    to each of the Azure AD Applicaiton that is part of the supplied collection
+    This function formats a user generated Azure DevOps PAT token and its creators name into a
+    well authentication token which can be directly used in a rest call header
+
+    .PARAMETER PatToken
+    Your PAT token as generated in Azure DevOps
+
+    .PARAMETER PatTokenOwnerName
+    Your name e.g. John Doe
 
     .EXAMPLE
-    $currentApps = Get-AzADApplication -DisplayNameStartWith "MyPurposeApps"
-
-    $newOwnerArgs = @{
-    AzAdApplicationCollection = $currentApps
-    NewOwnerEmail = "devjev@demojev.nl"
+    $adoAuthArgs = @{
+    PatToken = "26cb6489072f4214ba78b898fc3fc5dd"
+    PatTokenOwnerName = "John Doe"
     }
 
-    Add-NewApplicationOwnerInBulk @newOwnerArgs
+    $newToken = New-AdoAuthenticationToken @adoAuthArgs
+    $header = @{authorization = "Basic $newToken"}
 
     .NOTES
-    Author      : Jev - @devjevnl | https://www.devjev.nl
-    Source      : https://github.com/thecloudexplorers/simply-scripted
+    Author  : Jev - @devjevnl | https://www.devjev.nl
+    Source  : https://github.com/thecloudexplorers
 #>
 
-function Add-NewApplicationOwnerInBulk {
+function New-AdoAuthenticationToken {
     [CmdLetBinding()]
+    [OutputType([System.String])]
     param (
         [Parameter(Mandatory)]
         [ValidateNotNullOrEmpty()]
-        [Object[]] $AzAdApplicationCollection,
+        [System.String] $PatToken,
 
         [Parameter(Mandatory)]
         [ValidateNotNullOrEmpty()]
-        [System.String] $NewOwnerEmail
+        [System.String] $PatTokenOwnerName
     )
 
-    Begin {
+    # Format an authentication token
+    Write-Debug -Message "Adding PatTokenOwnerName PatToken into a single string"
+    $auth = " {0}:{1}" -f $PatTokenOwnerName, $PatToken
 
-        $filter = "Mail eq '{0}'" -f $NewOwnerEmail
-        $newOwner = Get-AzureADUser -Filter $filter
-        $currentUser = Get-AzureADCurrentSessionInfo
-    }
+    Write-Debug -Message "Encoding the single string with ToBase64String"
+    $utf8Auth = [System.Text.Encoding]::UTF8.GetBytes($Auth)
+    $base64Auth = [System.Convert]::ToBase64String($utf8Auth)
 
-    Process {
-
-        if ($newOwner) {
-            $AzAdApplicationCollection.ForEach{
-                $AzAdApp = $_
-
-                Write-Information -MessageData "Processing AD application [$($AzAdApp.DisplayName)]]"
-                $currentOwners = Get-AzureADApplicationOwner -ObjectId $AzAdApp.id
-                $userIsCurrentOwner = $currentOwners | Where-Object { $_.Mail -eq $currentUser.Account.Id }
-
-                if ($userIsCurrentOwner) {
-                    Write-Information -MessageData " Adding user [$($newOwner.DisplayName)] as owner to [$($AzAdApp.DisplayName)]]"
-                    $userIsOwner = $currentOwners | Where-Object { $_.Mail -eq $NewOwnerEmail }
-
-                    if ($userIsOwner) {
-                        Write-Information -MessageData "  User [$($newOwner.DisplayName) ] is alspready owner of [$($AzAdApp.DisplayName)]"
-                    } else {
-                        Add-AzureADApplicationOwner -ObjectId $AzAdApp.id -RefObjectId $newOwner.ObjectId
-                        Write-Information -MessageData "  User has been added"
-                    }
-                } else {
-                    Write-Information -MessageData " Current session user [$($currentUser.Account.Id)] is not an owner of [$($AzAdApp.DisplayName)], skipping"
-                }
-            }
-
-        } else {
-            Write-Warning "Unable to add new Application owner as no user has been found with email [$NewOwnerEmail]"
-        }
-
-    }
+    return $base64Auth
 }
