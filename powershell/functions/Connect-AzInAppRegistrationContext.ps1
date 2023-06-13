@@ -9,7 +9,7 @@
     This script checks if there is a context already present with the provided app identity if so
     the context is set to that specific identity, if not a new connection is made using the supplied app identity.
     In the case of an existing context is found, that specific context is hen set to active, instead of reconnecting again.
-    This is particularly useful for development purposes when using multiple identities is required.
+    This is particularly useful for development purpose when using multiple identities is required.
 
     Limitation: multitenant identities are currently not supported
 
@@ -24,9 +24,9 @@
 
     .EXAMPLE
     $authArgs = @{
-        ApplicationId           = "1ef5b0b1-ecd2-4a54-bf2c-ae54ab32dfdf"
-        ApplicationSecret       = 'Iru8Q~srAAAQtLLbSBsYuWGKpcVwUT35cPBdIdpI'
-        TenantId                = "633e9d70-5551-400b-902a-baf94940f6ec"
+        ApplicationId           = "2bf5b0b1-ecd2-4a54-bf2c-ae54ab32dfdf"
+        ApplicationSecret       = '12345678012345678901234567801234567890'
+        TenantId                = "612e9d70-5551-400b-902a-baf74930f6at"
     }
     Connect-AzInAppRegistrationContext @authArgs
 
