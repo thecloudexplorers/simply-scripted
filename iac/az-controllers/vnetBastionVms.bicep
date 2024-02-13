@@ -8,7 +8,7 @@ param publicIpAddressName string = 'djn-s-dmo-pip001'
 param bastionHostName string = 'djn-s-dmo-bas001'
 
 @description('Name for the Network Interface Card resource')
-param nicName string = 'djn-s-dmo-nic001'
+param nicName string = 'djn-s-dmo-vm001-nic001'
 
 @description('Name for the Virtual Machine resource - hopVM')
 param hopVmName string = 'djn-s-dmo-vm001'
@@ -63,7 +63,7 @@ module bastionPublicIp '../az-modules/Microsoft.Network/publicIPAddresses/standa
   }
 }
 
-module basicBastionHost '../az-modules/Microsoft.Network/bastionHosts/basicHost.bicep' = {
+module basicBastionHost '../az-modules/Microsoft.Network/bastionHosts/basicBastionHost.bicep' = {
   name: deploymentNames.standardHost
   dependsOn: [
     smallvNet
@@ -90,7 +90,7 @@ module simpleNic '../az-modules/Microsoft.Network/networkInterfaces/simpleNic.bi
   }
 }
 
-module simpleVm '../az-modules/Microsoft.Compute/virtualMachines/simpleVm.bicep' = {
+module simpleVm '../az-modules/Microsoft.Compute/virtualMachines/jumpBoxVm.bicep' = {
   name: deploymentNames.simpleVm
   dependsOn: [
     smallvNet

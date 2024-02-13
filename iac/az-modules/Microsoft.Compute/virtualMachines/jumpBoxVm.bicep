@@ -17,6 +17,8 @@ param adminUsername string
 @secure()
 param adminPassword string
 
+var aadLoginExtensionName = 'AADLoginForWindows'
+
 resource vm 'Microsoft.Compute/virtualMachines@2023-03-01' = {
   name: vmName
   location: location
@@ -63,5 +65,17 @@ resource vm 'Microsoft.Compute/virtualMachines@2023-03-01' = {
         }
       ]
     }
+  }
+}
+
+resource vmAadLoginExtensionName 'Microsoft.Compute/virtualMachines/extensions@2023-03-01' = {
+  name: aadLoginExtensionName
+  parent: vm
+  location: location
+  properties: {
+    publisher: 'Microsoft.Azure.ActiveDirectory'
+    type: aadLoginExtensionName
+    typeHandlerVersion: '1.0'
+    autoUpgradeMinorVersion: true
   }
 }

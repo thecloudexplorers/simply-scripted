@@ -16,7 +16,6 @@ resource simpleNic 'Microsoft.Network/networkInterfaces@2023-04-01' = {
         name: 'ipconfig1'
         properties: {
           privateIPAllocationMethod: 'Dynamic'
-
           subnet: {
             id: subnetId
           }

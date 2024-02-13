@@ -14,7 +14,7 @@ resource bastionHost 'Microsoft.Network/bastionHosts@2023-04-01' = {
   name: bastionHostName
   location: location
   sku: {
-    name: 'Basic'
+    name: 'Standard'
   }
   properties: {
     enableFileCopy: true
