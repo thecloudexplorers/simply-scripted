@@ -1,9 +1,9 @@
 # Deploy params, assuming resource group is already present
 $deployArgs = @{
-    TemplateFile      = "iac\az-controllers\vnetBastionVms.bicep"
+    TemplateFile      = "iac\az-controllers\bastionJumpBox.bicep"
     #TemplateParameterFile = "./src/params/starterParams.json"
     ResourceGroupName = "djn-s-dmo-rg001"
-    Name              = "vnetBastionVms-parent-deployment"
+    Name              = "bastionJumpBox-parent-deployment"
 }
 
 $resourceGroupExists = Get-AzResourceGroup -name $deployArgs.ResourceGroupName -ErrorAction SilentlyContinue

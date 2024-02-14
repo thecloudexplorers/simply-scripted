@@ -37,11 +37,11 @@ param vmAdminPassword string
 
 // Deployment name variables
 var deploymentNames = {
-  smallvNet: 'vnetBastionVms-small-vnet-module'
-  standardPublicIp: 'vnetBastionVms-standard-public-ip-module'
-  standardHost: 'vnetBastionVms-standard-bastion-host-module'
-  simpleNic: 'vnetBastionVms-simple-nic-module'
-  simpleVm: 'vnetBastionVms-simple-vm-module'
+  smallvNet: 'bastionJumpBox-small-vnet-module'
+  standardPublicIp: 'bastionJumpBox-standard-public-ip-module'
+  standardHost: 'bastionJumpBox-standard-bastion-host-module'
+  simpleNic: 'bastionJumpBox-simple-nic-module'
+  simpleVm: 'bastionJumpBox-simple-vm-module'
 }
 
 module smallvNet '../az-modules/Microsoft.Network/virtualNetworks/smallNetwork.bicep' = {
