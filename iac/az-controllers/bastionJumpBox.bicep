@@ -1,53 +1,49 @@
 @description('Name for the Virtual Network')
-param virtualNetworkName string = 'djn-s-dmo-vnet001'
+param virtualNetworkName string
 
 @description('Name for the Public IP Address resource')
-param publicIpAddressName string = 'djn-s-dmo-pip001'
+param publicIpAddressName string
 
 @description('Name for the Bastion Host resource')
-param bastionHostName string = 'djn-s-dmo-bas001'
+param bastionHostName string
+
+@description('Name for the Virtual Machine resource - hopVm')
+param jumpBoxVmName string
 
 @description('Name for the Network Interface Card resource')
-param nicName string = 'djn-s-dmo-vm001-nic001'
-
-@description('Name for the Virtual Machine resource - hopVM')
-param hopVmName string = 'djn-s-dmo-vm001'
+param jumpBoxVmNicName string
 
 @description('Name for the Key Vault resource')
-param keyVaultName string = 'djn-s-dmo-kv001'
+param keyVaultName string
 
 @description('Region in which the vNet should be deployed')
-param resourceLocation string = resourceGroup().location
-
-@description('Name of the subnet for the Azure Bastion Service')
-param bastionSubnetName string = 'AzureBastionSubnet'
-
-@description('Name of the hopVM subnet')
-param hopVmSubnetName string = 'djn-s-dmo-snet001'
+param resourceLocation string
 
 @description('Size of the virtual machine.')
-param vmSize string = 'Standard_B2as_v2'
+param vmSize string
 
-@description('Name of the application subnet')
-param applicationSubnetName string = 'djn-s-dmo-snet002'
+@description('Name of the hopVM subnet')
+param jumpBoxVmSubnetName string
 
 @description('Admin username for the virtual machine')
-param vmAdminUsername string = ''
+param vmAdminUsername string
 
 @description('Admin password for the virtual machine')
 @secure()
-param vmAdminPassword string = ''
+param vmAdminPassword string
 
 @description('Object ID of the user/service principal to grant full data plane access to the KeyVault.')
-param principalObjectId string = ''
+param principalObjectId string
 
 // Deployment name variables
 var deploymentNames = {
   smallvNet: 'bastionJumpBox-small-vnet-module'
+  bastionSubnet: 'bastionJumpBox-bastion-subnet-module'
+  jumpBoxSubnet: 'bastionJumpBox-jumpbox-subnet-module'
   standardPublicIp: 'bastionJumpBox-standard-public-ip-module'
   standardHost: 'bastionJumpBox-standard-bastion-host-module'
-  simpleNic: 'bastionJumpBox-simple-nic-module'
-  simpleVm: 'bastionJumpBox-simple-vm-module'
+  jumpBoxNic: 'bastionJumpBox-simple-nic-module'
+  jumpBoxVm: 'bastionJumpBox-jumpbox-vm-module'
   standardKeyVault: 'bastionJumpBox-standard-key-vault-module'
   usernameSecret: 'bastionJumpBox-standard-key-vault-username-module'
   passwordSecret: 'bastionJumpBox-standard-key-vault-password-module'
@@ -58,14 +54,38 @@ module smallvNet '../az-modules/Microsoft.Network/virtualNetworks/smallNetwork.b
   params: {
     virtualNetworkName: virtualNetworkName
     location: resourceLocation
-    firstSubnetName: bastionSubnetName
-    secondSubnetName: hopVmSubnetName
-    thirdSubnetName: applicationSubnetName
+  }
+}
+
+module bastionSubnet '../az-modules/Microsoft.Network/virtualNetworks/subnets/standardSubnet.bicep' = {
+  name: deploymentNames.bastionSubnet
+  dependsOn: [
+    smallvNet
+  ]
+  params: {
+    subnetName: 'AzureBastionSubnet'
+    addressPrefix: '10.0.1.0/25'
+    parentVnetName: virtualNetworkName
+  }
+}
+
+module jumpBoxSubnet '../az-modules/Microsoft.Network/virtualNetworks/subnets/standardSubnet.bicep' = {
+  name: deploymentNames.jumpBoxSubnet
+  dependsOn: [
+    smallvNet
+  ]
+  params: {
+    subnetName: jumpBoxVmSubnetName
+    addressPrefix: '10.0.2.0/25'
+    parentVnetName: virtualNetworkName
   }
 }
 
 module bastionPublicIp '../az-modules/Microsoft.Network/publicIPAddresses/standardPip.bicep' = {
   name: deploymentNames.standardPublicIp
+  dependsOn: [
+    smallvNet
+  ]
   params: {
     publicIpAddressName: publicIpAddressName
     location: resourceLocation
@@ -81,40 +101,38 @@ module basicBastionHost '../az-modules/Microsoft.Network/bastionHosts/basicBasti
   params: {
     bastionHostName: bastionHostName
     location: resourceLocation
-    subnetId: smallvNet.outputs.bastionSubnetId
+    subnetId: bastionSubnet.outputs.subnetId
     publicIpId: bastionPublicIp.outputs.publicIpAddressId
   }
 }
 
-module simpleNic '../az-modules/Microsoft.Network/networkInterfaces/simpleNic.bicep' = {
-  name: deploymentNames.simpleNic
+module jumpBoxNic '../az-modules/Microsoft.Network/networkInterfaces/simpleNic.bicep' = {
+  name: deploymentNames.jumpBoxNic
   dependsOn: [
     smallvNet
   ]
   params: {
-    nicName: nicName
+    nicName: jumpBoxVmNicName
     location: resourceLocation
-    subnetId: smallvNet.outputs.hopVmSubnetId
-
+    subnetId: jumpBoxSubnet.outputs.subnetId
   }
 }
 
-module simpleVm '../az-modules/Microsoft.Compute/virtualMachines/jumpBoxVm.bicep' = {
-  name: deploymentNames.simpleVm
+module jumpBoxVm '../az-modules/Microsoft.Compute/virtualMachines/jumpBoxVm.bicep' = {
+  name: deploymentNames.jumpBoxVm
   dependsOn: [
     smallvNet
-    simpleNic
+    jumpBoxNic
   ]
   params: {
-    vmName: hopVmName
+    vmName: jumpBoxVmName
     location: resourceLocation
     vmSize: vmSize
-    nicId: simpleNic.outputs.nicId
+    nicId: jumpBoxNic.outputs.nicId
     adminUsername: vmAdminUsername
     adminPassword: vmAdminPassword
   }
 }
-
 module standardKeyVault '../az-modules/Microsoft.KeyVault/vaults/standardVault.bicep' = {
   name: deploymentNames.standardKeyVault
   params: {
