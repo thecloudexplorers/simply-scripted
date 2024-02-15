@@ -13,6 +13,9 @@ param nicName string = 'djn-s-dmo-vm001-nic001'
 @description('Name for the Virtual Machine resource - hopVM')
 param hopVmName string = 'djn-s-dmo-vm001'
 
+@description('Name for the Key Vault resource')
+param keyVaultName string = 'djn-s-dmo-kv001'
+
 @description('Region in which the vNet should be deployed')
 param resourceLocation string = resourceGroup().location
 
@@ -29,11 +32,14 @@ param vmSize string = 'Standard_B2as_v2'
 param applicationSubnetName string = 'djn-s-dmo-snet002'
 
 @description('Admin username for the virtual machine')
-param vmAdminUsername string
+param vmAdminUsername string = ''
 
 @description('Admin password for the virtual machine')
 @secure()
-param vmAdminPassword string
+param vmAdminPassword string = ''
+
+@description('Object ID of the user/service principal to grant full data plane access to the KeyVault.')
+param principalObjectId string = ''
 
 // Deployment name variables
 var deploymentNames = {
@@ -42,6 +48,9 @@ var deploymentNames = {
   standardHost: 'bastionJumpBox-standard-bastion-host-module'
   simpleNic: 'bastionJumpBox-simple-nic-module'
   simpleVm: 'bastionJumpBox-simple-vm-module'
+  standardKeyVault: 'bastionJumpBox-standard-key-vault-module'
+  usernameSecret: 'bastionJumpBox-standard-key-vault-username-module'
+  passwordSecret: 'bastionJumpBox-standard-key-vault-password-module'
 }
 
 module smallvNet '../az-modules/Microsoft.Network/virtualNetworks/smallNetwork.bicep' = {
@@ -103,5 +112,38 @@ module simpleVm '../az-modules/Microsoft.Compute/virtualMachines/jumpBoxVm.bicep
     nicId: simpleNic.outputs.nicId
     adminUsername: vmAdminUsername
     adminPassword: vmAdminPassword
+  }
+}
+
+module standardKeyVault '../az-modules/Microsoft.KeyVault/vaults/standardVault.bicep' = {
+  name: deploymentNames.standardKeyVault
+  params: {
+    keyVaultName: keyVaultName
+    location: resourceLocation
+    principalObjectId: principalObjectId
+  }
+}
+
+module jumpBoxUserName '../az-modules/Microsoft.KeyVault/vaults/secrets/standardSecret.bicep' = {
+  dependsOn: [
+    standardKeyVault
+  ]
+  name: deploymentNames.usernameSecret
+  params: {
+    parentKeyVaultName: keyVaultName
+    secretName: 'jumpboxVmUsername'
+    secretValue: vmAdminUsername
+  }
+}
+
+module jumpBoxPassword '../az-modules/Microsoft.KeyVault/vaults/secrets/standardSecret.bicep' = {
+  dependsOn: [
+    standardKeyVault
+  ]
+  name: deploymentNames.passwordSecret
+  params: {
+    parentKeyVaultName: keyVaultName
+    secretName: 'jumpboxVmPassword'
+    secretValue: vmAdminPassword
   }
 }
