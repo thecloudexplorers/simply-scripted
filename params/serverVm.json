@@ -1,0 +1,30 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "virtualNetworkName": {
+      "value": "djn-s-dmo-vnet001"
+    },
+    "serverVmSubnetName": {
+      "value": "djn-s-dmo-snet002"
+    },
+    "serverVmNicName": {
+      "value": "djn-s-dmo-vm002-nic001"
+    },
+    "serverVmName": {
+      "value": "djn-s-dmo-vm002"
+    },
+    "resourceLocation": {
+      "value": "West Europe"
+    },
+    "vmSize": {
+      "value": "Standard_B2as_v2"
+    },
+    "vmAdminUsername": {
+      "value": ""
+    },
+    "vmAdminPassword": {
+      "value": ""
+    }
+  }
+}
