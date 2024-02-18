@@ -28,8 +28,6 @@ var deploymentNames = {
   serverSubnet: 'bastionJumpBox-jumpbox-subnet-module'
   serverNic: 'bastionJumpBox-server-nic-module'
   serverVm: 'bastionJumpBox-server-vm-module'
-  usernameSecret: 'bastionJumpBox-standard-key-vault-username-module'
-  passwordSecret: 'bastionJumpBox-standard-key-vault-password-module'
 }
 
 module serverSubnet '../az-modules/Microsoft.Network/virtualNetworks/subnets/standardSubnet.bicep' = {

@@ -1,10 +1,3 @@
-# Check if the resource group exists, if not create it
-$resourceGroupExists = Get-AzResourceGroup -name $deployArgs.ResourceGroupName -ErrorAction SilentlyContinue
-
-if ($null -eq $resourceGroupExists) {
-    New-AzResourceGroup -Name $deployArgs.ResourceGroupName -Location "West Europe"
-}
-
 # Deploy params jump box vm
 $deployBastionJumpBoxVmArgs = @{
     TemplateFile          = "iac\az-controllers\bastionJumpBox.bicep"
@@ -12,6 +5,15 @@ $deployBastionJumpBoxVmArgs = @{
     ResourceGroupName     = "djn-s-dmo-rg001"
     Name                  = "bastionJumpBox-parent-deployment"
 }
+
+# Check if the resource group exists, if not create it
+$resourceGroupExists = Get-AzResourceGroup -name $deployArgs.ResourceGroupName -ErrorAction SilentlyContinue
+
+if ($null -eq $resourceGroupExists) {
+    New-AzResourceGroup -Name $deployBastionJumpBoxVmArgs.ResourceGroupName -Location "West Europe"
+}
+
+# Deploy the jump box bicep controller
 New-AzResourceGroupDeployment @deployBastionJumpBoxVmArgs
 
 # Deploy the server VM
