@@ -38,8 +38,6 @@ param principalObjectId string
 // Deployment name variables
 var deploymentNames = {
   smallvNet: 'bastionJumpBox-small-vnet-module'
-  bastionSubnet: 'bastionJumpBox-bastion-subnet-module'
-  jumpBoxSubnet: 'bastionJumpBox-jumpbox-subnet-module'
   standardPublicIp: 'bastionJumpBox-standard-public-ip-module'
   standardHost: 'bastionJumpBox-standard-bastion-host-module'
   jumpBoxNic: 'bastionJumpBox-simple-nic-module'
@@ -54,30 +52,7 @@ module smallvNet '../az-modules/Microsoft.Network/virtualNetworks/smallNetwork.b
   params: {
     virtualNetworkName: virtualNetworkName
     location: resourceLocation
-  }
-}
-
-module bastionSubnet '../az-modules/Microsoft.Network/virtualNetworks/subnets/standardSubnet.bicep' = {
-  name: deploymentNames.bastionSubnet
-  dependsOn: [
-    smallvNet
-  ]
-  params: {
-    subnetName: 'AzureBastionSubnet'
-    addressPrefix: '10.0.1.0/25'
-    parentVnetName: virtualNetworkName
-  }
-}
-
-module jumpBoxSubnet '../az-modules/Microsoft.Network/virtualNetworks/subnets/standardSubnet.bicep' = {
-  name: deploymentNames.jumpBoxSubnet
-  dependsOn: [
-    smallvNet
-  ]
-  params: {
-    subnetName: jumpBoxVmSubnetName
-    addressPrefix: '10.0.2.0/25'
-    parentVnetName: virtualNetworkName
+    jumpVmSubnetName: jumpBoxVmSubnetName
   }
 }
 
@@ -101,7 +76,7 @@ module basicBastionHost '../az-modules/Microsoft.Network/bastionHosts/basicBasti
   params: {
     bastionHostName: bastionHostName
     location: resourceLocation
-    subnetId: bastionSubnet.outputs.subnetId
+    subnetId: smallvNet.outputs.bastionSubnetId
     publicIpId: bastionPublicIp.outputs.publicIpAddressId
   }
 }
@@ -114,7 +89,7 @@ module jumpBoxNic '../az-modules/Microsoft.Network/networkInterfaces/simpleNic.b
   params: {
     nicName: jumpBoxVmNicName
     location: resourceLocation
-    subnetId: jumpBoxSubnet.outputs.subnetId
+    subnetId: smallvNet.outputs.jumpVmSubnetId
   }
 }
 
