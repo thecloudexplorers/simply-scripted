@@ -40,6 +40,9 @@ module serverSubnet '../az-modules/Microsoft.Network/virtualNetworks/subnets/sta
 }
 
 module serverNic '../az-modules/Microsoft.Network/networkInterfaces/simpleNic.bicep' = {
+  dependsOn: [
+    serverSubnet
+  ]
   name: deploymentNames.serverNic
   params: {
     nicName: serverVmNicName
@@ -51,6 +54,9 @@ module serverNic '../az-modules/Microsoft.Network/networkInterfaces/simpleNic.bi
 
 module serverVm '../az-modules/Microsoft.Compute/virtualMachines/serverVm.bicep' = {
   name: deploymentNames.serverVm
+  dependsOn: [
+    serverNic
+  ]
   params: {
     vmName: serverVmName
     location: resourceLocation
