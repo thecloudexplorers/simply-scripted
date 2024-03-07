@@ -7,6 +7,9 @@ param addressPrefix string
 @description('Name of the parent vNet where the subnet will be created.')
 param parentVnetName string
 
+@description('Optional. Network Security Group id to associate with the subnet. If not provided, no NSG will be associated with the subnet.')
+param nsgId string?
+
 resource existingParentVnet 'Microsoft.Network/virtualNetworks@2023-04-01' existing = {
   name: parentVnetName
 }
@@ -16,6 +19,9 @@ resource subnet 'Microsoft.Network/virtualNetworks/subnets@2023-04-01' = {
   parent: existingParentVnet
   properties: {
     addressPrefix: addressPrefix
+    networkSecurityGroup: !empty(nsgId) ? {
+      id: nsgId
+    } : null
   }
 }
 
