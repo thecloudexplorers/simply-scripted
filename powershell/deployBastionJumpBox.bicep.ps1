@@ -7,7 +7,7 @@ $deployBastionJumpBoxVmArgs = @{
 }
 
 # Check if the resource group exists, if not create it
-$resourceGroupExists = Get-AzResourceGroup -name $deployArgs.ResourceGroupName -ErrorAction SilentlyContinue
+$resourceGroupExists = Get-AzResourceGroup -name $deployBastionJumpBoxVmArgs.ResourceGroupName -ErrorAction SilentlyContinue
 
 if ($null -eq $resourceGroupExists) {
     New-AzResourceGroup -Name $deployBastionJumpBoxVmArgs.ResourceGroupName -Location "West Europe"

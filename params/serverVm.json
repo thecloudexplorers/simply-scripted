@@ -21,10 +21,10 @@
       "value": "Standard_B2as_v2"
     },
     "vmAdminUsername": {
-      "value": ""
+      "value": "YOUR_USERNAME_HERE"
     },
     "vmAdminPassword": {
-      "value": ""
+      "value": "YOUR_PASSWORD_HERE"
     }
   }
 }
