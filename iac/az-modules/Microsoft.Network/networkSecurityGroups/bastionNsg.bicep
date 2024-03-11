@@ -1,3 +1,9 @@
+metadata moduleMetadata = {
+  author: 'Jev Suchoi'
+  description: 'This module deploys an specifc bastion NSG. It shoudl only be applied to an AzureBsstionSubnet'
+  version: '1.0.0'
+}
+
 @description('Name for the NSG resource')
 param networkSecurityGroupName string = 'djn-s-dmo-nsg001'
 

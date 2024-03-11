@@ -1,4 +1,17 @@
-@description(''''
+metadata controllerMetadata = {
+  author: 'Jev Suchoi'
+  description: '''This controller deploys a virtual network with two subnets, a bastion host, a jumpbox VM, and a key vault.
+  It also creates a secret in the key vault for the jumpbox VM username and password. The jumpbox VM is deployed with the
+  specified username and password. The key vault is granted full data plane access to the specified user/service principal.
+  The virtual network is deployed with the specified address prefixes. The bastion host is deployed with the specified public
+  IP address name. The bastion host and jumpbox VM are deployed with the specified network security group names. The jumpbox
+  VM is deployed with the specified virtual machine size. The jumpbox VM is deployed with the specified subnet name. The jumpbox
+  VM is deployed with the specified admin username and password. The virtual network, bastion host, jumpbox VM, and key vault
+  are deployed in the specified region.'''
+  version: '1.0.0'
+}
+
+@description('''
 Specify new for a greenfield deployment of the vNet otherwise specify existing.
 This is needed due to a a bicep limitation, when a vNet deployment is rerun without subnets directly specified in the vNet resoruce
 the ARM engine tries to delete and recreate the existing subnets, however since there are resources attached to those subnets

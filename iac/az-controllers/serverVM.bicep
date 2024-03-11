@@ -1,3 +1,10 @@
+metadata controllerMetadata = {
+  author: 'Jev Suchoi'
+  description: '''This controller is used to deploy a virtual network, subnet, network interface card,
+  and virtual machine in Azure.'''
+  version: '1.0.0'
+}
+
 @description('Name for the Virtual Network')
 param virtualNetworkName string
 

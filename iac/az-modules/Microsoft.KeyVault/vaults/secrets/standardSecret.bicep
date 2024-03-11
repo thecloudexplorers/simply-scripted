@@ -1,3 +1,9 @@
+metadata moduleMetadata = {
+  author: 'Jev Suchoi'
+  description: 'This module deploys a secret to an existing key vault.'
+  version: '1.0.0'
+}
+
 @description('Name of the secret')
 param secretName string
 

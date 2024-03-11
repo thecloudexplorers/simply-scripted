@@ -1,3 +1,9 @@
+metadata moduleMetadata = {
+  author: 'Jev Suchoi'
+  description: 'This module deploys a server type Windows 2022 virtual machine.'
+  version: '1.0.0'
+}
+
 @description('Name of the virtual machine resource')
 param vmName string = 'djn-s-dmo-vm002'
 
@@ -17,6 +23,7 @@ param adminUsername string
 @secure()
 param adminPassword string
 
+@description('Name of the Entra ID intergration extension')
 var aadLoginExtensionName = 'AADLoginForWindows'
 
 resource vm 'Microsoft.Compute/virtualMachines@2023-03-01' = {

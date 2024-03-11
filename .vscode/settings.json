@@ -33,5 +33,6 @@
   "explorer.compactFolders": false,
   "files.associations": {
     "*.yml": "azure-pipelines"
-  }
+  },
+  "azureAutomation.directory.basePath": "c:\\Users\\DevJev"
 }

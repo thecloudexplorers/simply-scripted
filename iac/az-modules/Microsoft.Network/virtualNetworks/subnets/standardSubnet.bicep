@@ -1,3 +1,8 @@
+metadata moduleMetadata = {
+  author: 'Jev Suchoi'
+  description: 'This module deploys an Azure Virtual Network Subnet.'
+  version: '1.0.0'
+}
 @description('Name of the subnet')
 param subnetName string
 

@@ -1,3 +1,9 @@
+metadata moduleMetadata = {
+  author: 'Jev Suchoi'
+  description: 'This module deploys an Azure Bastion Host using Standard SKU.'
+  version: '1.0.0'
+}
+
 @description('Name for the  Azure Bastion Host')
 param bastionHostName string = 'djn-s-dmo-bas001'
 

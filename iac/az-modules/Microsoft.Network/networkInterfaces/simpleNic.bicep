@@ -1,3 +1,10 @@
+metadata moduleMetadata = {
+  author: 'Jev Suchoi'
+  description: '''This module deploys an Azure Network Interface Card (NIC)
+  in a specified subnet.'''
+  version: '1.0.0'
+}
+
 @description('Name of the Nic resource')
 param nicName string = 'djn-s-dmo-nic001'
 

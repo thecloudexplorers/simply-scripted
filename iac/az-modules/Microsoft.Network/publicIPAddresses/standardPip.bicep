@@ -1,3 +1,9 @@
+metadata moduleMetadata = {
+  author: 'Jev Suchoi'
+  description: 'This module deploys an Azure Public IP Address based on Standard SKU.'
+  version: '1.0.0'
+}
+
 @description('Name for the Public IP Address resource')
 param publicIpAddressName string = 'djn-s-dmo-vnet001'
 

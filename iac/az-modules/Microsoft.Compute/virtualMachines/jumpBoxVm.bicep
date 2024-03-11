@@ -1,3 +1,9 @@
+metadata moduleMetadata = {
+  author: 'Jev Suchoi'
+  description: 'This module deploys a jumpt box type Windows 10 virtual machine.'
+  version: '1.0.0'
+}
+
 @description('Name of the virtual machine resource')
 param vmName string = 'djn-s-dmo-vm001'
 

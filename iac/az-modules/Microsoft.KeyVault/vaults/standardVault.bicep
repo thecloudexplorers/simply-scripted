@@ -1,3 +1,10 @@
+metadata moduleMetadata = {
+  author: 'Jev Suchoi'
+  description: ''''This module deploys an Azure KeyVault using the standard SKU.
+  It grants full data plane access to a specified user/service principal.'''''
+  version: '1.0.0'
+}
+
 @maxLength(24)
 @description('KeyVault name.')
 param keyVaultName string
