@@ -39,15 +39,15 @@
 
 function New-PlaceholderText {
     param(
+        [Parameter(Mandatory)]
+        [ValidateRange(1, 100)]
+        [System.Int32]$Number,
+
         [Parameter(Mandatory, ParameterSetName = 'Words')]
         [System.Management.Automation.SwitchParameter]$Words,
 
         [Parameter(Mandatory, ParameterSetName = 'Paragraphs')]
-        [System.Management.Automation.SwitchParameter]$Paragraphs,
-
-        [Parameter(Mandatory)]
-        [ValidateRange(1, 100)]
-        [System.Int32]$number
+        [System.Management.Automation.SwitchParameter]$Paragraphs
     )
 
     $loremIpsum = @"
@@ -58,11 +58,14 @@ irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nul
 pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia
 deserunt mollit anim id est laborum.
 "@
-    if ($type -eq 'paragraphs') {
-        $result = $loremIpsum * $number
+
+    if ($Paragraphs.IsPresent) {
+        $result = $loremIpsum * $Number
+    } elseif ($Words.IsPresent) {
+        $randomWords = $loremIpsum -split ' ' | Get-Random -Count $Number
+        $result = [string]::Join(" ", $randomWords)
     } else {
-        $words = $loremIpsum -split ' ' | Get-Random -Count $number
-        $result = [string]::Join(" ", $words)
+        Write-Error "You must specify either -Words or -Paragraphs"
     }
 
     return $result
