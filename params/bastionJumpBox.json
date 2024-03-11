@@ -1,0 +1,51 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "newOrExistingVirtualNetwork": {
+      "value": "existing"
+    },
+    "virtualNetworkName": {
+      "value": "djn-s-dmo-vnet001"
+    },
+    "bastionSubnetAddressPrefix": {
+      "value": "10.0.1.0/25"
+    },
+    "jumpBoxVmSubnetAddressPrefix": {
+      "value": "10.0.2.0/25"
+    },
+    "publicIpAddressName": {
+      "value": "djn-s-dmo-pip001"
+    },
+    "bastionHostName": {
+      "value": "djn-s-dmo-bas001"
+    },
+    "jumpBoxVmName": {
+      "value": "djn-s-dmo-vm001"
+    },
+    "jumpBoxVmNicName": {
+      "value": "djn-s-dmo-vm001-nic001"
+    },
+    "keyVaultName": {
+      "value": "djn-s-dmo-kv001"
+    },
+    "resourceLocation": {
+      "value": "West Europe"
+    },
+    "vmSize": {
+      "value": "Standard_B2as_v2"
+    },
+    "jumpBoxVmSubnetName": {
+      "value": "djn-s-dmo-snet001"
+    },
+    "vmAdminUsername": {
+      "value": "YOUR_ADMIN_USERNAME"
+    },
+    "vmAdminPassword": {
+      "value": "YOUR_ADMIN_PASSWORD"
+    },
+    "principalObjectId": {
+      "value": "YOUR_ADMIN_OBJECT_ID"
+    }
+  }
+}

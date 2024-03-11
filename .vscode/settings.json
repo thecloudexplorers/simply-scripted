@@ -18,8 +18,6 @@
   "powershell.codeFormatting.addWhitespaceAroundPipe": true,
   "powershell.codeFormatting.whitespaceAroundOperator": true,
   "powershell.codeFormatting.whitespaceAfterSeparator": true,
-  "azureFunctions.projectRuntime": "~2",
-  "azureFunctions.projectLanguage": "PowerShell",
   "files.exclude": {
     "obj": true,
     "bin": true
@@ -33,5 +31,6 @@
   "explorer.compactFolders": false,
   "files.associations": {
     "*.yml": "azure-pipelines"
-  }
+  },
+  "azureAutomation.directory.basePath": "c:\\Users\\DevJev"
 }
