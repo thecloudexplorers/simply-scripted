@@ -1,6 +1,6 @@
 # simply-scripted
 
-This repo is a collection of various scripts, functions, controllers and lab configurations that support automation of Azure, Azure DevOps and related tooling.
+This repo is a collection of scripts, functions, controllers and lab configurations that support automation of Azure, Azure DevOps and related tooling.
 
 ## Lab Environments
 
@@ -36,7 +36,7 @@ The following controllers .bicep files are used to create the lab environment. E
 
 ## PowerShell Functions
 
-Currently this repos provides the following PowerShell functions:
+This repo provides the following PowerShell functions:
 
 - Add-AzAdApplicationOwnerInBulk
 - Confirm-AdoGroupMembership
@@ -47,7 +47,7 @@ Currently this repos provides the following PowerShell functions:
 
 ## Bicep Modules
 
-Currently this repo provides the following Bicep modules:
+This repo provides the following Bicep modules:
 
 - jumpBoxVm
 - serverVm
