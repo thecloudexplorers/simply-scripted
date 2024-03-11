@@ -13,9 +13,6 @@
     .PARAMETER TimeSpanEndDate
     A mandatory parameter that specifies the end date of the range.
 
-    .OUTPUTS
-    DateTime[]. The function returns an array of two DateTime objects - a randomly generated start date and end date within the provided range.
-
     .EXAMPLE
     $currentDate = Get-Date
 
