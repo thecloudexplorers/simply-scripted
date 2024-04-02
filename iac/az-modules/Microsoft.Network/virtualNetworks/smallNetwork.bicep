@@ -1,7 +1,8 @@
 metadata moduleMetadata = {
-  author: 'Jev Suchoi'
-  description: 'This module deploys an Azure Virtual Network with an address space of 10.0.0.0/22'
   version: '1.0.0'
+  author: 'Jev Suchoi'
+  source: 'https://github.com/thecloudexplorers/simply-scripted'
+  description: 'This module deploys an Azure Virtual Network with an address space of 10.0.0.0/22'
 }
 
 @description('''
@@ -25,20 +26,22 @@ param virtualNetworkName string = 'djn-s-dmo-vnet001'
 @description('Region in which the vNet should be deployed')
 param location string = 'West Europe'
 
-resource virtualNetwork 'Microsoft.Network/virtualNetworks@2023-04-01' = if (newOrExisting == 'new') {
-  name: virtualNetworkName
-  location: location
-  properties: {
-    addressSpace: {
-      addressPrefixes: [
-        '10.0.0.0/22'
-      ]
+resource virtualNetwork 'Microsoft.Network/virtualNetworks@2023-04-01' =
+  if (newOrExisting == 'new') {
+    name: virtualNetworkName
+    location: location
+    properties: {
+      addressSpace: {
+        addressPrefixes: [
+          '10.0.0.0/22'
+        ]
+      }
     }
   }
-}
 
-resource virtualNetworkExisting 'Microsoft.Network/virtualNetworks@2023-04-01' existing = if (newOrExisting == 'existing') {
-  name: virtualNetworkName
-}
+resource virtualNetworkExisting 'Microsoft.Network/virtualNetworks@2023-04-01' existing =
+  if (newOrExisting == 'existing') {
+    name: virtualNetworkName
+  }
 
 output vNetId string = ((newOrExisting == 'new') ? virtualNetwork.id : virtualNetworkExisting.id)

@@ -1,7 +1,8 @@
 metadata moduleMetadata = {
-  author: 'Jev Suchoi'
-  description: 'This module deploys an Azure Virtual Network Subnet.'
   version: '1.0.0'
+  author: 'Jev Suchoi'
+  source: 'https://github.com/thecloudexplorers/simply-scripted'
+  description: 'This module deploys an Azure Virtual Network Subnet.'
 }
 @description('Name of the subnet')
 param subnetName string
@@ -24,9 +25,11 @@ resource subnet 'Microsoft.Network/virtualNetworks/subnets@2023-04-01' = {
   parent: existingParentVnet
   properties: {
     addressPrefix: addressPrefix
-    networkSecurityGroup: !empty(nsgId) ? {
-      id: nsgId
-    } : null
+    networkSecurityGroup: !empty(nsgId)
+      ? {
+          id: nsgId
+        }
+      : null
   }
 }
 

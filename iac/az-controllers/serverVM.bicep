@@ -1,8 +1,9 @@
 metadata controllerMetadata = {
+  version: '1.0.0'
   author: 'Jev Suchoi'
+  source: 'https://github.com/thecloudexplorers/simply-scripted'
   description: '''This controller is used to deploy a virtual network, subnet, network interface card,
   and virtual machine in Azure.'''
-  version: '1.0.0'
 }
 
 @description('Name for the Virtual Network')
@@ -55,7 +56,6 @@ module serverNic '../az-modules/Microsoft.Network/networkInterfaces/simpleNic.bi
     nicName: serverVmNicName
     location: resourceLocation
     subnetId: serverSubnet.outputs.subnetId
-
   }
 }
 

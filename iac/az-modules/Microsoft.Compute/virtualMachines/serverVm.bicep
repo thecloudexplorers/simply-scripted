@@ -1,7 +1,8 @@
 metadata moduleMetadata = {
-  author: 'Jev Suchoi'
-  description: 'This module deploys a server type Windows 2022 virtual machine.'
   version: '1.0.0'
+  author: 'Jev Suchoi'
+  source: 'https://github.com/thecloudexplorers/simply-scripted'
+  description: 'This module deploys a server type Windows 2022 virtual machine.'
 }
 
 @description('Name of the virtual machine resource')

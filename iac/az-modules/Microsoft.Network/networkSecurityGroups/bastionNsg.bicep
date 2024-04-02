@@ -1,7 +1,8 @@
 metadata moduleMetadata = {
-  author: 'Jev Suchoi'
-  description: 'This module deploys an specifc bastion NSG. It shoudl only be applied to an AzureBsstionSubnet'
   version: '1.0.0'
+  author: 'Jev Suchoi'
+  source: 'https://github.com/thecloudexplorers/simply-scripted'
+  description: 'This module deploys an specifc bastion NSG. It shoudl only be applied to an AzureBsstionSubnet'
 }
 
 @description('Name for the NSG resource')
