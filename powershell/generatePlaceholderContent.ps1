@@ -1,21 +1,61 @@
+#Requires -PSEdition Desktop
+#Requires -Modules Microsoft.Graph.Users.Actions
+#Requires -Modules Microsoft.Graph.Calendar
 
-$nrOfEmailsToGenerate = 200
-$nrOfEventsToGenerate = 500
-$sourceUpn = ""
-$targetUpn = ""
-$targetName = ""
-$timeZone = "W. Europe Standard Time"
+<#
+    .SYNOPSIS
+    This function add the specified user as owner of the specified App Registrations
+
+    .DESCRIPTION
+    This function adds the specified user (as additional) as owner to
+    all App registration part of the supplied collection. The email of the user in question is used.
+
+    .EXAMPLE
+    $currentApps = Get-AzADApplication -DisplayNameStartWith "MyPurposeApps"
+
+    $newOwnerArgs = @{
+        AzAdApplicationCollection   = $currentApps
+        NewOwnerEmail               = "devjev@demojev.nl"
+    }
+    Add-NewApplicationOwnerInBulk @newOwnerArgs
+
+    .NOTES
+    Author      : Jev - @devjevnl | https://www.devjev.nl
+    Source      : https://github.com/thecloudexplorers/simply-scripted
+#>
+
+[CmdLetBinding()]
+param (
+    [Parameter(Mandatory)]
+    [ValidateNotNullOrEmpty()]
+    [System.Int32] $nrOfEmailsToGenerate = 200,
+
+    [Parameter(Mandatory)]
+    [ValidateNotNullOrEmpty()]
+    [System.Int32] $nrOfEventsToGenerate = 500,
+
+    [Parameter(Mandatory)]
+    [ValidateNotNullOrEmpty()]
+    [System.String] $sourceUpn,
+
+    [Parameter(Mandatory)]
+    [ValidateNotNullOrEmpty()]
+    [System.String] $targetUpn
+
+)
 
 Import-Module Microsoft.Graph.Users.Actions
 Import-Module Microsoft.Graph.Calendar
+Import-Module Microsoft.Graph.Users.Functions
 
 . .\powershell\functions\New-PlaceholderText.ps1
 . .\powershell\functions\Get-StartAndEndDate.ps1
 
+# Get the correct time zone for Amsterdam.
+Invoke-MgTimeUserOutlook -UserId $sourceUpn
+$amsterdamTimeZone = $timeZones | where-Object { $_.DisplayName -like "(*Amsterdam*" }
 
 for ($i = 0; $i -lt $nrOfEventsToGenerate; $i++) {
-    <# Action that will repeat until the condition is met #>
-
     $eventLocationName = New-PlaceholderText -Number 5 -Words
     $eventContent = New-PlaceholderText -Number 10 -Paragraphs
 
@@ -29,11 +69,11 @@ for ($i = 0; $i -lt $nrOfEventsToGenerate; $i++) {
         }
         start                 = @{
             dateTime = $eventDates.RandomStartDate
-            timeZone = $timeZone
+            timeZone = $amsterdamTimeZone.Alias
         }
         end                   = @{
             dateTime = $eventDates.RandomEndDate
-            timeZone = $timeZone
+            timeZone = $amsterdamTimeZone.Alias
         }
         location              = @{
             displayName = $eventLocationName
