@@ -1,0 +1,54 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "storageAccountNameDev": {
+      "value": "djnddmosa001"
+    },
+    "storageAccountNamePrd": {
+      "value": "djnpdmosa001"
+    },
+    "newOrExistingVirtualNetwork": {
+      "value": "existing"
+    },
+    "virtualNetworkName": {
+      "value": "djn-s-dmo-vnet001"
+    },
+    "jumpBoxVmSubnetAddressPrefixDev": {
+      "value": "10.0.1.0/25"
+    },
+    "jumpBoxVmSubnetAddressPrefixPrd": {
+      "value": "10.0.2.0/25"
+    },
+    "jumpBoxVmName": {
+      "value": "djn-s-dmo-vm001"
+    },
+    "jumpBoxVmNicName": {
+      "value": "djn-s-dmo-vm001-nic001"
+    },
+    "keyVaultName": {
+      "value": "djn-s-dmo-kv001"
+    },
+    "resourceLocation": {
+      "value": "West Europe"
+    },
+    "vmSize": {
+      "value": "Standard_B2as_v2"
+    },
+    "jumpBoxVmSubnetNameDev": {
+      "value": "djn-d-dmo-snet001"
+    },
+    "jumpBoxVmSubnetNamePrd": {
+      "value": "djn-p-dmo-snet001"
+    },
+    "vmAdminUsername": {
+      "value": ""
+    },
+    "vmAdminPassword": {
+      "value": ""
+    },
+    "principalObjectId": {
+      "value": ""
+    }
+  }
+}

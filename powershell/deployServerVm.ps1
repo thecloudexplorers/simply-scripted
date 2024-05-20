@@ -25,3 +25,17 @@ $runCommandArgs = @{
     ScriptString      = "Install-WindowsFeature -name Web-Server -IncludeManagementTools"
 }
 Invoke-AzVMRunCommand @runCommandArgs
+
+de
+
+
+# Deploy the server VM
+$deployArgs = @{
+    TemplateFile          = "C:\dev\gh\thecloudexplorers\simply-scripted\iac\az-controllers\vmWithStorageAccountPrivateEndpoint.bicep"
+    TemplateParameterFile = "params\vmWithStorageAccountPrivateEndpoint.json"
+    ResourceGroupName     = "djn-s-dmo-rg001"
+    Name                  = "test-deploy-sa"
+}
+
+# Deploy the serverVm controller
+New-AzResourceGroupDeployment @deployArgs
