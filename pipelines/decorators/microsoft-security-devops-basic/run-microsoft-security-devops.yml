@@ -1,0 +1,7 @@
+steps:
+  - task: MicrosoftSecurityDevOps@1
+    displayName: '(Org injected) Run Microsoft Security DevOps'
+    inputs:
+      command: 'run'
+      policy: 'microsoft'
+      break: true

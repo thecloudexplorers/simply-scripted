@@ -1,6 +1,6 @@
 steps:
   - task: PowerShell@2
-    displayName: 'Decorator Task'
+    displayName: 'Run my script (injected from decorator)'
     inputs:
       targetType: 'inline'
       script: |
