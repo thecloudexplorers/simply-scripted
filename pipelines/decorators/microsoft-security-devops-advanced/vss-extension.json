@@ -1,9 +1,9 @@
 {
   "manifestVersion": 1,
-  "id": "org-microsoft-security-devops-advanced",
+  "id": "microsoft-security-devops-decorator-advanced",
   "publisher": "DevJevNL",
-  "version": "1.4.0",
-  "name": "Org Microsoft Security DevOps Advanced",
+  "version": "1.0.0",
+  "name": "Microsoft Security DevOps Decorator Advanced",
   "description": "Injects a Microsoft Security DevOps after the execution of the checkout task checks if the Microsoft Security DevOps is enabled and if so skips execution to prevent double runs.",
   "public": false,
   "categories": [
@@ -16,14 +16,13 @@
   ],
   "contributions": [
     {
-      "id": "org-microsoft-security-devops-advanced-task",
+      "id": "microsoft-security-devops-decorator-advanced-task",
       "type": "ms.azure-pipelines.pipeline-decorator",
       "targets": [
-        "ms.azure-pipelines-agent-job.post-task-tasks"
+        "ms.azure-pipelines-agent-job.post-checkout-tasks"
       ],
       "properties": {
-        "template": "run-microsoft-security-devops.yml",
-        "targettask": "6D15AF64-176C-496D-B583-FD2AE21D4DF4"
+        "template": "run-microsoft-security-devops.yml"
       }
     }
   ],
