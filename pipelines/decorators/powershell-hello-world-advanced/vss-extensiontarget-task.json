@@ -1,0 +1,37 @@
+{
+  "manifestVersion": 1,
+  "id": "powershell-hello-world-advanced",
+  "publisher": "DevJevNL",
+  "version": "1.4.0",
+  "name": "PowerShell Hello World Advanced",
+  "description": "Injects a PowerShell hello world after a Bash task.",
+  "public": false,
+  "categories": [
+    "Azure Pipelines"
+  ],
+  "targets": [
+    {
+      "id": "Microsoft.VisualStudio.Services"
+    }
+  ],
+  "contributions": [
+    {
+      "id": "powershell-hello-world-advanced-task",
+      "type": "ms.azure-pipelines.pipeline-decorator",
+      "targets": [
+        "ms.azure-pipelines-agent-job.post-task-tasks"
+      ],
+      "properties": {
+        "template": "run-powershell-script.yml",
+        "targettask": "6C731C3C-3C68-459A-A5C9-BDE6E6595B5B"
+      }
+    }
+  ],
+  "files": [
+    {
+      "path": "run-powershell-script.yml",
+      "addressable": true,
+      "contentType": "text/plain"
+    }
+  ]
+}

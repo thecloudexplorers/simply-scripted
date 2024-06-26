@@ -1,0 +1,8 @@
+steps:
+  - ${{ if not(containsValue(job.steps.*.task.id, '8d616517-6390-454f-b369-6fd038d8fe96')) }}:
+    - task: MicrosoftSecurityDevOps@1
+      displayName: 'Injected - Run Microsoft Security DevOps'
+      inputs:
+        command: 'run'
+        policy: 'microsoft'
+        break: true
