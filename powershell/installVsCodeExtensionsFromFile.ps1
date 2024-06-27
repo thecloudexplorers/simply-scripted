@@ -82,8 +82,14 @@ $extensionsJson.ForEach{
             # install the extension
             $expressionOut = Invoke-Expression "code --install-extension `"$fullFilePath`""
             $expressionOut.ForEach{
-                Write-Information $_
+                Write-Information "$_"
             }
+
+            if ($currentExtension.disabled -eq $true) {
+                Invoke-Expression "code --disable-extension `"$($currentExtension.identifier.id)`""
+                Write-Information "Disabled the extension [$($extensionMetadata.Name)] as it was disabled in the extensions.json file"
+            }
+
         } else {
             Write-Information "Extension [$($currentExtension.identifier.id)] is already installed"
         }
