@@ -1,3 +1,4 @@
+#Requires -PSEdition Core
 <#
     .SYNOPSIS
     Retrieves metadata for a specified Visual Studio Code extension from the Visual Studio Marketplace.
@@ -10,14 +11,6 @@
     .PARAMETER ExtensionId
     The unique identifier of the Visual Studio Code extension. This parameter is required.
 
-    .EXAMPLE
-    PS> $metadata = Get-VsCodeExtensionMetadata -ExtensionId "ms-python.python"
-    PS> $metadata
-    Publisher     : ms-python
-    ExtensionName : python
-    Version       : 2023.10.1
-    AssetUri      : https://example.com/assetUri
-
     .OUTPUTS
     System.Management.Automation.PSCustomObject
     The function returns a custom object with the following properties:
@@ -26,7 +19,18 @@
     - Version: The version of the extension.
     - AssetUri: The URI for the extension's assets.
 
+    .EXAMPLE
+    PS> $metadata = Get-VsCodeExtensionMetadata -ExtensionId "ms-python.python"
+    PS> $metadata
+    Publisher     : ms-python
+    ExtensionName : python
+    Version       : 2023.10.1
+    AssetUri      : https://example.com/assetUri
+
     .NOTES
+    Author      : Jev - @devjevnl | https://www.devjev.nl
+    Source      : https://github.com/thecloudexplorers/simply-scripted
+
     The function uses the Visual Studio Marketplace API to retrieve the extension metadata.
     This API is undocumented and may change without notice, use it at your own risk.
 #>
