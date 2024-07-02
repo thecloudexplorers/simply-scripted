@@ -1,0 +1,36 @@
+{
+  "manifestVersion": 1,
+  "id": "pre-pipeline-decorator",
+  "publisher": "DevJevNL",
+  "version": "1.0.0",
+  "name": "Pre Pipeline Decorator",
+  "public": false,
+  "targets": [
+    {
+      "id": "Microsoft.VisualStudio.Services"
+    }
+  ],
+  "description": "This is a sample of an Azure Pipeline Decorator which executes before any other task",
+  "categories": [
+    "Azure Pipelines"
+  ],
+  "contributions": [
+    {
+      "id": "my-required-task",
+      "type": "ms.azure-pipelines.pipeline-decorator",
+      "targets": [
+        "ms.azure-pipelines-agent-job.pre-job-tasks"
+      ],
+      "properties": {
+        "template": "run-powershell-script.yml"
+      }
+    }
+  ],
+  "files": [
+    {
+      "path": "run-powershell-script.yml",
+      "addressable": true,
+      "contentType": "text/plain"
+    }
+  ]
+}
