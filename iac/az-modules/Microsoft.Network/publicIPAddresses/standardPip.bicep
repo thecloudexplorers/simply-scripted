@@ -1,7 +1,8 @@
 metadata moduleMetadata = {
-  author: 'Jev Suchoi'
-  description: 'This module deploys an Azure Public IP Address based on Standard SKU.'
   version: '1.0.0'
+  author: 'Jev Suchoi'
+  source: 'https://github.com/thecloudexplorers/simply-scripted'
+  description: 'This module deploys an Azure Public IP Address based on Standard SKU.'
 }
 
 @description('Name for the Public IP Address resource')

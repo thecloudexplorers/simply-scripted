@@ -1,8 +1,9 @@
 metadata moduleMetadata = {
+  version: '1.0.0'
   author: 'Jev Suchoi'
+  source: 'https://github.com/thecloudexplorers/simply-scripted'
   description: '''This module deploys an NSG with a rule to allow traffic from the Azure Bastion
   subnet to the VMs in the VNet.'''
-  version: '1.0.0'
 }
 
 @description('Name for the NSG resource resource')
@@ -35,7 +36,6 @@ resource networkSecurityGroup 'Microsoft.Network/networkSecurityGroups@2023-04-0
           sourceAddressPrefix: bastionSubnetAddressPrefix
           destinationAddressPrefix: '*'
           access: 'Allow'
-
         }
       }
     ]

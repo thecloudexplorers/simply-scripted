@@ -1,8 +1,9 @@
 metadata moduleMetadata = {
+  version: '1.0.0'
   author: 'Jev Suchoi'
+  source: 'https://github.com/thecloudexplorers/simply-scripted'
   description: '''This module deploys an Azure Network Interface Card (NIC)
   in a specified subnet.'''
-  version: '1.0.0'
 }
 
 @description('Name of the Nic resource')
