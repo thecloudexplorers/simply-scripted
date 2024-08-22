@@ -1,13 +1,13 @@
 # Decorator examples
 
-This folder contains examples of [Azure DevOps pipeline decorators](https://learn.microsoft.com/en-us/azure/devops/extend/develop/add-pipeline-decorator?view=azure-devops). For more information on this topic check out the blog post [I am in your pipeline decorating it with compliance]() on [devjev.nl](https://www.devjev.nl/).
-The examples mentioned next are available. Each example consist from a `vss-extension.json` and a .yml file as it is assumed that the rest of the required scaffolding is already in place.
+This folder contains examples of [Azure DevOps pipeline decorators](https://learn.microsoft.com/en-us/azure/devops/extend/develop/add-pipeline-decorator?view=azure-devops). For more information on this topic check out the blog post [I am in your pipeline decorating it with compliance](https://www.devjev.nl/posts/2024/i-am-in-your-pipeline-decorating-it-with-compliance/) on [devjev.nl](https://www.devjev.nl/).
+Each example consist from a `vss-extension.json` and a .yml file as this set-up assumes that the rest of the required scaffolding is already in place (if not, follow the steps in the mentioned topic).
 
-## Powershell Hello World Basic
+## PowerShell Hello World Basic
 
 A simple example that injects a PowerShell task that writes `Hello World` into a pipeline every time a pipeline is executed.
 
-## Powershell Hello World Advanced
+## PowerShell Hello World Advanced
 
 An example that injects a PowerShell task that writes `Hello World` into a pipeline after a Bash task.
 
