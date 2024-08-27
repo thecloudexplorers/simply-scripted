@@ -173,7 +173,8 @@ $currentConfigFoldersCollection.ForEach{
 
             # Replace tokens with values in the config file
             Convert-TokensToValues @tokensToValuesArgs
-            Write-Host " Config file has been processed"
+            Write-Host " Config file has been processed `n"
         }
     }
+    Write-Host "Folder has been processed `n"
 }
