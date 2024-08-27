@@ -2,13 +2,44 @@
 
 <#
     .SYNOPSIS
-    TODO
+    Replaces tokens in a target file with corresponding values from a
+    metadata collection.
 
     .DESCRIPTION
-    TODO
+    This function reads a target file and replaces tokens, defined by
+    start and end token patterns, with values from a provided metadata
+    collection. If a custom output file path is specified, the processed
+    file is saved there; otherwise, the original file is overwritten.
+
+    .PARAMETER MetadataCollection
+    A hashtable containing metadata key-value pairs used to replace
+    tokens in the target file.
+
+    .PARAMETER TargetFilePath
+    The path to the file where tokens need to be replaced.
+
+    .PARAMETER CustomOutputFilePath
+    An optional parameter specifying the path to save the processed
+    file. If not specified, the original file will be overwritten.
+
+    .PARAMETER StartTokenPattern
+    The pattern indicating the start of a token in the target file.
+
+    .PARAMETER EndTokenPattern
+    The pattern indicating the end of a token in the target file.
 
     .EXAMPLE
-    TODO
+    $convertTokensParams = @{
+        MetadataCollection    = @{
+            "Token1" = "Value1"
+            "Token2" = "Value2"
+        }
+        TargetFilePath        = "C:\path\to\file.txt"
+        CustomOutputFilePath  = "C:\path\to\output\file.txt" # Optional
+        StartTokenPattern     = "{{"
+        EndTokenPattern       = "}}"
+    }
+    Convert-TokensToValues @convertTokensParams
 
     .NOTES
     Author      : Jev - @devjevnl | https://www.devjev.nl
@@ -38,7 +69,8 @@ function Convert-TokensToValues {
     )
 
     try {
-        Write-Debug -Message "Loading  target file [$TargetFilePath]"
+        $targetFile = Get-Item -Path $TargetFilePath
+        Write-Host " Replacing tokens in file [$($targetFile.Name)]"
         $targetFileContent = Get-Content -Path $TargetFilePath -Raw
 
         # Loop trough all keys to check if they match with possible tokens in the current line
@@ -54,7 +86,6 @@ function Convert-TokensToValues {
 
         # Verify if all tokens have been replaced
         if ($targetFileContent.Contains($StartTokenPattern) -or $targetFileContent.Contains($EndTokenPattern)) {
-
             # Create a regex pattern from the StartTokenPattern
             foreach ($char in $StartTokenPattern.ToCharArray()) {
                 # Add a backslash followed by the character to the output string
@@ -78,13 +109,13 @@ function Convert-TokensToValues {
                 if ($matchForLeft.Matches.Count -gt $matchForRight.Matches.Count) {
 
                     $missingEndTokenIndex = $matchForLeft.Matches.Index -join ', '
-                    Write-Information -Message "One or more closing tokens [$EndTokenPattern] are missing!"
-                    Write-Information -Message "Character index locations of the placeholder values with missing tokens: $missingEndTokenIndex"
+                    Write-Host "  One or more closing tokens [$EndTokenPattern] are missing!"
+                    Write-Host "  Character index locations of the placeholder values with missing tokens: $missingEndTokenIndex"
                 } elseif ($matchForLeft.Matches.Count -lt $matchForRight.Matches.Count) {
 
                     $missingStartTokenIndex = $matchForRight.Matches.Index -join ', '
-                    Write-Information -Message "One or more open tokens [$StartTokenPattern] are missing!"
-                    Write-Information -Message "Character index locations of the placeholder values with missing tokens: $missingStartTokenIndex"
+                    Write-Host "  One or more open tokens [$StartTokenPattern] are missing!"
+                    Write-Host "  Character index locations of the placeholder values with missing tokens: $missingStartTokenIndex"
                 }
             } else {
                 # Not all tokens have been replaces, show a warning
@@ -101,25 +132,26 @@ function Convert-TokensToValues {
                 # Create a string from the match values
                 $warningValues = $matchValues -join ', '
 
-                Write-Information -Message "Unreplaced tokens detected, make sure the MetadataCollection parameter contains all tokens"
-                Write-Information -Message "Unreplaced tokens: $warningValues"
+                Write-Host -ForegroundColor Yellow "  Unreplaced tokens detected, make sure the MetadataCollection parameter contains all tokens"
+                Write-Host -ForegroundColor Yellow "  Unreplaced tokens: $warningValues"
             }
         }
 
         # If the CustomOutputFilePath parameter has not been provided the original file will be replaced
         if ($CustomOutputFilePath.Length -eq 0) {
             $outputFilePath = $TargetFilePath
-            Write-Debug -Message " no custom output filepath specified, original file will be overwritten"
+            Write-Debug -Message "  Custom output filepath is empty, overwriting original file"
         } else {
             $outputFilePath = $CustomOutputFilePath
-            Write-Debug -Message " custom output filepath specified, original file will not be modified"
+            Write-Debug -Message "  Custom output filepath is [$CustomOutputFilePath], original file will remain intact"
         }
 
         # save file to disk, since filetype is json UTF8 encoding is applied
         $targetFileContent | Out-File -FilePath $outputFilePath -Encoding UTF8
+        Write-Host " All token have been replaced processed"
 
     } catch {
-        Write-Host "An unexpected error with the following message occurred while converting tokens to values:"
-        Write-Host $_.Exception.Message
+        Write-Host "An unexpected error with the following message occurred while converting tokens to values:" -ForegroundColor Red
+        Write-Host $_.Exception.Message -ForegroundColor Red
     }
 }
