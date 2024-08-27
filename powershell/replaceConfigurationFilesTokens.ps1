@@ -8,7 +8,7 @@
     The script scans a root folder for subdirectories containing configuration files.
     It processes these files by replacing tokens defined between start and end token
     patterns with values from a metadata.jsonc file which must be present in the same
-    folder as teh tokenized files. Additionally, if the switch
+    folder as the tokenized files. Additionally, if the switch
     `ExtractTokenValueFromConfigFileName` is used, it extracts a token value from the
     configuration file name and adds it to the metadata.
 
@@ -88,12 +88,10 @@ param (
     [System.String] $TargetTokenNameForTokenValueFromConfigFileName
 )
 
-# set logging output to visible
-$InformationPreference = 'Continue'
-# set errors to break script execution
+# Set errors to break script execution
 $ErrorActionPreference = 'Stop'
 
-# load Write-ConsoleLogMessage function via dot sourcing
+# Load Write-ConsoleLogMessage function via dot sourcing
 Write-Host "Importing Convert-TokensToValues.ps1"
 $convertTokensToValues = "{0}\{1}" -f $RootRepoLocation, "powershell\functions\Convert-TokensToValues.ps1"
 . $convertTokensToValues
