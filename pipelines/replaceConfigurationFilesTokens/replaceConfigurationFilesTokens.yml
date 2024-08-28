@@ -21,6 +21,7 @@ resources:
       name: LandingZoneControlPlane/landing-zone-configuration
       ref: master
 
+trigger: none
 
 pool:
   vmImage: windows-latest
