@@ -38,6 +38,8 @@ stages:
             displayName: 'Run replaceConfigurationFilesTokens.ps1'
             inputs:
               targetType: 'filePath'
+              showWarnings: true
+              pwsh: true
               filePath: $(rootRepoLocation)\powershell\replaceConfigurationFilesTokens.ps1
               arguments: > # Use this to avoid newline characters in multiline string
                 -RootRepoLocation "$(rootRepoLocation)"
