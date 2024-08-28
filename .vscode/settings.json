@@ -3,6 +3,26 @@
   "editor.tabSize": 4,
   "editor.detectIndentation": false,
   "editor.formatOnSave": true,
+  "[markdown]": {
+    "editor.rulers": [
+      {
+        "column": 80,
+        "color": "#5BA150"
+      }
+    ]
+  },
+  "[powershell]": {
+    "editor.rulers": [
+      {
+        "column": 80,
+        "color": "#5BA150"
+      },
+      {
+        "column": 120,
+        "color": "#0277BD"
+      }
+    ]
+  },
   "files.defaultLanguage": "powershell",
   "files.trimTrailingWhitespace": true,
   "editor.renderWhitespace": "all",
@@ -32,5 +52,8 @@
   "files.associations": {
     "*.yml": "azure-pipelines"
   },
-  "azureAutomation.directory.basePath": "c:\\Users\\DevJev"
+  "cSpell.enableFiletypes": [
+    "azure-pipelines",
+    "powershell"
+  ]
 }
