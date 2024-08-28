@@ -43,7 +43,7 @@ stages:
                 -RootRepoLocation "$(rootRepoLocation)"
                 -ConfigFilesRootFolder "World"
                 -StartTokenPattern "#{"
-                -EndTokenPattern ""}#"
+                -EndTokenPattern "}#"
                 -ExtractTokenValueFromConfigFileName
                 -PrefixForConfigFileNameWithTokenValue "env"
                 -TargetTokenNameForTokenValueFromConfigFileName "environment_acronym"
