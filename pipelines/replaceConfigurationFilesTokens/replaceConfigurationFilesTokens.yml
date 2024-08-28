@@ -8,12 +8,6 @@ variables:
   - name: configFilesArtifactName
     value: consumableConfigurationFiles
 
-  - name: azureSubscription
-    value: 'bbc-tnt-plt-sc-arm-securityGroups'
-
-  - name: azureSubscriptionManagementGroup
-    value: 'bbc-tnt-plt-sc-arm-managementGroups'
-
 resources:
   repositories:
     - repository: landing-zone-control-plane
@@ -42,7 +36,7 @@ stages:
               showWarnings: true
               pwsh: true
               filePath: $(rootRepoLocation)\powershell\replaceConfigurationFilesTokens.ps1
-              arguments: > # Use this to avoid newline characters in multiline string
+              arguments: >
                 -RootRepoLocation "$(rootRepoLocation)"
                 -ConfigFilesRootFolder "$(configFilesRootFolder)"
                 -StartTokenPattern "#{"
