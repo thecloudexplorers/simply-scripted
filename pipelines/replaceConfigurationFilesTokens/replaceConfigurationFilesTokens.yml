@@ -43,7 +43,7 @@ stages:
               filePath: $(rootRepoLocation)\powershell\replaceConfigurationFilesTokens.ps1
               arguments: > # Use this to avoid newline characters in multiline string
                 -RootRepoLocation "$(rootRepoLocation)"
-                -ConfigFilesRootFolder "World"
+                -ConfigFilesRootFolder "$(configFilesRootFolder)"
                 -StartTokenPattern "#{"
                 -EndTokenPattern "}#"
                 -ExtractTokenValueFromConfigFileName
