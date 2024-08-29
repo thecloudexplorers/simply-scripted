@@ -86,7 +86,7 @@ function Set-AzRoleAssignments {
     }
 
     if ($roleAssignmentsDelta.Count -gt 0) {
-        Write-Information -MessageData "   Delta detected in the RoleAssignments, applying drift control"
+        Write-Host "   Delta detected in the RoleAssignments, applying drift control"
 
         $roleAssignmentsDelta.ForEach{
             $delta = $_
@@ -96,15 +96,15 @@ function Set-AzRoleAssignments {
                     # Removing excessive role assignments
                     $rogueRoleAssignment = $roleAssignmentExists | Where-Object { $_.RoleDefinitionName -eq $delta.InputObject }
 
-                    Write-Information -MessageData "   Removing rogue role assignment [$($rogueRoleAssignment.RoleDefinitionName)]"
+                    Write-Host "   Removing rogue role assignment [$($rogueRoleAssignment.RoleDefinitionName)]"
                     Remove-AzRoleAssignment -InputObject $rogueRoleAssignment 3> $null
-                    Write-Information -MessageData "   UPDATED: Rogue role assignment removed"
+                    Write-Host "   UPDATED: Rogue role assignment removed"
                 }
                 '<=' {
                     # Adding missing role assignments
-                    Write-Information -MessageData "   Adding missing assignment [$($delta.InputObject)]"
+                    Write-Host "   Adding missing assignment [$($delta.InputObject)]"
                     New-AzRoleAssignment -ObjectId $enIdIdentity.Id -RoleDefinitionName $delta.InputObject -Scope $RoleAssignmentScope 1> $null
-                    Write-Information -MessageData "   UPDATED: Missing role assignment added"
+                    Write-Host "   UPDATED: Missing role assignment added"
                 }
                 Default {
                     Write-Error -Message "Something went wrong comparing role Assignments, unsupported side indicator [$($delta.SideIndicator)]" -ErrorAction Stop
@@ -112,6 +112,6 @@ function Set-AzRoleAssignments {
             }
         }
     } else {
-        Write-Information -MessageData "   SUCCESS: no drift has been detected all role assignments are correct"
+        Write-Host "   SUCCESS: no drift has been detected all role assignments are correct"
     }
 }
