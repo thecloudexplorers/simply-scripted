@@ -64,10 +64,10 @@ function Set-AzRoleAssignments {
     $enIdIdentity = $null
     switch ($EnIdObjectType) {
         enIdApplication {
-            $enIdIdentity = Get-EnIdServicePrincipal -Filter "DisplayName eq '$EnIdIdentityName'"
+            $enIdIdentity = Get-AzADServicePrincipal -Filter "DisplayName eq '$EnIdIdentityName'"
         }
         enIdSecurityGroup {
-            $enIdIdentity = Get-EnIdGroup -DisplayName $EnIdIdentityName
+            $enIdIdentity = Get-AzADGroup -DisplayName $EnIdIdentityName
         }
         Default {
             Write-Error -Message "Unable to resolve the EnIdObjectType as an enIdSecurityGroup or an enIdApplication" -ErrorAction Stop
