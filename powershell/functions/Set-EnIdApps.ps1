@@ -30,10 +30,10 @@
         },
     ]
 
-    $EnIdAppsArgs = @{
-        InIdApps = enIdApplictionsColl
+    $enIdAppsArgs = @{
+        EnIdApps = enIdApplictionsColl
     }
-    New-InIdApps @InIdAppsArgs
+    New-EnIdApps @enIdAppsArgs
 
     .NOTES
     Author      : Jev - @devjevnl | https://www.devjev.nl
