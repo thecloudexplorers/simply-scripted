@@ -4,8 +4,8 @@
     Creates Entra ID App Registrations in bulk (application). And applies basic drift control
 
     .DESCRIPTION
-    This function creates an Creates an Entra ID App Registration and a corresponding Enterprise application.
-    It also applies drift control on the description field of the application and enterprise application.
+    This function creates creates Entra ID App Registrations and their corresponding Enterprise applications.
+    It also applies drift control on the description field of the applications and enterprise applications.
 
     .VERSION
     2.0.0
