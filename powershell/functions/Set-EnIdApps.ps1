@@ -43,7 +43,7 @@
     https://learn.microsoft.com/en-us/powershell/module/Az.Resources/new-azadapplication
 #>
 
-function New-InIdApps {
+function Set-InIdApps {
     [CmdLetBinding()]
     param (
         [Parameter(Mandatory)]
