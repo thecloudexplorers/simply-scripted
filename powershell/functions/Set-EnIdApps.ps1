@@ -10,7 +10,7 @@
     .VERSION
     2.0.0
 
-    .PARAMETER InIdApps
+    .PARAMETER EnIdApps
     A collection Entra ID Application objects to create
 
     .EXAMPLE
@@ -90,7 +90,7 @@ function New-InIdApps {
                 New-AzADServicePrincipal -ApplicationId $appExists.AppId -Note $enIdApp.description 1>$null
                 Write-Host "  UPDATED: created missing AzAd Service Principal"
             } else {
-                # ensuring the correct description is set in the note field of the enterprise application
+                # Ensuring the correct description is set in the note field of the enterprise application
                 if ($servicePrincipalExists.Note -ne $enIdApp.description) {
                     $servicePrincipalExists | Update-AzADServicePrincipal -Note $enIdApp.description
                     Write-Host "  UPDATED: Service Principal note value has been corrected"
