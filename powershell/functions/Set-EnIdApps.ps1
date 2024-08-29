@@ -1,10 +1,10 @@
 #requires -Modules Az.Resources
 <#
     .SYNOPSIS
-    Creates Entra Id App Registrations in bulk (application). And applies basic drift control
+    Creates Entra ID App Registrations in bulk (application). And applies basic drift control
 
     .DESCRIPTION
-    This function creates an Creates an Entra Id App Registration and a corresponding Enterprise application.
+    This function creates an Creates an Entra ID App Registration and a corresponding Enterprise application.
     It also applies drift control on the description field of the application and enterprise application.
 
     .VERSION
@@ -62,17 +62,17 @@ function Set-EnIdApps {
         $appExists = Get-AzADApplication -Filter "DisplayName eq '$($enIdApp.name)'"
 
         if ($null -eq $appExists) {
-            Write-Host " Creating Entra Id Application [$($enIdApp.name)]"
+            Write-Host " Creating Entra ID Application [$($enIdApp.name)]"
             $newApp = New-AzADApplication -DisplayName $enIdApp.name -Note $enIdApp.description
 
             # Create a corresponding enterprise application for the app registration in question
-            Write-Host "  Creating Entra Id Service Principal for the concerning AzAd Application"
+            Write-Host "  Creating Entra ID Service Principal for the concerning Entra ID Application"
             New-AzADServicePrincipal -ApplicationId $newApp.AppId -Note $enIdApp.description 1>$null
-            Write-Host "  Entra Id Service Principal has been created"
+            Write-Host "  Entra ID Service Principal has been created"
             Write-Host " Application has been created"
 
         } else {
-            Write-Host " Entra Id Application [$($enIdApp.name)] is already present, applying drift control"
+            Write-Host " Entra ID Application [$($enIdApp.name)] is already present, applying drift control"
             [System.Boolean]$driftDetected = $false
 
             # Ensuring the correct description is set in the note field of the application
@@ -88,7 +88,7 @@ function Set-EnIdApps {
             if ($null -eq $servicePrincipalExists) {
                 $driftDetected = $true
                 New-AzADServicePrincipal -ApplicationId $appExists.AppId -Note $enIdApp.description 1>$null
-                Write-Host "  UPDATED: created missing AzAd Service Principal"
+                Write-Host "  UPDATED: created missing Entra ID Service Principal"
             } else {
                 # Ensuring the correct description is set in the note field of the enterprise application
                 if ($servicePrincipalExists.Note -ne $enIdApp.description) {
