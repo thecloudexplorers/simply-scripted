@@ -57,7 +57,7 @@ function New-TenantRootAssignment {
     if ($null -ne $roleExists) {
         $tenantRootScope = '/'
 
-        Write-Host "Resolving identity type for [$EnIdIdentityName]"
+        Write-Host " Resolving identity type for [$EnIdIdentityName]"
 
         # Initialize the Entra ID Identity variable
         $azAdIdentity = $null
@@ -65,19 +65,19 @@ function New-TenantRootAssignment {
         # Check if the identity is a Service Principal
         $azAdIdentity = Get-AzADServicePrincipal -Filter "DisplayName eq '$EnIdIdentityName'"
         if ($null -ne $azAdIdentity) {
-            Write-Host "Identity has been resolves as a Entra ID Service Principal"
+            Write-Host " Identity has been resolves as a Entra ID Service Principal"
 
         } else {
             # Check if the identity is a Security Group
             $azAdIdentity = Get-AzADGroup -DisplayName $EnIdIdentityName
 
             if ($null -ne $azAdIdentity) {
-                Write-Host "Identity has been resolves as an Entra ID Security Group"
+                Write-Host " Identity has been resolves as an Entra ID Security Group"
             } else {
                 # Check if the identity is a User
                 $azAdIdentity = Get-AzADUser -DisplayName $EnIdIdentityName
                 if ($null -ne $azAdIdentity) {
-                    Write-Host "Identity has been resolves as an Entra ID User"
+                    Write-Host " Identity has been resolves as an Entra ID User"
                 } else {
                     Write-Error -Message "Supplied Identity does not exists or the current principal does not have access to it" -ErrorAction Stop
                 }
@@ -93,9 +93,9 @@ function New-TenantRootAssignment {
         # If the assignment does not exist, create a new role assignment
         if ($null -eq $assignmentExists) {
             New-AzRoleAssignment -Scope '/' -RoleDefinitionName $EnIdRoleDefinition -ObjectId $azAdIdentity.Id 1> $null
-            Write-Host "Identity [$EnIdIdentityName] has been added"
+            Write-Host " Identity [$EnIdIdentityName] has been added"
         } else {
-            Write-Host "Identity [$EnIdIdentityName] already has [$EnIdRoleDefinition] assignment on scope [$tenantRootScope]"
+            Write-Host " Identity [$EnIdIdentityName] already has [$EnIdRoleDefinition] assignment on scope [$tenantRootScope]"
         }
 
     } else {
