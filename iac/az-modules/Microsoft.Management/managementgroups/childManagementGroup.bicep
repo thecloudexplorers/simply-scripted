@@ -2,11 +2,7 @@ metadata resources = {
   version: '1.0.0'
   author: 'Jev Suchoi'
   source: 'https://github.com/thecloudexplorers/simply-scripted'
-  description: '''This Bicep file deploys a hierarchical structure of management groups
-  following the Cloud Adoption Framework (CAF) design. It includes parameters for configuring
-  up to six tiers of management groups, along with an optional default management group
-  for new subscriptions and a flag for requiring write permissions for creating new
-  management groups.'''
+  description: 'This bicep file deploys a management group as child of the specified parent management group'
 }
 
 targetScope = 'managementGroup'
