@@ -3,11 +3,11 @@
 
 <#
     .SYNOPSIS
-    This script adds any Entra ID Object as a Tenant Root Owner.
+    This function adds any existing Entra ID Object as a Tenant Root Owner.
 
     .DESCRIPTION
-    This script checks if the specified Entra ID Object is already an Owner on
-    the Tenant Root. If not, the specified identity is added.
+    This script checks if the specified Entra ID Object exists and is already
+    an Owner on the Tenant Root. If not, the specified identity is added.
     Required permissions are assumed to be in place.
     Supported Identity types:
     - User
