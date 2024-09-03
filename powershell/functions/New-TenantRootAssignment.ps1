@@ -92,7 +92,7 @@ function New-TenantRootAssignment {
 
         # If the assignment does not exist, create a new role assignment
         if ($null -eq $assignmentExists) {
-            New-AzRoleAssignment -Scope '/' -RoleDefinitionName $EnIdRoleDefinition -ObjectId $user.Id 1> $null
+            New-AzRoleAssignment -Scope '/' -RoleDefinitionName $EnIdRoleDefinition -ObjectId $azAdIdentity.Id 1> $null
             Write-Host "Identity [$EnIdIdentityName] has been added"
         } else {
             Write-Host "Identity [$EnIdIdentityName] already has [$EnIdRoleDefinition] assignment on scope [$tenantRootScope]"
