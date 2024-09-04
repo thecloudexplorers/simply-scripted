@@ -28,7 +28,8 @@
     .\New-TenantRootAssignment.ps1 @newTenantOwnerArgs
 
     .NOTES
-    Author  : Jev - @devjevnl | https://www.devjev.nl
+    Version     : 2.0.0
+    Author      : Jev - @devjevnl | https://www.devjev.nl
     Source      : https://github.com/thecloudexplorers/simply-scripted
 
     .LINK
