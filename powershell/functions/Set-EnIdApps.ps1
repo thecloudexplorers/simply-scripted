@@ -7,9 +7,6 @@
     This function creates creates Entra ID App Registrations and their corresponding Enterprise applications.
     It also applies drift control on the description field of the applications and enterprise applications.
 
-    .VERSION
-    2.0.0
-
     .PARAMETER EnIdApps
     A collection Entra ID Application objects to create
 
@@ -36,6 +33,7 @@
     New-EnIdApps @enIdAppsArgs
 
     .NOTES
+    Version     : 2.0.0
     Author      : Jev - @devjevnl | https://www.devjev.nl
     Source      : https://github.com/thecloudexplorers/simply-scripted
 

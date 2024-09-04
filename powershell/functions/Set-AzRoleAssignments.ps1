@@ -11,9 +11,6 @@
     Limitations:
     Only Azure AD Security groups and Service Principals (Enterprise Applications) are currently supported
 
-    .VERSION
-    2.0.0
-
     .PARAMETER RoleAssignmentScope
     Scope for the role assignment
 
@@ -37,6 +34,7 @@
     }
 
     .NOTES
+    Version     : 2.0.0
     Author      : Jev - @devjevnl | https://www.devjev.nl
     Source      : https://github.com/thecloudexplorers/simply-scripted
 #>
