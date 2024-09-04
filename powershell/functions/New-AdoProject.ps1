@@ -22,9 +22,6 @@
     .PARAMETER AdoProjectDescription
     A description for the desired project
 
-    .PARAMETER AdoProjectSourceControlType
-    Source control type, default is set to Git, option to override it to TFVC
-
     .PARAMETER AdoAuthenticationHeader
     Azure DevOps authentication header based on PAT token
 
@@ -72,10 +69,6 @@ function New-AdoProject {
         [ValidateSet('Basic', 'Agile', 'Scrum', 'CMMI')]
         [System.String] $AdoProjectProcessTemplate,
 
-        [ValidateNotNullOrEmpty()]
-        [ValidateSet("Git", "TFVC")]
-        [System.String] $AdoProjectSourceControlType,
-
         [Parameter(Mandatory)]
         [ValidateNotNullOrEmpty()]
         [System.Collections.Hashtable] $AdoAuthenticationHeader
@@ -94,7 +87,7 @@ function New-AdoProject {
         description  = $AdoProjectDescription
         capabilities = @{
             versioncontrol  = @{
-                sourceControlType = $AdoProjectSourceControlType
+                sourceControlType = 'Git'
             }
             processTemplate = @{
                 templateTypeId = $processTemplate.id
