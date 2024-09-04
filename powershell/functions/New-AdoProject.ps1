@@ -51,10 +51,6 @@ function New-AdoProject {
     param (
         [Parameter(Mandatory)]
         [ValidateNotNullOrEmpty()]
-        [System.String] $AdoApiUri,
-
-        [Parameter(Mandatory)]
-        [ValidateNotNullOrEmpty()]
         [System.String] $AdoOrganizationName,
 
         [Parameter(Mandatory)]
@@ -77,7 +73,7 @@ function New-AdoProject {
     # getting all available process templates, a process template id is required for creating projects
     # https://docs.microsoft.com/en-us/rest/api/azure/devops/core/processes/get
     # GET https://dev.azure.com/{organization}/_apis/process/processes/{processId}?api-version=7.2-preview.1
-    $processesApiUri = $AdoApiUri + $AdoOrganizationName + "/_apis/process/processes?api-version=7.2-preview.1"
+    $processesApiUri = "https://dev.azure.com/" + $AdoOrganizationName + "/_apis/process/processes?api-version=7.2-preview.1"
     $processesApiResponse = Invoke-RestMethod -Uri $processesApiUri -Method 'Get' -Headers $AdoAuthenticationHeader
 
     $processTemplate = $processesApiResponse.value | Where-Object { $_.name -eq $AdoProjectProcessTemplate }
@@ -100,7 +96,7 @@ function New-AdoProject {
     # create azure devops project
     # https://docs.microsoft.com/en-us/rest/api/azure/devops/core/projects/get
     # POST https://dev.azure.com/{organization}/_apis/projects?api-version=7.2-preview.4
-    $projectsApiUri = $AdoApiUri + $AdoOrganizationName + "/_apis/projects/?api-version=7.2-preview.4"
+    $projectsApiUri = "https://dev.azure.com/" + $AdoOrganizationName + "/_apis/projects/?api-version=7.2-preview.4"
     $projectsApiResponse = Invoke-RestMethod -Uri $projectsApiUri -Method 'Post' -Headers $AdoAuthenticationHeader -Body $projectJsonObject
     Write-Information -MessageData " Project creation queued for [$AdoProjectName] project"
 
