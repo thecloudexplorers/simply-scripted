@@ -42,6 +42,7 @@
     Convert-TokensToValues @convertTokensParams
 
     .NOTES
+    Version     : 1.0.0
     Author      : Jev - @devjevnl | https://www.devjev.nl
     Source      : https://github.com/thecloudexplorers/simply-scripted
 #>
