@@ -7,6 +7,9 @@
     This function creates an azure DevOps project in the specified organization with source control type Git and
     process template tye set to Agile for the Boards.
 
+    .VERSION
+    2.0.0
+
     .PARAMETER AdoApiUri
     Ado Api uri of Azure DevOps, unless modified by microsoft this should be https://dev.azure.com/
 
