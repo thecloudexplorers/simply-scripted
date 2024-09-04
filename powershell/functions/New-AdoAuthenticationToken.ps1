@@ -1,11 +1,13 @@
 #Requires -PSEdition Core
 <#
     .SYNOPSIS
-    This function returns a well formatted Azure DevOps authentication token
+    This function returns a well formatted Azure DevOps authentication
+    token.
 
     .DESCRIPTION
-    This function formats a user generated Azure DevOps PAT token and its creators name into a
-    well authentication token which can be directly used in a rest call header
+    This function formats a user generated Azure DevOps PAT token and
+    its creators name into a well authentication token which can be
+    directly used in a rest call header.
 
     .PARAMETER PatToken
     Your PAT token as generated in Azure DevOps
@@ -15,7 +17,7 @@
 
     .EXAMPLE
     $adoAuthArgs = @{
-    PatToken = "26cb6489072f4214ba78b898fc3fc5dd"
+    PatToken = "YOUR_PAT_TOKEN"
     PatTokenOwnerName = "John Doe"
     }
 
@@ -23,8 +25,9 @@
     $header = @{authorization = "Basic $newToken"}
 
     .NOTES
+    Version : 2.0.0
     Author  : Jev - @devjevnl | https://www.devjev.nl
-    Source  : https://github.com/thecloudexplorers
+    Source  : https://github.com/thecloudexplorers/simply-scripted
 #>
 
 function New-AdoAuthenticationToken {
