@@ -70,7 +70,7 @@ function New-AdoProject {
         [System.Collections.Hashtable] $AdoAuthenticationHeader
     )
 
-    # getting all available process templates, a process template id is required for creating projects
+    # Getting all available process templates, a process template id is required for creating projects
     # https://docs.microsoft.com/en-us/rest/api/azure/devops/core/processes/get
     # GET https://dev.azure.com/{organization}/_apis/process/processes/{processId}?api-version=7.2-preview.1
     $processesApiUri = "https://dev.azure.com/" + $AdoOrganizationName + "/_apis/process/processes?api-version=7.2-preview.1"
@@ -93,27 +93,27 @@ function New-AdoProject {
 
     $projectJsonObject = $projectObject | ConvertTo-Json
 
-    # create azure devops project
+    # Create Azure DevOps Project
     # https://docs.microsoft.com/en-us/rest/api/azure/devops/core/projects/get
     # POST https://dev.azure.com/{organization}/_apis/projects?api-version=7.2-preview.4
     $projectsApiUri = "https://dev.azure.com/" + $AdoOrganizationName + "/_apis/projects/?api-version=7.2-preview.4"
     $projectsApiResponse = Invoke-RestMethod -Uri $projectsApiUri -Method 'Post' -Headers $AdoAuthenticationHeader -Body $projectJsonObject
-    Write-Information -MessageData " Project creation queued for [$AdoProjectName] project"
+    Write-Host " Project creation queued for [$AdoProjectName] project"
 
     try {
 
-        # project creation is processed by Microsoft via a queue, query the queue url returned from the creation Api call
+        # Project creation is processed by Microsoft via a queue, query the queue url returned from the creation Api call
         # to query the queue status and create a while loop waiting for the queue to be processed
         $projectCreationStatus = Invoke-RestMethod -Uri $projectsApiResponse.url -Method 'Get' -Headers $AdoAuthenticationHeader
 
-        Write-Information -MessageData "  Queue is being processed"
+        Write-Host "  Queue is being processed"
         while ($projectCreationStatus.status -eq "inProgress" -or $projectCreationStatus.status -eq "notSet" -or $projectCreationStatus.status -eq "queued") {
-            # sleeping 3 seconds to wait for the queue to complete
+            # Sleeping 3 seconds to wait for the queue to complete
             $sleepTime = 3
-            Write-Information -MessageData "  Sleeping for [$sleepTime] seconds"
+            Write-Host "  Sleeping for [$sleepTime] seconds"
             Start-Sleep -Seconds $sleepTime
 
-            Write-Information -MessageData "  Updating queue"
+            Write-Host "  Updating queue"
             $projectCreationStatus = $null
             $projectCreationStatus = Invoke-RestMethod -Uri $projectsApiResponse.url -Method 'Get' -Headers $AdoAuthenticationHeader
         }
@@ -121,7 +121,7 @@ function New-AdoProject {
         if ($projectCreationStatus.status -ne 'succeeded') {
             Write-Error -Message " Creating a new Azure DevOps project [$AdoProjectName] failed with status [$($projectCreationStatus.status)] " -ErrorAction Stop
         } else {
-            Write-Information -MessageData " Project has been created `n"
+            Write-Host " Project has been created `n"
         }
     } catch {
         Throw $_
