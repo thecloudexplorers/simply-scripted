@@ -4,14 +4,16 @@
     Verifies if an Entra ID group is already a group member
 
     .DESCRIPTION
-    This script checks via in the input provided group object id if the concerning Entra ID Group is already a member
-    of the via the Azure DevOps group descriptor provided Azure DevOps group
+    This script checks via in the input provided group object id if the
+    concerning Entra ID Group is already a member of the via the Azure DevOps
+    group descriptor provided Azure DevOps group
 
     .PARAMETER AdoOrganizationName
     Azure DevOps organization name
 
     .PARAMETER AdoTargetGroupDescriptor
-    Descriptor property of the Azure DevOps group in which membership confirmation is needed
+    Descriptor property of the Azure DevOps group in which membership
+    confirmation is needed
 
     .PARAMETER EnIdGroupId
     Group id of the Azure DevOps group who's membership needs confirmation
@@ -27,7 +29,7 @@
 
     $inputArgs = @{
         AdoOrganizationName = "my-organization"
-        AdoTargetGroupDescriptor = "vso.OWI3MYYyMTYtNGN0Zi03Yjc0LWE5MTEtZWZiMGZhOWM3Nzdm"
+        AdoTargetGroupDescriptor = "vso.OWI3MYYyMTYtNGN0Zi03Yjc0LWENzdm"
         EnIdGroupId "ENTRA_ID_GROUP_OBJECT_ID"
         AdoAuthenticationHeader = $authHeader
     }
@@ -68,7 +70,7 @@ function Confirm-AdoGroupMembership {
     # https://docs.microsoft.com/en-us/rest/api/azure/devops/graph/memberships/list
     # GET https://vssps.dev.azure.com/{organization}/_apis/graph/Memberships/{subjectDescriptor}?api-version=7.2-preview.1
     $membershipsApiUri = "https://vssps.dev.azure.com/" + $AdoOrganizationName + "/_apis/graph/Memberships/" + $AdoTargetGroupDescriptor + "?direction=Down&api-version=7.2-preview.1"
-    $membershipsApiResponse = Invoke-RestMethod -Uri $membershipsApiUri  -Method 'Get' -Headers $AdoAuthenticationHeader
+    $membershipsApiResponse = Invoke-RestMethod -Uri $membershipsApiUri  -Method 'GET' -Headers $AdoAuthenticationHeader
 
     $membershipsCollection = @{
         "lookupKeys" = @()
@@ -87,7 +89,7 @@ function Confirm-AdoGroupMembership {
     # https://docs.microsoft.com/pt-pt/rest/api/azure/devops/graph/subject-lookup/lookup-subjects
     # POST https://vssps.dev.azure.com/{organization}/_apis/graph/subjectlookup?api-version=7.2-preview.1
     $subjectLookupApiUri = "https://vssps.dev.azure.com/" + $AdoOrganizationName + "/_apis/graph/subjectlookup?api-version=7.2-preview.1"
-    $subjectLookupApiResponse = Invoke-RestMethod -Uri $subjectLookupApiUri  -Method 'Post' -Headers $AdoAuthenticationHeader -Body $jsonMembershipCollection
+    $subjectLookupApiResponse = Invoke-RestMethod -Uri $subjectLookupApiUri  -Method 'POST' -Headers $AdoAuthenticationHeader -Body $jsonMembershipCollection
 
     $groupMembership = $subjectLookupApiResponse.value.PSObject.Properties | Where-Object { $_.Value.originId -eq $EnIdGroupId }
 
