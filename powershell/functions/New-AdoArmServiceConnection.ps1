@@ -76,10 +76,6 @@ function New-AdoArmServiceConnection {
     param (
         [Parameter(Mandatory)]
         [ValidateNotNullOrEmpty()]
-        [System.String] "https://dev.azure.com/",
-
-        [Parameter(Mandatory)]
-        [ValidateNotNullOrEmpty()]
         [System.String] $AdoOrganizationName,
 
         [Parameter(Mandatory)]
