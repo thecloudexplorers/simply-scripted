@@ -4,12 +4,10 @@
     Creates a new service connection of the type Azure Resource Manager
 
     .DESCRIPTION
-    This function creates an Azure Resource Manager in the specified project based on the specified App registration and a corresponding
-    app secret. The secret hint is stored in the description field of the created service connection to allow matching of the secret
-    for maintenance tasks
-
-    .PARAMETER AdoApiUri
-    Ado Api uri of Azure DevOps, unless modified by microsoft this should be https://dev.azure.com/
+    This function creates an Azure Resource Manager in the specified project
+    based on the specified App registration and a corresponding app secret.
+    The secret hint is stored in the description field of the created service
+    connection to allow matching of the secret for maintenance tasks
 
     .PARAMETER AdoOrganizationName
     Name of the concerning Azure DevOps organization
@@ -33,13 +31,14 @@
     Subscription name of the concerning tenant for the desired service connection
 
     .PARAMETER AppRegistrationId
-    App id of the Az Ad Application that will be used for this service connection
+    App id of the Entra ID Application that will be used for this service connection
 
     .PARAMETER AppRegistrationKey
-    App secret of the Az Ad Application that will be used for this service connection
+    App secret of the Entra ID Application that will be used for this service connection
 
     .PARAMETER AppRegistrationKeyHint
-    App secret hint of the Az Ad Application that will be used for this service connection, this hint will be stored in the description field to allow matching of the secret
+    App secret hint of the Entra ID Application that will be used for this service connection,
+    this hint will be stored in the description field to allow matching of the secret
 
     .PARAMETER AdoAuthenticationHeader
     Azure DevOps authentication header based on PAT token
@@ -54,11 +53,11 @@
         AdoVsspsApiUri = "https://vssps.dev.azure.com/"
         AdoOrganizationName = "my-organization"
         AdoProjectName = "My-AdoProject"
-        AdoProjectId "070bc563-e9e9-4227-bee1-r045488791f4"
+        AdoProjectId "YOUR_ADO_PROJECT_ID"
         ServiceConnectionName = "my-arm-service-connection"
-        TenantId = "11e142dd-7e46-4ad8-8a0c-516940f8c402"
-        SubscriptionId = "89c32bb9-6274-4293-aa91-68feb572489b"
-        AppRegistrationKey = "vd9sxjnn5q4tht5uovaz77uidbyw"
+        TenantId = "YOUR_TENANT_ID"
+        SubscriptionId = "YOUR_SUBSCRIPTION_ID"
+        AppRegistrationKey = "YOUR_APP_REGISTRATION_KEY"
         AppRegistrationKeyHint = "vd9"
         AdoAuthenticationHeader = $authHeader
 
@@ -67,6 +66,7 @@
     New-AdoArmServiceConnection @inputArgs
 
     .NOTES
+    Version     : 2.0.0
     Author      : Jev - @devjevnl | https://www.devjev.nl
     Source      : https://github.com/thecloudexplorers/simply-scripted
 #>
@@ -76,7 +76,7 @@ function New-AdoArmServiceConnection {
     param (
         [Parameter(Mandatory)]
         [ValidateNotNullOrEmpty()]
-        [System.String] $AdoApiUri,
+        [System.String] "https://dev.azure.com/",
 
         [Parameter(Mandatory)]
         [ValidateNotNullOrEmpty()]
@@ -123,8 +123,8 @@ function New-AdoArmServiceConnection {
         [System.Collections.Hashtable] $AdoAuthenticationHeader
     )
 
-    Write-Information -MessageData " Creating new service connection"
-    # each service connection id must be unique
+    Write-Host " Creating new service connection"
+    # Each service connection id must be unique
     $serviceConnectionId = New-Guid
     $isReady = "false"
 
@@ -164,14 +164,16 @@ function New-AdoArmServiceConnection {
 
     $serviceConnectionJsonObject = $serviceConnectionObject | ConvertTo-Json -Depth 5
 
+    # Create new service endpoint
     # https://docs.microsoft.com/en-us/rest/api/azure/devops/serviceendpoint/endpoints/create
-    $serviceConnectionApiUri = $AdoApiUri + $AdoOrganizationName + "/_apis/serviceendpoint/endpoints/" + $serviceConnectionId + "?api-version=7.1-preview.4"
+    # POST https://dev.azure.com/{organization}/_apis/serviceendpoint/endpoints?api-version=7.2-preview.4
+    $serviceConnectionApiUri = "https://dev.azure.com/" + $AdoOrganizationName + "/_apis/serviceendpoint/endpoints/" + $serviceConnectionId + "?api-version=7.2-preview.4"
     $newServiceConnection = Invoke-RestMethod -Uri $serviceConnectionApiUri -Method 'Post' -Headers $AdoAuthenticationHeader -Body $serviceConnectionJsonObject
 
-    # making sure background creation process has been completed for the new service connection
+    # Making sure background creation process has been completed for the new service connection
     Start-Sleep -Seconds 5
 
-    Write-Information -MessageData " Service connection has been created"
+    Write-Host " Service connection has been created"
 
     return $newServiceConnection
 }
