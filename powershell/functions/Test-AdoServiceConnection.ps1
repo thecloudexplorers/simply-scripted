@@ -1,10 +1,12 @@
 #Requires -PSEdition Core
 <#
     .SYNOPSIS
-    Test an Azure DevOps service connection of the type Azure Resource Management
+    Test an Azure DevOps service connection of the type Azure Resource
+    Management
 
     .DESCRIPTION
-    This function tests an Azure Resource Management type service connection. This is the same functionality
+    This function tests an Azure Resource Management type service connection.
+    This is the same functionality
     as available via the verify button in the user interface.
 
     .PARAMETER AdoOrganizationName
@@ -14,7 +16,8 @@
     Name of the concerning project
 
     .PARAMETER ServiceConnectionObject
-    Full service connection object, returned via get or new service connection function
+    Full service connection object, returned via get or new service connection
+    function
 
     .PARAMETER AdoAuthenticationHeader
     Azure DevOps authentication header based on a PAT token
