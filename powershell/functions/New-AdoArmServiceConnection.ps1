@@ -167,18 +167,12 @@ function New-AdoArmServiceConnection {
         $serviceConnectionApiUri = "https://dev.azure.com/" + $AdoOrganizationName + "/_apis/serviceendpoint/endpoints/" + $serviceConnectionId + "?api-version=7.2-preview.4"
         $newServiceConnection = Invoke-RestMethod -Uri $serviceConnectionApiUri -Method 'Post' -Headers $AdoAuthenticationHeader -Body $serviceConnectionJsonObject
 
-        # Clean up the secret
-        $AppRegistrationKey = $null
-
         # Making sure background creation process has been completed for the new service connection
         Start-Sleep -Seconds 5
 
         Write-Host " Service connection has been created"
     } catch {
         throw "$($_.Exception)"
-    } finally {
-        # Clean up the secret
-        $AppRegistrationKey = $null
     }
 
     return $newServiceConnection
