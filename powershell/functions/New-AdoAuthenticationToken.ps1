@@ -1,13 +1,12 @@
 #Requires -PSEdition Core
 <#
     .SYNOPSIS
-    This function returns a well formatted Azure DevOps authentication
-    token.
+    This function returns a well formatted Azure DevOps authentication token.
 
     .DESCRIPTION
-    This function formats a user generated Azure DevOps PAT token and
-    its creators name into a well authentication token which can be
-    directly used in a rest call header.
+    This function formats a user generated Azure DevOps PAT token and its
+    creators name into a well authentication token which can be directly used
+    in a rest call header.
 
     .PARAMETER PatToken
     Your PAT token as generated in Azure DevOps
