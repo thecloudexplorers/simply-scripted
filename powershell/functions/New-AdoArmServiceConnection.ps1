@@ -119,7 +119,7 @@ function New-AdoArmServiceConnection {
         [System.Collections.Hashtable] $AdoAuthenticationHeader
     )
 
-    Write-Host " Creating new service connection"
+    Write-Host " Creating new service connection [$ServiceConnectionName]"
     # Each service connection id must be unique
     $serviceConnectionId = New-Guid
     $isReady = "false"
@@ -160,16 +160,26 @@ function New-AdoArmServiceConnection {
 
     $serviceConnectionJsonObject = $serviceConnectionObject | ConvertTo-Json -Depth 5
 
-    # Create new service endpoint
-    # https://docs.microsoft.com/en-us/rest/api/azure/devops/serviceendpoint/endpoints/create
-    # POST https://dev.azure.com/{organization}/_apis/serviceendpoint/endpoints?api-version=7.2-preview.4
-    $serviceConnectionApiUri = "https://dev.azure.com/" + $AdoOrganizationName + "/_apis/serviceendpoint/endpoints/" + $serviceConnectionId + "?api-version=7.2-preview.4"
-    $newServiceConnection = Invoke-RestMethod -Uri $serviceConnectionApiUri -Method 'Post' -Headers $AdoAuthenticationHeader -Body $serviceConnectionJsonObject
+    try {
+        # Create new service endpoint
+        # https://docs.microsoft.com/en-us/rest/api/azure/devops/serviceendpoint/endpoints/create
+        # POST https://dev.azure.com/{organization}/_apis/serviceendpoint/endpoints?api-version=7.2-preview.4
+        $serviceConnectionApiUri = "https://dev.azure.com/" + $AdoOrganizationName + "/_apis/serviceendpoint/endpoints/" + $serviceConnectionId + "?api-version=7.2-preview.4"
+        $newServiceConnection = Invoke-RestMethod -Uri $serviceConnectionApiUri -Method 'Post' -Headers $AdoAuthenticationHeader -Body $serviceConnectionJsonObject
 
-    # Making sure background creation process has been completed for the new service connection
-    Start-Sleep -Seconds 5
+        # Clean up the secret
+        $AppRegistrationKey = $null
 
-    Write-Host " Service connection has been created"
+        # Making sure background creation process has been completed for the new service connection
+        Start-Sleep -Seconds 5
+
+        Write-Host " Service connection has been created"
+    } catch {
+        Throw $_
+    } finally {
+        # Clean up the secret
+        $AppRegistrationKey = $null
+    }
 
     return $newServiceConnection
 }
