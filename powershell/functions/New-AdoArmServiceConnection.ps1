@@ -54,7 +54,6 @@
     }
 
     $inputArgs = @{
-        AdoVsspsApiUri = "https://vssps.dev.azure.com/"
         AdoOrganizationName = "my-organization"
         AdoProjectName = "My-AdoProject"
         AdoProjectId "YOUR_ADO_PROJECT_ID"
