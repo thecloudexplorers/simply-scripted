@@ -28,17 +28,21 @@
     Subscription Id of the concerning tenant for the desired service connection
 
     .PARAMETER SubscriptionName
-    Subscription name of the concerning tenant for the desired service connection
+    Subscription name of the concerning tenant for the desired service
+    connection
 
     .PARAMETER AppRegistrationId
-    App id of the Entra ID Application that will be used for this service connection
+    App id of the Entra ID Application that will be used for this service
+    connection
 
     .PARAMETER AppRegistrationKey
-    App secret of the Entra ID Application that will be used for this service connection
+    App secret of the Entra ID Application that will be used for this service
+    connection
 
     .PARAMETER AppRegistrationKeyHint
-    App secret hint of the Entra ID Application that will be used for this service connection,
-    this hint will be stored in the description field to allow matching of the secret
+    App secret hint of the Entra ID Application that will be used for this
+    service connection, this hint will be stored in the description field to
+    allow matching of the secret
 
     .PARAMETER AdoAuthenticationHeader
     Azure DevOps authentication header based on PAT token
