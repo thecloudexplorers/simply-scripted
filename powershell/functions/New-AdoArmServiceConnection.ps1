@@ -175,7 +175,7 @@ function New-AdoArmServiceConnection {
 
         Write-Host " Service connection has been created"
     } catch {
-        Throw $_
+        throw "$($_.Exception)"
     } finally {
         # Clean up the secret
         $AppRegistrationKey = $null
