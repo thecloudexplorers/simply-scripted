@@ -2,14 +2,17 @@
 #Requires -Modules Az.Resources
 <#
     .SYNOPSIS
-    Assigns the specified RBAC role to the specified principal, at any desired scope.
+    Assigns the specified RBAC role to the specified principal, at any desired
+    scope.
 
     .DESCRIPTION
-    This function checks if the specified principal holds any RBAC role at the specified scope
-    if this does not match with the input RBAC role for that principal, this function corrects it.
+    This function checks if the specified principal holds any RBAC role at the
+    specified scope if this does not match with the input RBAC role for that
+    principal, this function corrects it.
 
     Limitations:
-    Only Azure AD Security groups and Service Principals (Enterprise Applications) are currently supported
+    Only Azure AD Security groups and Service Principals
+    (Enterprise Applications) are currently supported
 
     .PARAMETER RoleAssignmentScope
     Scope for the role assignment
@@ -24,11 +27,13 @@
     Array of Role Assignment names
 
     .PARAMETER EnIdObjectType
-    Specify the type identity object, acceptable values are: enIdApplication, enIdSecurityGroup
+    Specify the type identity object, acceptable values are:
+    - enIdApplication
+    - enIdSecurityGroup
 
     .EXAMPLE
     $inputArgs = @{
-        RoleAssignmentScope = "/subscriptions/a61asf7f-12b6-4c13-b5d2-4302e728c57a/resourceGroups/My-Solution-RG"
+        RoleAssignmentScope = "/subscriptions/SUB_ID/resourceGroups/MY_RG_NAME"
         EnIdIdentityName = "my-security-group"
         RoleAssignments = Object[]$RoleAssignmentsArray
     }
@@ -72,8 +77,9 @@ function Set-AzRoleAssignments {
         }
     }
 
+    Write-Debug -Message "   Getting present role assignments for scope [$RoleAssignmentScope]"
     [PSCustomObject[]]$roleAssignmentExists = Get-AzRoleAssignment -Scope $RoleAssignmentScope 3> $null | Where-Object { $_.ObjectId -eq $enIdIdentity.Id -and $_.Scope -eq $RoleAssignmentScope }
-
+    Write-Debug -Message "   Comparing present and defined role assignments"
     if ($null -eq $roleAssignmentExists ) {
         # To be able to compare objects, a dummy object is created if no role assignments exist for the identity in question
         $roleAssignmentExists = @()
