@@ -4,11 +4,13 @@
     Creates a new Azure DevOps project
 
     .DESCRIPTION
-    This function creates an azure DevOps project in the specified organization with source control type Git and
-    process template tye set to Agile for the Boards.
+    This function creates an azure DevOps project in the specified
+    Azure DevOps Organization with source control type Git and the
+    desired process template.
 
     .PARAMETER AdoApiUri
-    Ado Api uri of Azure DevOps, unless modified by microsoft this should be https://dev.azure.com/
+    Ado Api uri of Azure DevOps, unless modified by microsoft
+    this should be https://dev.azure.com/
 
     .PARAMETER AdoOrganizationName
     Name of the concerning Azure DevOps organization
@@ -18,9 +20,6 @@
 
     .PARAMETER AdoProjectDescription
     A description for the desired project
-
-    .PARAMETER AdoProjectSourceControlType
-    Source control type, default is set to Git, option to override it to TFVC
 
     .PARAMETER AdoAuthenticationHeader
     Azure DevOps authentication header based on PAT token
@@ -42,6 +41,7 @@
     New-AdoProject @inputArgs
 
     .NOTES
+    Version : 2.0.0
     Author      : Jev - @devjevnl | https://www.devjev.nl
     Source      : https://github.com/thecloudexplorers/simply-scripted
 #>
@@ -49,10 +49,6 @@
 function New-AdoProject {
     [CmdLetBinding()]
     param (
-        [Parameter(Mandatory)]
-        [ValidateNotNullOrEmpty()]
-        [System.String] $AdoApiUri,
-
         [Parameter(Mandatory)]
         [ValidateNotNullOrEmpty()]
         [System.String] $AdoOrganizationName,
@@ -69,19 +65,15 @@ function New-AdoProject {
         [ValidateSet('Basic', 'Agile', 'Scrum', 'CMMI')]
         [System.String] $AdoProjectProcessTemplate,
 
-        [ValidateNotNullOrEmpty()]
-        [ValidateSet("Git", "TFVC")]
-        [System.String] $AdoProjectSourceControlType,
-
         [Parameter(Mandatory)]
         [ValidateNotNullOrEmpty()]
         [System.Collections.Hashtable] $AdoAuthenticationHeader
     )
 
-    # getting all available process templates, a process template id is required for creating projects
+    # Getting all available process templates, a process template id is required for creating projects
     # https://docs.microsoft.com/en-us/rest/api/azure/devops/core/processes/get
-    # GET https://dev.azure.com/{organization}/_apis/process/processes/{processId}?api-version=7.1-preview.1
-    $processesApiUri = $AdoApiUri + $AdoOrganizationName + "/_apis/process/processes?api-version=7.1-preview.1"
+    # GET https://dev.azure.com/{organization}/_apis/process/processes/{processId}?api-version=7.2-preview.1
+    $processesApiUri = "https://dev.azure.com/" + $AdoOrganizationName + "/_apis/process/processes?api-version=7.2-preview.1"
     $processesApiResponse = Invoke-RestMethod -Uri $processesApiUri -Method 'Get' -Headers $AdoAuthenticationHeader
 
     $processTemplate = $processesApiResponse.value | Where-Object { $_.name -eq $AdoProjectProcessTemplate }
@@ -91,7 +83,7 @@ function New-AdoProject {
         description  = $AdoProjectDescription
         capabilities = @{
             versioncontrol  = @{
-                sourceControlType = $AdoProjectSourceControlType
+                sourceControlType = 'Git'
             }
             processTemplate = @{
                 templateTypeId = $processTemplate.id
@@ -101,27 +93,27 @@ function New-AdoProject {
 
     $projectJsonObject = $projectObject | ConvertTo-Json
 
-    # create azure devops project
+    # Create Azure DevOps Project
     # https://docs.microsoft.com/en-us/rest/api/azure/devops/core/projects/get
-    # POST https://dev.azure.com/{organization}/_apis/projects?api-version=7.1-preview.4
-    $projectsApiUri = $AdoApiUri + $AdoOrganizationName + "/_apis/projects/?api-version=7.1-preview.4"
+    # POST https://dev.azure.com/{organization}/_apis/projects?api-version=7.2-preview.4
+    $projectsApiUri = "https://dev.azure.com/" + $AdoOrganizationName + "/_apis/projects/?api-version=7.2-preview.4"
     $projectsApiResponse = Invoke-RestMethod -Uri $projectsApiUri -Method 'Post' -Headers $AdoAuthenticationHeader -Body $projectJsonObject
-    Write-Information -MessageData " Project creation queued for [$AdoProjectName] project"
+    Write-Host " Project creation queued for [$AdoProjectName] project"
 
     try {
 
-        # project creation is processed by Microsoft via a queue, query the queue url returned from the creation Api call
+        # Project creation is processed by Microsoft via a queue, query the queue url returned from the creation Api call
         # to query the queue status and create a while loop waiting for the queue to be processed
         $projectCreationStatus = Invoke-RestMethod -Uri $projectsApiResponse.url -Method 'Get' -Headers $AdoAuthenticationHeader
 
-        Write-Information -MessageData "  Queue is being processed"
+        Write-Host "  Queue is being processed"
         while ($projectCreationStatus.status -eq "inProgress" -or $projectCreationStatus.status -eq "notSet" -or $projectCreationStatus.status -eq "queued") {
-            # sleeping 3 seconds to wait for the queue to complete
+            # Sleeping 3 seconds to wait for the queue to complete
             $sleepTime = 3
-            Write-Information -MessageData "  Sleeping for [$sleepTime] seconds"
+            Write-Host "  Sleeping for [$sleepTime] seconds"
             Start-Sleep -Seconds $sleepTime
 
-            Write-Information -MessageData "  Updating queue"
+            Write-Host "  Updating queue"
             $projectCreationStatus = $null
             $projectCreationStatus = Invoke-RestMethod -Uri $projectsApiResponse.url -Method 'Get' -Headers $AdoAuthenticationHeader
         }
@@ -129,7 +121,7 @@ function New-AdoProject {
         if ($projectCreationStatus.status -ne 'succeeded') {
             Write-Error -Message " Creating a new Azure DevOps project [$AdoProjectName] failed with status [$($projectCreationStatus.status)] " -ErrorAction Stop
         } else {
-            Write-Information -MessageData " Project has been created `n"
+            Write-Host " Project has been created `n"
         }
     } catch {
         Throw $_
