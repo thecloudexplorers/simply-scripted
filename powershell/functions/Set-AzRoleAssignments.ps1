@@ -2,14 +2,17 @@
 #Requires -Modules Az.Resources
 <#
     .SYNOPSIS
-    Assigns the specified RBAC role to the specified principal, at any desired scope.
+    Assigns the specified RBAC role to the specified principal, at any desired
+    scope.
 
     .DESCRIPTION
-    This function checks if the specified principal holds any RBAC role at the specified scope
-    if this does not match with the input RBAC role for that principal, this function corrects it.
+    This function checks if the specified principal holds any RBAC role at the
+    specified scope if this does not match with the input RBAC role for that
+    principal, this function corrects it.
 
     Limitations:
-    Only Azure AD Security groups and Service Principals (Enterprise Applications) are currently supported
+    Only Azure AD Security groups and Service Principals
+    (Enterprise Applications) are currently supported
 
     .PARAMETER RoleAssignmentScope
     Scope for the role assignment
@@ -17,23 +20,26 @@
     .PARAMETER ResourceGroupName
     Name of the target resource group
 
-    .PARAMETER AzAdIdentityName
-    DisplayName of either an AzADServicePrincipal or AzADGroup
+    .PARAMETER EnIdIdentityName
+    DisplayName of either an EnIdServicePrincipal or EnIdGroup
 
     .PARAMETER RoleAssignments
     Array of Role Assignment names
 
-    .PARAMETER AzAdObjectType
-    Specify the type identity object, acceptable values are: azAdApplication, azAdSecurityGroup
+    .PARAMETER EnIdObjectType
+    Specify the type identity object, acceptable values are:
+    - enIdApplication
+    - enIdSecurityGroup
 
     .EXAMPLE
     $inputArgs = @{
-        RoleAssignmentScope = "/subscriptions/a61asf7f-12b6-4c13-b5d2-4302e728c57a/resourceGroups/My-Solution-RG"
-        AzAdIdentityName = "my-security-group"
+        RoleAssignmentScope = "/subscriptions/SUB_ID/resourceGroups/MY_RG_NAME"
+        EnIdIdentityName = "my-security-group"
         RoleAssignments = Object[]$RoleAssignmentsArray
     }
 
     .NOTES
+    Version     : 2.0.0
     Author      : Jev - @devjevnl | https://www.devjev.nl
     Source      : https://github.com/thecloudexplorers/simply-scripted
 #>
@@ -46,7 +52,7 @@ function Set-AzRoleAssignments {
         [System.String] $RoleAssignmentScope,
 
         [ValidateNotNullOrEmpty()]
-        [System.String] $AzAdIdentityName,
+        [System.String] $EnIdIdentityName,
 
         [Parameter(Mandatory)]
         [ValidateNotNullOrEmpty()]
@@ -54,35 +60,37 @@ function Set-AzRoleAssignments {
 
         [Parameter(Mandatory)]
         [ValidateNotNullOrEmpty()]
-        [System.String] $AzAdObjectType
+        [ValidateSet('enIdApplication', 'enIdSecurityGroup')]
+        [System.String] $EnIdObjectType
     )
 
-    $azAdIdentity = $null
-    switch ($AzAdObjectType) {
-        azAdApplication {
-            $azAdIdentity = Get-AzADServicePrincipal -Filter "DisplayName eq '$AzAdIdentityName'"
+    $enIdIdentity = $null
+    switch ($EnIdObjectType) {
+        enIdApplication {
+            $enIdIdentity = Get-AzADServicePrincipal -Filter "DisplayName eq '$EnIdIdentityName'"
         }
-        azAdSecurityGroup {
-            $azAdIdentity = Get-AzADGroup -DisplayName $AzAdIdentityName
+        enIdSecurityGroup {
+            $enIdIdentity = Get-AzADGroup -DisplayName $EnIdIdentityName
         }
         Default {
-            Write-Error -Message "Unable to resolve the AzAdObjectType as an azAdSecurityGroup or an AzAdApplication" -ErrorAction Stop
+            Write-Error -Message "Unable to resolve the EnIdObjectType as an enIdSecurityGroup or an enIdApplication" -ErrorAction Stop
         }
     }
 
-    [PSCustomObject[]]$roleAssignmentexists = Get-AzRoleAssignment -Scope $RoleAssignmentScope 3> $null | Where-Object { $_.ObjectId -eq $azAdIdentity.Id -and $_.Scope -eq $RoleAssignmentScope }
-
-    if ($null -eq $roleAssignmentexists ) {
-        # to be able to compare objects, a dummy object is created if no role assignments exist for the identity in question
-        $roleAssignmentexists = @()
-        $roleAssignmentsDelta = Compare-Object -ReferenceObject $RoleAssignments -DifferenceObject $roleAssignmentexists
+    Write-Debug -Message "   Getting present role assignments for scope [$RoleAssignmentScope]"
+    [PSCustomObject[]]$roleAssignmentExists = Get-AzRoleAssignment -Scope $RoleAssignmentScope 3> $null | Where-Object { $_.ObjectId -eq $enIdIdentity.Id -and $_.Scope -eq $RoleAssignmentScope }
+    Write-Debug -Message "   Comparing present and defined role assignments"
+    if ($null -eq $roleAssignmentExists ) {
+        # To be able to compare objects, a dummy object is created if no role assignments exist for the identity in question
+        $roleAssignmentExists = @()
+        $roleAssignmentsDelta = Compare-Object -ReferenceObject $RoleAssignments -DifferenceObject $roleAssignmentExists
     } else {
-        # role assignments exist for the identity in question, so a proper compare is done
-        $roleAssignmentsDelta = Compare-Object -ReferenceObject $RoleAssignments -DifferenceObject $roleAssignmentexists.RoleDefinitionName
+        # Tole assignments exist for the identity in question, so a proper compare is done
+        $roleAssignmentsDelta = Compare-Object -ReferenceObject $RoleAssignments -DifferenceObject $roleAssignmentExists.RoleDefinitionName
     }
 
     if ($roleAssignmentsDelta.Count -gt 0) {
-        Write-Information -MessageData "   Delta detected in the RoleAssignments, applying drift control"
+        Write-Host "   Delta detected in the RoleAssignments, applying drift control"
 
         $roleAssignmentsDelta.ForEach{
             $delta = $_
@@ -90,24 +98,24 @@ function Set-AzRoleAssignments {
             switch ($delta.SideIndicator) {
                 '=>' {
                     # Removing excessive role assignments
-                    $rogueRoleAssignment = $roleAssignmentexists | Where-Object { $_.RoleDefinitionName -eq $delta.InputObject }
+                    $rogueRoleAssignment = $roleAssignmentExists | Where-Object { $_.RoleDefinitionName -eq $delta.InputObject }
 
-                    Write-Information -MessageData "   Removing rogue role assignment [$($rogueRoleAssignment.RoleDefinitionName)]"
+                    Write-Host "   Removing rogue role assignment [$($rogueRoleAssignment.RoleDefinitionName)]"
                     Remove-AzRoleAssignment -InputObject $rogueRoleAssignment 3> $null
-                    Write-Information -MessageData "   UPDATED: Rogue role assignment removed"
+                    Write-Host "   UPDATED: Rogue role assignment removed"
                 }
                 '<=' {
                     # Adding missing role assignments
-                    Write-Information -MessageData "   Adding missing assignment [$($delta.InputObject)]"
-                    New-AzRoleAssignment -ObjectId $azAdIdentity.Id -RoleDefinitionName $delta.InputObject -Scope $RoleAssignmentScope 1> $null
-                    Write-Information -MessageData "   UPDATED: Missing role assignment added"
+                    Write-Host "   Adding missing assignment [$($delta.InputObject)]"
+                    New-AzRoleAssignment -ObjectId $enIdIdentity.Id -RoleDefinitionName $delta.InputObject -Scope $RoleAssignmentScope 1> $null
+                    Write-Host "   UPDATED: Missing role assignment added"
                 }
                 Default {
-                    Write-Error -Message "Something went wrong compairing role Assignments, unsupported side indicator [$($delta.SideIndicator)]" -ErrorAction Stop
+                    Write-Error -Message "Something went wrong comparing role Assignments, unsupported side indicator [$($delta.SideIndicator)]" -ErrorAction Stop
                 }
             }
         }
     } else {
-        Write-Information -MessageData "   SUCCESS: no drift has been detected all role assignments are correct"
+        Write-Host "   SUCCESS: no drift has been detected all role assignments are correct"
     }
 }

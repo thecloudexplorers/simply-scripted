@@ -4,22 +4,24 @@
 
 <#
     .SYNOPSIS
-    This function connects to MgGraph (Connect-MgGraph) by acquiring the token from the current AzContext (Get-AzAccessToken)
+    This function connects to MgGraph (Connect-MgGraph) by acquiring the token
+    from the current AzContext (Get-AzAccessToken)
 
     .DESCRIPTION
-    This function uses the current AzContext bearer token to connect to MgGraph. If an existing MgGraph context exists,
-    the function checks if this context matches the current AzContext. If this is not the case
-    Disconnect-MgGraph is used followed by a reconnect with the current AzContext token
+    This function uses the current AzContext bearer token to connect to MgGraph.
+    If an existing MgGraph context exists, the function checks if this context
+    matches the current AzContext. If this is not the case Disconnect-MgGraph
+    is used followed by a reconnect with the current AzContext token
 
     .EXAMPLE
-    Connect-MgGrapWithCurrentAzContext
+    Connect-MgGraphWithCurrentAzContext
 
     .NOTES
     Author      : Jev - @devjevnl | https://www.devjev.nl
     Source      : https://github.com/thecloudexplorers/simply-scripted
 #>
 
-function Connect-MgGrapWithCurrentAzContext {
+function Connect-MgGraphWithCurrentAzContext {
     try {
         Write-Information -MessageData "`nEnsuring proper connection `nChecking AzContext..."
         $currentAzContext = Get-AzContext
@@ -32,14 +34,15 @@ function Connect-MgGrapWithCurrentAzContext {
             if ($currentMgContext.ClientId -ne $currentAzContext.Account.Id) {
                 Write-Information -MessageData "MgContext ClientId does NOT match with AzContext AccountId `n reconnecting to MgGraph using application [$currentAzContext.Account.Id]"
 
-                if ($null -ne $currentMgContextndition) {
-                    # disconnecting current session and context
+                if ($null -ne $currentMgContext) {
+                    # Disconnecting current session and context
                     Disconnect-MgGraph
                 }
 
-                # reconnecting with AzContext application
-                $graphTokenObject = Get-AzAccessToken -ResourceUrl 'https://graph.microsoft.com'
+                # Reconnecting with AzContext application
+                $graphTokenObject = Get-AzAccessToken -ResourceUrl 'https://graph.microsoft.com' -AsSecureString
                 Connect-MgGraph -AccessToken $graphTokenObject.Token
+
             } else {
                 Write-Information -MessageData "MgContext ClientId is equal to AzContext AccountId, both are already connect via application [$($currentAzContext.Account.Id)]"
             }
@@ -48,7 +51,6 @@ function Connect-MgGrapWithCurrentAzContext {
             Write-Error -Message "No active azure context was not found, make sure you are connected via Connect-AzAccount `n" -ErrorAction Stop
         }
     } catch {
-        Write-Output "An error occurred during authorization"
-        Write-Output $_
+        Write-Error "An error occurred during authorization: $_" -ErrorAction Stop
     }
 }
