@@ -10,6 +10,12 @@
     all App registration part of the supplied collection. The email of
     the user in question is used.
 
+    .PARAMETER EnIdApplicationCollection
+    Collection of Entra ID Application objects
+
+    .PARAMETER NewOwnerEmail
+    Email of the new owner, must be a valid SPN of an existing user
+
     .EXAMPLE
     $currentApps = Get-AzADApplication -DisplayNameStartWith "MyPurposeApps"
 
@@ -17,7 +23,7 @@
         EnIdApplicationCollection   = $currentApps
         NewOwnerEmail               = "devjev@demojev.nl"
     }
-    Add-NewApplicationOwnerInBulk @newOwnerArgs
+    Add-EnIdApplicationOwnerInBulk @newOwnerArgs
 
     .NOTES
     Version:    : 2.0.0
