@@ -1,0 +1,33 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "newOrExistingVirtualNetwork": {
+      "value": "new"
+    },
+    "virtualNetworkName": {
+      "value": "djn-dmo-s-vnet001"
+    },
+    "devBoxSubnetAddressPrefix": {
+      "value": "10.0.2.0/25"
+    },
+    "devBoxSubnetName": {
+      "value": "djn-dmo-s-snet001"
+    },
+    "devCenterNetworkConnectionName": {
+      "value": "djn-dmo-s-dnc001"
+    },
+    "devCenterName": {
+      "value": "djn-dmo-s-dc001"
+    },
+    "projectName": {
+      "value": "djn-dmo-s-prj001"
+    },
+    "devBoxDefinitionName": {
+      "value": "djn-dmo-s-dbd001"
+    },
+    "devCenterProjectPoolName": {
+      "value": "djn-dmo-s-dcpp001"
+    }
+  }
+}
