@@ -6,7 +6,8 @@ metadata resources = {
   following the Cloud Adoption Framework (CAF) design. It includes parameters for configuring
   up to six tiers of management groups, along with an optional default management group
   for new subscriptions and a flag for requiring write permissions for creating new
-  management groups.'''
+  management groups.
+  The of this module is inspired on Tao Yang's Azure Bicep Module for Management Group Hierarchy post'''
 }
 metadata resourceSets = {}
 
