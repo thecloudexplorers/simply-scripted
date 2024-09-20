@@ -49,22 +49,22 @@ function Add-EnIdApplicationOwnerInBulk {
             $EnIdApplicationCollection.ForEach{
                 $EnIdApp = $_
 
-                Write-Information -MessageData "Processing AD application [$($EnIdApp.DisplayName)]]"
+                Write-Host "Processing AD application [$($EnIdApp.DisplayName)]]"
                 $currentOwners = Get-AzureADApplicationOwner -ObjectId $EnIdApp.id
                 $userIsCurrentOwner = $currentOwners | Where-Object { $_.Mail -eq $currentUser.Account.Id }
 
                 if ($userIsCurrentOwner) {
-                    Write-Information -MessageData " Adding user [$($newOwner.DisplayName) as owner to [$($EnIdApp.DisplayName)]]"
+                    Write-Host " Adding user [$($newOwner.DisplayName) as owner to [$($EnIdApp.DisplayName)]]"
                     $userIsOwner = $currentOwners | Where-Object { $_.Mail -eq $NewOwnerEmail }
 
                     if ($userIsOwner) {
-                        Write-Information -MessageData "  User [$($newOwner.DisplayName) ] is alspready owner of [$($EnIdApp.DisplayName)]"
+                        Write-Host "  User [$($newOwner.DisplayName) ] is alspready owner of [$($EnIdApp.DisplayName)]"
                     } else {
                         Add-AzureADApplicationOwner -ObjectId $EnIdApp.id -RefObjectId $newOwner.Id
-                        Write-Information -MessageData "  User has been added"
+                        Write-Host "  User has been added"
                     }
                 } else {
-                    Write-Information -MessageData " Current context identity [$($currentUser.Account.Id)] is not an owner of [$($EnIdApp.DisplayName)], skipping"
+                    Write-Host " Current context identity [$($currentUser.Account.Id)] is not an owner of [$($EnIdApp.DisplayName)], skipping"
                 }
             }
 
