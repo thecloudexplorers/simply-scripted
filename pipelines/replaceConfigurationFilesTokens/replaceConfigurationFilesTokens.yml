@@ -1,0 +1,51 @@
+variables:
+  - name: configFilesRootFolder
+    value: $(Build.SourcesDirectory)\landing-zone-configuration\djn
+
+  - name: rootRepoLocation
+    value: $(Build.SourcesDirectory)\simply-scripted
+
+  - name: configFilesArtifactName
+    value: consumableConfigurationFiles
+
+resources:
+  repositories:
+    - repository: landing-zone-control-plane
+      type: git
+      name: LandingZoneControlPlane/landing-zone-configuration
+      ref: master
+
+trigger: none
+
+pool:
+  vmImage: windows-latest
+
+stages:
+  - stage: prepare_configuration_files_stage
+    displayName: Prepare Configuration Files
+    jobs:
+      - job: repalce_tokens_in_configuration_files_step
+        displayName: Replace Tokens in Configuration Files
+        steps:
+          - checkout: self
+          - checkout: landing-zone-control-plane
+          - task: PowerShell@2
+            displayName: 'Run replaceConfigurationFilesTokens.ps1'
+            inputs:
+              targetType: 'filePath'
+              showWarnings: true
+              pwsh: true
+              filePath: $(rootRepoLocation)\powershell\replaceConfigurationFilesTokens.ps1
+              arguments: >
+                -RootRepoLocation "$(rootRepoLocation)"
+                -ConfigFilesRootFolder "$(configFilesRootFolder)"
+                -StartTokenPattern "#{"
+                -EndTokenPattern "}#"
+                -ExtractTokenValueFromConfigFileName
+                -PrefixForConfigFileNameWithTokenValue "env"
+                -TargetTokenNameForTokenValueFromConfigFileName "environment_acronym"
+
+          - task: PublishBuildArtifacts@1
+            inputs:
+              pathToPublish: $(configFilesRootFolder)
+              artifactName: $(configFilesArtifactName)

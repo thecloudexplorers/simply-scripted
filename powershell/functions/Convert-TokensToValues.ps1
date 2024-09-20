@@ -42,6 +42,7 @@
     Convert-TokensToValues @convertTokensParams
 
     .NOTES
+    Version     : 1.0.0
     Author      : Jev - @devjevnl | https://www.devjev.nl
     Source      : https://github.com/thecloudexplorers/simply-scripted
 #>
@@ -109,8 +110,8 @@ function Convert-TokensToValues {
                 if ($matchForLeft.Matches.Count -gt $matchForRight.Matches.Count) {
 
                     $missingEndTokenIndex = $matchForLeft.Matches.Index -join ', '
-                    Write-Host "  One or more closing tokens [$EndTokenPattern] are missing!"
-                    Write-Host "  Character index locations of the placeholder values with missing tokens: $missingEndTokenIndex"
+                    Write-Warning "  One or more closing tokens [$EndTokenPattern] are missing!"
+                    Write-Warning "  Character index locations of the placeholder values with missing tokens: $missingEndTokenIndex"
                 } elseif ($matchForLeft.Matches.Count -lt $matchForRight.Matches.Count) {
 
                     $missingStartTokenIndex = $matchForRight.Matches.Index -join ', '
@@ -132,8 +133,8 @@ function Convert-TokensToValues {
                 # Create a string from the match values
                 $warningValues = $matchValues -join ', '
 
-                Write-Host -ForegroundColor Yellow "  Unreplaced tokens detected, make sure the MetadataCollection parameter contains all tokens"
-                Write-Host -ForegroundColor Yellow "  Unreplaced tokens: $warningValues"
+                Write-Warning "  Unreplaced tokens detected, make sure the MetadataCollection parameter contains all tokens"
+                Write-Warning "  Unreplaced tokens: $warningValues"
             }
         }
 
@@ -151,7 +152,7 @@ function Convert-TokensToValues {
         Write-Host " All token have been replaced processed"
 
     } catch {
-        Write-Host "An unexpected error with the following message occurred while converting tokens to values:" -ForegroundColor Red
-        Write-Host $_.Exception.Message -ForegroundColor Red
+        Write-Error "An unexpected error with the following message occurred while converting tokens to values"
+        Write-Error "Exception message: [$($_.Exception.Message)]" -ErrorAction Stop
     }
 }
