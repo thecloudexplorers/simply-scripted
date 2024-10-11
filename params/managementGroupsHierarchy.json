@@ -1,0 +1,95 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "tier1ManagementGroup": {
+      "value": {
+        "id": "mg10001",
+        "displayName": "DevJev NL"
+      }
+    },
+    "tier2ManagementGroups": {
+      "value": [
+        {
+          "id": "mg20001",
+          "displayName": "Platform Landing Zones",
+          "parentId": "mg10001"
+        },
+        {
+          "id": "mg20002",
+          "displayName": "Workload Landing Zones",
+          "parentId": "mg10001"
+        }
+      ]
+    },
+    "tier3ManagementGroups": {
+      "value": [
+        {
+          "id": "mg30001",
+          "displayName": "Identity",
+          "parentId": "mg20001"
+        },
+        {
+          "id": "mg30002",
+          "displayName": "Management",
+          "parentId": "mg20001"
+        },
+        {
+          "id": "mg30003",
+          "displayName": "Connectivity",
+          "parentId": "mg20001"
+        },
+        {
+          "id": "mg30004",
+          "displayName": "Confidential",
+          "parentId": "mg20002"
+        },
+        {
+          "id": "mg30005",
+          "displayName": "Internal",
+          "parentId": "mg20002"
+        },
+        {
+          "id": "mg30006",
+          "displayName": "Public",
+          "parentId": "mg20002"
+        },
+        {
+          "id": "mg30007",
+          "displayName": "Experimental",
+          "parentId": "mg20002"
+        },
+        {
+          "id": "mg30008",
+          "displayName": "Sandbox",
+          "parentId": "mg20002"
+        },
+        {
+          "id": "mg40009",
+          "displayName": "Decommissioned",
+          "parentId": "mg20002"
+        },
+        {
+          "id": "mg30010",
+          "displayName": "Quarantine",
+          "parentId": "mg20002"
+        }
+      ]
+    },
+    "tier4ManagementGroups": {
+      "value": []
+    },
+    "tier5ManagementGroups": {
+      "value": []
+    },
+    "tier6ManagementGroups": {
+      "value": []
+    },
+    "RequireWritePermissionsForNewManagementGroupCreation": {
+      "value": true
+    },
+    "IdOfDefaultManagementGroupForNewSubscriptions": {
+      "value": "mg30010"
+    }
+  }
+}
