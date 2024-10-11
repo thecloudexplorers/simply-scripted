@@ -17,22 +17,23 @@
     Connect-MgGraphWithCurrentAzContext
 
     .NOTES
+    Version:    : 2.0.0
     Author      : Jev - @devjevnl | https://www.devjev.nl
     Source      : https://github.com/thecloudexplorers/simply-scripted
 #>
 
 function Connect-MgGraphWithCurrentAzContext {
     try {
-        Write-Information -MessageData "`nEnsuring proper connection `nChecking AzContext..."
+        Write-Host "`nEnsuring proper connection `nChecking AzContext..."
         $currentAzContext = Get-AzContext
         if ($null -ne $currentAzContext ) {
 
-            Write-Information -MessageData "An active azure context was found. Using the current context for MgGraph authorization"
+            Write-Host "An active azure context was found. Using the current context for MgGraph authorization"
             $currentMgContext = Get-MgContext
 
-            Write-Information -MessageData "Verifying MgContext ClientId with AzContext AccountId"
+            Write-Host "Verifying MgContext ClientId with AzContext AccountId"
             if ($currentMgContext.ClientId -ne $currentAzContext.Account.Id) {
-                Write-Information -MessageData "MgContext ClientId does NOT match with AzContext AccountId `n reconnecting to MgGraph using application [$currentAzContext.Account.Id]"
+                Write-Host "MgContext ClientId does NOT match with AzContext AccountId `n reconnecting to MgGraph using application [$($currentAzContext.Account.Id)]"
 
                 if ($null -ne $currentMgContext) {
                     # Disconnecting current session and context
@@ -44,13 +45,13 @@ function Connect-MgGraphWithCurrentAzContext {
                 Connect-MgGraph -AccessToken $graphTokenObject.Token
 
             } else {
-                Write-Information -MessageData "MgContext ClientId is equal to AzContext AccountId, both are already connect via application [$($currentAzContext.Account.Id)]"
+                Write-Host "MgContext ClientId is equal to AzContext AccountId, both are already connect via application [$($currentAzContext.Account.Id)]"
             }
-            Write-Information -MessageData "Full connection is established `n"
+            Write-Host "Full connection is established `n"
         } else {
             Write-Error -Message "No active azure context was not found, make sure you are connected via Connect-AzAccount `n" -ErrorAction Stop
         }
     } catch {
-        Write-Error "An error occurred during authorization: $_" -ErrorAction Stop
+        Write-Error -Message "An error occurred during authorization: $_" -ErrorAction Stop
     }
 }
