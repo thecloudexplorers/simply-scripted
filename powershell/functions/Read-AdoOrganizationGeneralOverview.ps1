@@ -27,7 +27,7 @@
              The function includes logic to detect expired or invalid Bearer tokens
              based on HTML fallback content.
 
-    Version     : 0.5.0
+    Version     : 0.5.1
     Author      : Jev - @devjevnl | https://www.devjev.nl
     Source      : https://github.com/thecloudexplorers/simply-scripted
 
