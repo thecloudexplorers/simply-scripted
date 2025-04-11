@@ -21,7 +21,7 @@
 
              Microsoft may change or remove this endpoint without notice.
 
-    Version     : 0.5.0
+    Version     : 0.5.1
     Author      : Jev - @devjevnl | https://www.devjev.nl
     Source      : https://github.com/thecloudexplorers/simply-scripted
 
@@ -32,12 +32,12 @@ function Read-AdoOrganizationPipelinesSettings {
     [CmdletBinding()]
     param (
         # Azure DevOps organization name
-        [Parameter(Mandatory = $true)]
-        [string]$Organization,
+        [Parameter(Mandatory)]
+        [Systrem.String]$Organization,
 
         # Bearer token for authentication
-        [Parameter(Mandatory = $true)]
-        [string]$AccessToken
+        [Parameter(Mandatory)]
+        [Systrem.String]$AccessToken
     )
 
     # Internal endpoint for querying pipeline settings via contribution data provider
