@@ -23,7 +23,7 @@
              Microsoft may change, deprecate, or remove it at any time without notice.
              Use in production scenarios at your own risk and validate regularly.
 
-    Version     : 0.5.0
+    Version     : 0.5.1
     Author      : Jev - @devjevnl | https://www.devjev.nl
     Source      : https://github.com/thecloudexplorers/simply-scripted
 
@@ -36,11 +36,11 @@ function Read-AdoOrganizationSecurityPolicies {
     param (
         # Name of the Azure DevOps organization
         [Parameter(Mandatory)]
-        [string]$Organization,
+        [System.String]$Organization,
 
         # Bearer token with permissions to query organization policy settings
         [Parameter(Mandatory)]
-        [string]$AccessToken
+        [System.String]$AccessToken
     )
 
     # Construct the internal policy settings endpoint
