@@ -38,11 +38,11 @@
 function Read-AdoOrganizationGeneralOverview {
     [CmdletBinding()]
     param (
-        [Parameter(Mandatory = $true)]
-        [string]$Organization,
+        [Parameter(Mandatory)]
+        [System.String] $Organization,
 
-        [Parameter(Mandatory = $true)]
-        [string]$AccessToken
+        [Parameter(Mandatory)]
+        [System.String] $AccessToken
     )
 
     $uri = "https://dev.azure.com/$Organization/_settings/organizationOverview?__rt=fps&__ver=2"
@@ -53,6 +53,7 @@ function Read-AdoOrganizationGeneralOverview {
     }
 
     try {
+        Write-Host
         $rawResponse = Invoke-WebRequest -Uri $uri -Method Get -Headers $headers -UseBasicParsing
 
         # Detect HTML response indicating token failure
