@@ -1,19 +1,19 @@
 <#
-.SYNOPSIS
+    .SYNOPSIS
     Reads the general billing settings of an Azure DevOps organization.
 
-.DESCRIPTION
+    .DESCRIPTION
     This function queries the Azure DevOps Commerce (AzComm) API to retrieve general billing
     setup information such as billing status, linked subscription, and account information.
     It also handles cases where billing is not configured.
 
-.PARAMETER OrganizationId
+    .PARAMETER OrganizationId
     The GUID of the Azure DevOps organization (not the display name).
 
-.PARAMETER AccessToken
+    .PARAMETER AccessToken
     A valid Azure DevOps Bearer token with permission to query billing details.
 
-.EXAMPLE
+    .EXAMPLE
     $billingParams = @{
         OrganizationId = "a6c61e95-bc6a-4998-b599-5c1add3fd48b"
         AccessToken    = $token
@@ -21,17 +21,17 @@
 
     Read-AdoOrganizationGeneralBillingSettings @billingParams
 
-.NOTES
+    .NOTES
     This function uses a documented but lesser-known API endpoint:
     https://azdevopscommerce.dev.azure.com/{orgId}/_apis/AzComm/BillingSetup
 
     Microsoft may restrict access based on user role or token scope.
 
-    Version     : 0.5.0
+    Version     : 0.5.1
     Author      : Jev - @devjevnl | https://www.devjev.nl
     Source      : https://github.com/thecloudexplorers/simply-scripted
 
-.LINK
+    .LINK
     https://learn.microsoft.com/en-us/rest/api/azure/devops/commerce/billing-setup/read?view=azure-devops-rest-7.1
 #>
 function Read-AdoOrganizationGeneralBillingSettings {
