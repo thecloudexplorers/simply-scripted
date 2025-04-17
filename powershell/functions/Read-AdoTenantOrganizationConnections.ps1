@@ -25,7 +25,7 @@
 .NOTES
     API: https://aexprodweu1.vsaex.visualstudio.com/_apis/EnterpriseCatalog/Organizations?tenantId={tenantId}
 
-    Version     : 0.6.0
+    Version     : 0.5.0
     Author      : Jev - @devjevnl | https://www.devjev.nl
     Source      : https://github.com/thecloudexplorers/simply-scripted
 #>
@@ -95,6 +95,3 @@ function Read-AdoTenantOrganizationConnections {
         Write-Error "Failed to download or process CSV: $($_.Exception.Message)"
     }
 }
-
-$token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6Im9PdmN6NU1fN3AtSGpJS2xGWHo5M3VfVjBabyJ9.eyJuYW1laWQiOiJmMTZkMGUyMi0wMzA5LTY2NDgtYjhkNC02ZTAzODJjN2VlMTEiLCJzY3AiOiJhcHBfdG9rZW4iLCJhdWkiOiI1NjU3YTg0YS1jZmRmLTQ4NmEtODM4MC0yMjVhNjZiNjllOTUiLCJzaWQiOiI2NDMxZWVkNC0xZWM0LTQ2MDQtODMzOS1iZmVkMDQ1MzE1OGMiLCJpc3MiOiJhcHAudnN0b2tlbi52aXN1YWxzdHVkaW8uY29tIiwiYXVkIjoiYXBwLnZzdG9rZW4udmlzdWFsc3R1ZGlvLmNvbSIsIm5iZiI6MTc0NDc5NTc5OCwiZXhwIjoxNzQ0Nzk5OTk4fQ.kdNE44o4tx0gx0f3YeD_gc43uDX6e_jMz_iw9JIgIWZBHDBpDZ01KyajjA6XPscTS9ykNzgoEhAivMD2vsjstRc023yW4OcKxXYov7QgSl6s61D6veR6ydXXnutVLmTaeAvply6_XcdCL73eXLDikfOIqjgFiWwdQrxq6aTvyejwAhiihXMO9bEpiJjoruW1eyB0ey-LcMxIv18etLIVvCuJ_X3YIXcaM3C316sMHqBvGkd6etg5MSs7Bziq-o61hLOK87RB9RhiaK29jDJ0SNX7DR34E4keCSMwzoN4c5ICpC2Nxb2Bn7eO8mU3m7Wvwh_KvPRkz8qKQ86esyts1g"
-Read-AdoTenantOrganizationConnections -TenantId "a74be31f-7904-4c43-8ef5-c82967c8e559" -AccessToken $token
