@@ -237,3 +237,13 @@ Remember that the PowerShell language, tools, and community understanding are co
    **Description**: Include metadata in your scripts or modules (e.g., author, description, license) and manage versioning appropriately. Consider packaging scripts into modules for easier distribution. (Specific techniques not detailed in sources).  
    **Rationale**: Metadata and versioning are crucial for managing, sharing, and maintaining scripts and tools over time. Packaging simplifies distribution and installation.  
    [Read More: PoshCode Best Practices Guide](https://github.com/PoshCode/PowerShellPracticeAndStyle#best-practices-introduction)
+
+
+41. **Best Practice Title**: Consistent Parameter Formatting  
+**Description**: Format each parameter using a clean, multi-line layout. Place the `[Parameter(...)]` attribute on its own line, followed by the type and variable on the next line, with a single space between the type and variable name. Always include a trailing comma if it is part of a list.
+```powershell
+[Parameter(Mandatory)]
+[string] $Organization,
+```
+**Rationale**: This formatting style improves readability and enforces visual consistency across scripts. When working with multiple parameters, especially in team environments or in long parameter blocks, it makes the structure easier to scan and understand at a glance. It also aligns with common conventions in formal PowerShell module development and contributes to clean code practices.
+[Read More: DevJev.nl]()
