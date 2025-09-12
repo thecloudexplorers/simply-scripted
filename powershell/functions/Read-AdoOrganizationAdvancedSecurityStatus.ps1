@@ -54,6 +54,8 @@ function Read-AdoOrganizationAdvancedSecurityStatus {
         [System.Collections.Hashtable] $AdoAuthenticationHeader
     )
 
+    $advancedSecurityEnabled = $false
+
     $meterUsageUri = "https://advsec.dev.azure.com/$Organization/_apis/Management/MeterUsage/Last?api-version=7.1-preview.1"
 
     try {
@@ -85,24 +87,21 @@ function Read-AdoOrganizationAdvancedSecurityStatus {
             Write-Host "Advanced Security is NOT enabled for organization: $Organization"
         }
 
-        Write-Host ""
-        Write-Host "Assessment complete."
+
     } catch {
-        $message = $_.ErrorDetails.Message
+        $jsonErrorMessage = $_.ErrorDetails.Message | ConvertFrom-Json -ErrorAction SilentlyContinue
 
-        Write-Host ""
-        Write-Host "===== Azure DevOps Advanced Security Status ====="
-        Write-Host ""
-
-        if ($message -match 'AdvSecNotEnabledForOrgException') {
-            Write-Host "Advanced Security is NOT enabled for organization: $Organization"
-        } elseif ($message -match 'MeterUsageNotFoundException') {
-            Write-Host "Advanced Security is ENABLED but usage data is not yet available for organization: $Organization"
+        if ($null -ne $jsonErrorMessage) {
+            if ($jsonErrorMessage.typeKey -eq "MeterUsageNotFoundException") {
+                $advancedSecurityEnabled = $false
+            } else {
+                Write-Error "Unexpected error occurred: $($_.Exception.Message)" -ErrorAction Stop
+            }
         } else {
-            Write-Error "Unexpected error occurred: $($_.Exception.Message)"
+            Write-Error "Unexpected error occurred: $($_.Exception.Message)" -ErrorAction Stop
         }
+    } finally {
+        Write-Host "Advanced Security status is [$advancedSecurityEnabled] for organization [$Organization]"
 
-        Write-Host ""
-        Write-Host "Assessment complete."
     }
 }
