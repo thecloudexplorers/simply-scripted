@@ -1,28 +1,43 @@
 <#
 .SYNOPSIS
-    Determines whether Advanced Security is enabled for an Azure DevOps organization.
+    Determines whether Advanced Security is enabled for an Azure DevOps
+    organization.
 
 .DESCRIPTION
-    This function queries the Azure DevOps Advanced Security API and detects whether Advanced Security
-    is enabled for the organization. It handles three scenarios:
+    This function queries the Azure DevOps Advanced Security API and detects
+    whether Advanced Security is enabled for the organization. It handles three
+    scenarios:
     - Advanced Security is enabled and usage data is returned
     - Advanced Security is enabled but usage data is not yet available
     - Advanced Security is not enabled at all
 
-    If enabled and reporting, the function outputs billing date, unique committer count,
-    and billed user identities.
+    If enabled and reporting, the function outputs billing date, billable
+    status, and billed user identities. The function also checks for token
+    expiration and access errors.
 
 .PARAMETER Organization
     The name of your Azure DevOps organization (e.g. 'devjevnl').
 
-.PARAMETER AccessToken
-    A valid Azure DevOps Bearer token with access to organization settings.
+.PARAMETER AdoAuthenticationHeader
+    A hashtable containing the Azure DevOps authentication headers for PAT usage.
+    Should include 'Content-Type' and 'Authorization' keys, e.g.:
+    Example:
+        $patAuthenticationHeader = @{
+            'Content-Type'  = 'application/json'
+            'Authorization' = 'Basic ' + $adoAuthToken
+        }
 
 .EXAMPLE
-    $advSecParams = @{
-        Organization = "devjevnl"
-        AccessToken  = $token
+    $adoAuthToken = New-AdoAuthenticationToken -PatToken $patTokenReadAdvancedSecurity -PatTokenOwnerName $PatTokenOwnerName
+    $patAuthenticationHeader = @{
+        'Content-Type'  = 'application/json'
+        'Authorization' = 'Basic ' + $adoAuthToken
     }
+    $params = @{
+        Organization           = "devjevnl"
+        AdoAuthenticationHeader = $patAuthenticationHeader
+    }
+    Read-AdoOrganizationAdvancedSecurityStatus @params
 
     Read-AdoOrganizationAdvancedSecurityStatus @advSecParams
 
@@ -31,16 +46,16 @@
     https://advsec.dev.azure.com/{org}/_apis/Management/MeterUsage/Last
 
     Response types handled:
-    - 200 OK with usage data            → Advanced Security is enabled
-    - MeterUsageNotFoundException       → Enabled but usage data is not yet available
-    - AdvSecNotEnabledForOrgException   → Not enabled
+    - 200 OK with usage data       -> Advanced Security is enabled
+    - MeterUsageNotFoundException  -> Not enabled or data usage not available
+    - HTML/Sign In response        -> Token expired or access denied
 
-    Version     : 0.6.0
+    Version     : 1.0.0
     Author      : Jev - @devjevnl | https://www.devjev.nl
     Source      : https://github.com/thecloudexplorers/simply-scripted
 
 .LINK
-    https://learn.microsoft.com/en-us/azure/devops/organizations/security/advanced-security-overview
+    https://learn.microsoft.com/en-us/azure/devops/repos/security/configure-github-advanced-security-features?view=azure-devops&tabs=yaml&pivots=standalone-ghazdo&wt.mc_id=DT-MVP-5005327
 #>
 function Read-AdoOrganizationAdvancedSecurityStatus {
     [CmdletBinding()]
@@ -89,9 +104,9 @@ function Read-AdoOrganizationAdvancedSecurityStatus {
         if ($restResponse.isAdvSecEnabled -eq $true) {
 
             Write-Host "Advanced Security is ENABLED for organization [$Organization]"
-            Write-Host "Billing Date             [$($response.billingDate)]"
-            Write-Host "Billable Status          [$($response.isAdvSecBillable)]"
-            Write-Host "Unique Committer Count   [$($response.uniqueCommitterCount)]"
+            Write-Host "Billing Date             [$($restResponse.billingDate)]"
+            Write-Host "Billable Status          [$($restResponse.isAdvSecBillable)]"
+            Write-Host "Unique Committer Count   [$($restResponse.uniqueCommitterCount)]"
 
             # populate output hash table
             $responseHashTable.isAdvSecEnabled = $restResponse.isAdvSecEnabled
