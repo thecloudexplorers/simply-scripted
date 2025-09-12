@@ -31,7 +31,7 @@
     https://advsec.dev.azure.com/{org}/_apis/Management/MeterUsage/Last
 
     Response types handled:
-    - 200 OK with usage data             → Advanced Security is enabled
+    - 200 OK with usage data            → Advanced Security is enabled
     - MeterUsageNotFoundException       → Enabled but usage data is not yet available
     - AdvSecNotEnabledForOrgException   → Not enabled
 
@@ -49,20 +49,15 @@ function Read-AdoOrganizationAdvancedSecurityStatus {
         [Parameter(Mandatory)]
         [string]$Organization,
 
-        # Valid Bearer token
         [Parameter(Mandatory)]
-        [string]$AccessToken
+        [ValidateNotNullOrEmpty()]
+        [System.Collections.Hashtable] $AdoAuthenticationHeader
     )
 
-    $uri = "https://advsec.dev.azure.com/$Organization/_apis/Management/MeterUsage/Last?api-version=7.1-preview.1"
-
-    $headers = @{
-        Authorization = "Bearer $AccessToken"
-        Accept        = "application/json"
-    }
+    $meterUsageUri = "https://advsec.dev.azure.com/$Organization/_apis/Management/MeterUsage/Last?api-version=7.1-preview.1"
 
     try {
-        $rawResponse = Invoke-WebRequest -Uri $uri -Method Get -Headers $headers -UseBasicParsing
+        $rawResponse = Invoke-WebRequest -Uri $meterUsageUri -Method Get -Headers $AdoAuthenticationHeader -UseBasicParsing
 
         if ($rawResponse.Content -match '<html' -or $rawResponse.RawContent -match 'Sign In') {
             throw "Access denied or token expired. Please verify your Bearer token is still valid."
