@@ -54,54 +54,56 @@ function Read-AdoOrganizationAdvancedSecurityStatus {
         [System.Collections.Hashtable] $AdoAuthenticationHeader
     )
 
-    $advancedSecurityEnabled = $false
-
     $meterUsageUri = "https://advsec.dev.azure.com/$Organization/_apis/Management/MeterUsage/Last?api-version=7.1-preview.1"
 
     try {
-        $rawResponse = Invoke-WebRequest -Uri $meterUsageUri -Method Get -Headers $AdoAuthenticationHeader -UseBasicParsing
-
-        if ($rawResponse.Content -match '<html' -or $rawResponse.RawContent -match 'Sign In') {
-            throw "Access denied or token expired. Please verify your Bearer token is still valid."
-        }
-
-        $response = $rawResponse.Content | ConvertFrom-Json
-
-        Write-Host ""
-        Write-Host "===== Azure DevOps Advanced Security Status ====="
-        Write-Host ""
-
-        if ($response.isAdvSecEnabled -eq $true) {
-            Write-Host "Advanced Security is ENABLED for organization: $Organization"
-            Write-Host "Billing Date             : $($response.billingDate)"
-            Write-Host "Billable Status          : $($response.isAdvSecBillable)"
-            Write-Host "Unique Committer Count   : $($response.uniqueCommitterCount)"
-
-            if ($response.billedUsers) {
-                Write-Host "Billed Users:"
-                foreach ($user in $response.billedUsers) {
-                    Write-Host "  - $($user.userIdentity.displayName)"
-                }
-            }
-        } else {
-            Write-Host "Advanced Security is NOT enabled for organization: $Organization"
-        }
-
-
+        $restResponse = Invoke-RestMethod -Uri $meterUsageUri -Method 'GET' -Headers $AdoAuthenticationHeader -UseBasicParsing
     } catch {
         $jsonErrorMessage = $_.ErrorDetails.Message | ConvertFrom-Json -ErrorAction SilentlyContinue
 
         if ($null -ne $jsonErrorMessage) {
+            # Check for MeterUsageNotFoundException which indicates that Advanced Security is not enabled
             if ($jsonErrorMessage.typeKey -eq "MeterUsageNotFoundException") {
-                $advancedSecurityEnabled = $false
+                Write-Host "Advanced Security is NOT enabled for organization [$Organization]"
             } else {
                 Write-Error "Unexpected error occurred: $($_.Exception.Message)" -ErrorAction Stop
             }
         } else {
             Write-Error "Unexpected error occurred: $($_.Exception.Message)" -ErrorAction Stop
         }
-    } finally {
-        Write-Host "Advanced Security status is [$advancedSecurityEnabled] for organization [$Organization]"
-
     }
+
+    $responseHashTable = @{
+        isAdvSecEnabled  = $false
+        billingDate      = $null
+        isAdvSecBillable = $false
+        billedUsers      = @()
+    }
+
+    # Check if response content returns a html page which usually indicates token expired
+    if ($rawResponse.Content -match '<html' -or $rawResponse.RawContent -match 'Sign In') {
+        Write-Error "Access denied or token expired. Please verify your Bearer token is still valid." -ErrorAction Stop
+
+    } elseif ($null -ne $restResponse) {
+        # Advanced Security is enabled, check if usage data is available
+        if ($restResponse.isAdvSecEnabled -eq $true) {
+
+            Write-Host "Advanced Security is ENABLED for organization [$Organization]"
+            Write-Host "Billing Date             [$($response.billingDate)]"
+            Write-Host "Billable Status          [$($response.isAdvSecBillable)]"
+            Write-Host "Unique Committer Count   [$($response.uniqueCommitterCount)]"
+
+            # populate output hash table
+            $responseHashTable.isAdvSecEnabled = $restResponse.isAdvSecEnabled
+            $responseHashTable.billingDate = $restResponse.billingDate
+            $responseHashTable.isAdvSecBillable = $restResponse.isAdvSecBillable
+            $responseHashTable.billedUsers = $restResponse.billedUsers
+        } else {
+            Write-Host "Advanced Security is NOT enabled for organization [$Organization]"
+        }
+    } else {
+        Write-Host "Advanced Security is NOT enabled for organization [$Organization]"
+    }
+
+    return $responseHashTable
 }
