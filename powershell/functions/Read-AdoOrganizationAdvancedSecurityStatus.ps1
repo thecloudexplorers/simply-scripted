@@ -19,8 +19,8 @@
     The name of your Azure DevOps organization (e.g. 'devjevnl').
 
 .PARAMETER AdoAuthenticationHeader
-    A hashtable containing the Azure DevOps authentication headers for PAT usage.
-    Should include 'Content-Type' and 'Authorization' keys, e.g.:
+    A hashtable containing the Azure DevOps authentication headers for PAT
+    usage. Should include 'Content-Type' and 'Authorization' keys, e.g.:
     Example:
         $patAuthenticationHeader = @{
             'Content-Type'  = 'application/json'
@@ -28,7 +28,12 @@
         }
 
 .EXAMPLE
-    $adoAuthToken = New-AdoAuthenticationToken -PatToken $patTokenReadAdvancedSecurity -PatTokenOwnerName $PatTokenOwnerName
+    $adoAuthTokenParams = @{
+        PatToken         = $patTokenReadAdvancedSecurity
+        PatTokenOwnerName = $PatTokenOwnerName
+    }
+    $adoAuthToken = New-AdoAuthenticationToken @adoAuthTokenParams
+
     $patAuthenticationHeader = @{
         'Content-Type'  = 'application/json'
         'Authorization' = 'Basic ' + $adoAuthToken
@@ -72,15 +77,22 @@ function Read-AdoOrganizationAdvancedSecurityStatus {
     $meterUsageUri = "https://advsec.dev.azure.com/$Organization/_apis/Management/MeterUsage/Last?api-version=7.1-preview.1"
 
     try {
-        $restResponse = Invoke-RestMethod -Uri $meterUsageUri -Method 'GET' -Headers $AdoAuthenticationHeader -UseBasicParsing
+        $invokeParams = @{
+            Uri             = $meterUsageUri
+            Method          = 'GET'
+            Headers         = $AdoAuthenticationHeader
+            UseBasicParsing = $true
+        }
+        $restResponse = Invoke-RestMethod @invokeParams
     } catch {
         $jsonErrorMessage = $_.ErrorDetails.Message | ConvertFrom-Json -ErrorAction SilentlyContinue
 
         if ($null -ne $jsonErrorMessage) {
-            # Check for MeterUsageNotFoundException which indicates that Advanced Security is not enabled
-            if ($jsonErrorMessage.typeKey -eq "MeterUsageNotFoundException") {
-                Write-Host "Advanced Security is NOT enabled for organization [$Organization]"
-            } else {
+            <#
+            Ensure that only the MeterUsageNotFoundException is ignored as this is expected when Advanced Security is
+            not enabled
+            #>
+            if ($jsonErrorMessage.typeKey -ne "MeterUsageNotFoundException") {
                 Write-Error "Unexpected error occurred: $($_.Exception.Message)" -ErrorAction Stop
             }
         } else {
@@ -103,21 +115,20 @@ function Read-AdoOrganizationAdvancedSecurityStatus {
         # Advanced Security is enabled, check if usage data is available
         if ($restResponse.isAdvSecEnabled -eq $true) {
 
-            Write-Host "Advanced Security is ENABLED for organization [$Organization]"
-            Write-Host "Billing Date             [$($restResponse.billingDate)]"
-            Write-Host "Billable Status          [$($restResponse.isAdvSecBillable)]"
-            Write-Host "Unique Committer Count   [$($restResponse.uniqueCommitterCount)]"
+            Write-Information -Message "Advanced Security is ENABLED for organization [$Organization]"
 
             # populate output hash table
             $responseHashTable.isAdvSecEnabled = $restResponse.isAdvSecEnabled
             $responseHashTable.billingDate = $restResponse.billingDate
             $responseHashTable.isAdvSecBillable = $restResponse.isAdvSecBillable
             $responseHashTable.billedUsers = $restResponse.billedUsers
+
+            Write-Output $responseHashTable
         } else {
-            Write-Host "Advanced Security is NOT enabled for organization [$Organization]"
+            Write-Information -Message "Advanced Security is NOT enabled for organization [$Organization]"
         }
     } else {
-        Write-Host "Advanced Security is NOT enabled for organization [$Organization]"
+        Write-Information -Message "Advanced Security is NOT enabled for organization [$Organization]"
     }
 
     return $responseHashTable
