@@ -1,12 +1,12 @@
 <#
 .SYNOPSIS
     Determines whether Advanced Security is enabled for an Azure DevOps
-    organization.
+    organization level.
 
 .DESCRIPTION
     This function queries the Azure DevOps Advanced Security API and detects
-    whether Advanced Security is enabled for the organization. It handles three
-    scenarios:
+    whether Advanced Security is enabled for the organization level. It handles
+    three scenarios:
     - Advanced Security is enabled and usage data is returned
     - Advanced Security is enabled but usage data is not yet available
     - Advanced Security is not enabled at all
@@ -74,62 +74,47 @@ function Read-AdoOrganizationAdvancedSecurityStatus {
         [System.Collections.Hashtable] $AdoAuthenticationHeader
     )
 
-    $meterUsageUri = "https://advsec.dev.azure.com/$Organization/_apis/Management/MeterUsage/Last?api-version=7.1-preview.1"
+    $enablementUri = "https://advsec.dev.azure.com/$Organization/_apis/management/enablement?api-version=7.2-preview.3"
 
     try {
+        # Call the Advanced Security Enablement API
         $invokeParams = @{
-            Uri             = $meterUsageUri
+            Uri             = $enablementUri
             Method          = 'GET'
             Headers         = $AdoAuthenticationHeader
             UseBasicParsing = $true
         }
         $restResponse = Invoke-RestMethod @invokeParams
-    } catch {
-        $jsonErrorMessage = $_.ErrorDetails.Message | ConvertFrom-Json -ErrorAction SilentlyContinue
 
-        if ($null -ne $jsonErrorMessage) {
-            <#
-            Ensure that only the MeterUsageNotFoundException is ignored as this is expected when Advanced Security is
-            not enabled
-            #>
-            if ($jsonErrorMessage.typeKey -ne "MeterUsageNotFoundException") {
-                Write-Error "Unexpected error occurred: $($_.Exception.Message)" -ErrorAction Stop
-            }
-        } else {
-            Write-Error "Unexpected error occurred: $($_.Exception.Message)" -ErrorAction Stop
+        $responseHashTable = @{
+            isSecretProtectionPlanEnabled = $false
+            isCodeSecurityPlanEnabled     = $false
         }
-    }
 
-    $responseHashTable = @{
-        isAdvSecEnabled  = $false
-        billingDate      = $null
-        isAdvSecBillable = $false
-        billedUsers      = @()
-    }
+        # Check if response content returns a html page which usually indicates token expired
+        if ($rawResponse.Content -match '<html' -or $rawResponse.RawContent -match 'Sign In') {
+            Write-Error "Access denied or token expired. Please verify your Bearer token is still valid." -ErrorAction Stop
 
-    # Check if response content returns a html page which usually indicates token expired
-    if ($rawResponse.Content -match '<html' -or $rawResponse.RawContent -match 'Sign In') {
-        Write-Error "Access denied or token expired. Please verify your Bearer token is still valid." -ErrorAction Stop
+        } elseif ($null -ne $restResponse) {
+            Write-Information -Message "Organization level:"
 
-    } elseif ($null -ne $restResponse) {
-        # Advanced Security is enabled, check if usage data is available
-        if ($restResponse.isAdvSecEnabled -eq $true) {
+            $secretProtectionPlan = $restResponse.enablementOnCreateSettings.enableSecretProtectionOnCreate
+            Write-Information -Message "Advanced Security Secret Protection plan status [$secretProtectionPlan]"
 
-            Write-Information -Message "Advanced Security is ENABLED for organization [$Organization]"
+            $codeSecurityPlan = $restResponse.enablementOnCreateSettings.enableCodeSecurityOnCreate
+            Write-Information -Message "Advanced Security Code Security plan status [$codeSecurityPlan]"
 
             # populate output hash table
-            $responseHashTable.isAdvSecEnabled = $restResponse.isAdvSecEnabled
-            $responseHashTable.billingDate = $restResponse.billingDate
-            $responseHashTable.isAdvSecBillable = $restResponse.isAdvSecBillable
-            $responseHashTable.billedUsers = $restResponse.billedUsers
+            $responseHashTable.isSecretProtectionPlanEnabled = $secretProtectionPlan
+            $responseHashTable.isCodeSecurityPlanEnabled = $codeSecurityPlan
 
-            Write-Output $responseHashTable
         } else {
             Write-Information -Message "Advanced Security is NOT enabled for organization [$Organization]"
         }
-    } else {
-        Write-Information -Message "Advanced Security is NOT enabled for organization [$Organization]"
-    }
 
-    return $responseHashTable
+        return $responseHashTable
+
+    } catch {
+        Write-Error "Unexpected error occurred: $($_.Exception.Message)" -ErrorAction Stop
+    }
 }
