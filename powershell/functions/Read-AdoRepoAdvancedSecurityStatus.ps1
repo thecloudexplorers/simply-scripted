@@ -53,7 +53,7 @@ function Read-AdoRepoAdvancedSecurityStatus {
                 $repoInfo = Invoke-RestMethod -Uri $repoUri -Headers $AdoAuthenticationHeader -Method Get
 
                 # Add to result collection
-                [System.Void]$result.Add([PSCustomObject]@{
+                [System.Void]$repoAdvancedSecurityStatusCollection.Add([PSCustomObject]@{
                         ProjectId                 = $projectId
                         ProjectName               = $projectInfo.name
                         RepositoryId              = $repoId
@@ -92,7 +92,7 @@ function Read-AdoRepoAdvancedSecurityStatus {
                     $repoInfo = Invoke-RestMethod -Uri $repoUri -Headers $AdoAuthenticationHeader -Method Get
 
                     # Add new entry
-                    [System.Void]$result.Add([PSCustomObject]@{
+                    [System.Void]$repoAdvancedSecurityStatusCollection.Add([PSCustomObject]@{
                             ProjectId                 = $projectId
                             ProjectName               = $projectInfo.name
                             RepositoryId              = $repoId
@@ -103,6 +103,12 @@ function Read-AdoRepoAdvancedSecurityStatus {
                         })
                 }
             }
+
+            # Summary output
+            $reposWithSecretProtection = $repoAdvancedSecurityStatusCollection | Where-Object { $_.SecretProtectionEnabled -eq $true }
+            $reposWithCodeSecurity = $repoAdvancedSecurityStatusCollection | Where-Object { $_.CodeSecurityEnabled -eq $true }
+            Write-Information -Message "Total repositories with Secret Protection enabled: [$($reposWithSecretProtection.Count)]"
+            Write-Information -Message "Total repositories with Code Security enabled: [$($reposWithCodeSecurity.Count)]"
 
             # Return the result
             return  $repoAdvancedSecurityStatusCollection
