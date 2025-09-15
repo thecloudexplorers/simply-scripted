@@ -34,7 +34,7 @@ function Read-AdoRepoAdvancedSecurityStatus {
             Where-Object { $_.secretProtectionFeatures.secretProtectionEnabled -eq $true }
 
             # Initialize result collection
-            $result = [System.Collections.ArrayList]::new()
+            $repoAdvancedSecurityStatusCollection = [System.Collections.ArrayList]::new()
 
             # Process Secret Protection enabled repositories
             foreach ($currentRepo in $secretProtectionEnabledRepos) {
@@ -72,13 +72,13 @@ function Read-AdoRepoAdvancedSecurityStatus {
                 $projectId = $currentRepo.projectId
                 $repoId = $currentRepo.repositoryId
 
-                # Check if this repository is already in our results (has both enabled)
-                $existingRepo = $result | Where-Object { $_.RepositoryId -eq $repoId }
+                # Check if this repository is already in our results (has secretProtectionEnabledRepos enabled)
+                $existingRepo = $repoAdvancedSecurityStatusCollection | Where-Object { $_.RepositoryId -eq $repoId }
 
                 if ($existingRepo) {
                     # Update existing entry
                     $existingRepo.CodeSecurityEnabled = $currentRepo.codeSecurityFeatures.codeSecurityEnabled
-                    $existingRepo.DependencyScanningEnabled = $currentRepo.codeSecurityFeatures.dependencyScanningEnabled
+                    $existingRepo.DependencyScanningEnabled = $currentRepo.codeSecurityFeatures.dependencyScanningInjectionEnabled
 
                 } else {
                     # Get project details
@@ -99,13 +99,13 @@ function Read-AdoRepoAdvancedSecurityStatus {
                             RepositoryName            = $repoInfo.name
                             SecretProtectionEnabled   = $false
                             CodeSecurityEnabled       = $currentRepo.codeSecurityFeatures.codeSecurityEnabled
-                            DependencyScanningEnabled = $currentRepo.codeSecurityFeatures.dependencyScanningEnabled
+                            DependencyScanningEnabled = $currentRepo.codeSecurityFeatures.dependencyScanningInjectionEnabled
                         })
                 }
             }
 
             # Return the result
-            $result
+            return  $repoAdvancedSecurityStatusCollection
 
             Write-Host "Stopped here!!!"
         }
