@@ -1,19 +1,17 @@
 <#
 .SYNOPSIS
-    Determines whether Advanced Security is enabled for an Azure DevOps
-    organization level.
+    Reads organization-level Advanced Security enablement settings in Azure
+    DevOps.
 
 .DESCRIPTION
-    This function queries the Azure DevOps Advanced Security API and detects
-    whether Advanced Security is enabled for the organization level. It handles
-    three scenarios:
-    - Advanced Security is enabled and usage data is returned
-    - Advanced Security is enabled but usage data is not yet available
-    - Advanced Security is not enabled at all
+    Uses the Azure DevOps Advanced Security enablement endpoint to determine
+    whether the following organization-level plans are enabled:
+    - Secret Protection
+    - Code Security
 
-    If enabled and reporting, the function outputs billing date, billable
-    status, and billed user identities. The function also checks for token
-    expiration and access errors.
+    Returns a hashtable with:
+    - isSecretProtectionPlanEnabled (bool)
+    - isCodeSecurityPlanEnabled     (bool)
 
 .PARAMETER Organization
     The name of your Azure DevOps organization (e.g. 'devjevnl').
@@ -43,19 +41,28 @@
         AdoAuthenticationHeader = $patAuthenticationHeader
     }
     Read-AdoOrganizationAdvancedSecurityStatus @params
-
     Read-AdoOrganizationAdvancedSecurityStatus @advSecParams
 
 .NOTES
-    This function uses the internal Azure DevOps endpoint:
-    https://advsec.dev.azure.com/{org}/_apis/Management/MeterUsage/Last
+    This function queries the Azure DevOps Advanced Security organization
+    enablement endpoint to read the default plan enablement settings:
 
-    Response types handled:
-    - 200 OK with usage data       -> Advanced Security is enabled
-    - MeterUsageNotFoundException  -> Not enabled or data usage not available
-    - HTML/Sign In response        -> Token expired or access denied
+    Endpoint:
+    https://advsec.dev.azure.com/{organization}/_apis/management/enablement?api-version=7.2-preview.3
 
-    Version     : 1.0.0
+    Determines organization-level defaults for:
+    - Secret Protection (enableSecretProtectionOnCreate)
+    - Code Security     (enableCodeSecurityOnCreate)
+
+    Response handling:
+    - 200 OK with JSON -> values parsed and returned
+    - Null/empty body  -> treated as not enabled
+    - HTML/Sign In     -> token expired or access denied
+
+    Authentication:
+    - Uses PAT via Basic Authorization header
+
+    Version     : 2.0.0
     Author      : Jev - @devjevnl | https://www.devjev.nl
     Source      : https://github.com/thecloudexplorers/simply-scripted
 
@@ -65,7 +72,6 @@
 function Read-AdoOrganizationAdvancedSecurityStatus {
     [CmdletBinding()]
     param (
-        # Azure DevOps organization name
         [Parameter(Mandatory)]
         [string]$Organization,
 
@@ -74,6 +80,9 @@ function Read-AdoOrganizationAdvancedSecurityStatus {
         [System.Collections.Hashtable] $AdoAuthenticationHeader
     )
 
+    # Get the current status of Advanced Security for the organization
+    # https://learn.microsoft.com/en-us/rest/api/azure/devops/advancedsecurity/org-enablement/get?view=azure-devops-rest-7.2&wt.mc_id=DT-MVP-5005327
+    # GET https://advsec.dev.azure.com/{organization}/_apis/management/enablement?api-version=7.2-preview.3
     $enablementUri = "https://advsec.dev.azure.com/$Organization/_apis/management/enablement?api-version=7.2-preview.3"
 
     try {
@@ -104,7 +113,7 @@ function Read-AdoOrganizationAdvancedSecurityStatus {
             $codeSecurityPlan = $restResponse.enablementOnCreateSettings.enableCodeSecurityOnCreate
             Write-Information -Message "Advanced Security Code Security plan status [$codeSecurityPlan]"
 
-            # populate output hash table
+            # Populate output hash table
             $responseHashTable.isSecretProtectionPlanEnabled = $secretProtectionPlan
             $responseHashTable.isCodeSecurityPlanEnabled = $codeSecurityPlan
 
