@@ -180,11 +180,11 @@ function Read-AdoRepoAdvancedSecurityStatus {
             # Summary output
             $reposWithOutSecretProtection = $repoAdvancedSecurityStatusCollection | Where-Object { $_.SecretProtectionFeatures.SecretProtectionEnabled -eq $false }
             $reposWithOutCodeSecurity = $repoAdvancedSecurityStatusCollection | Where-Object { $_.CodeSecurityFeatures.CodeSecurityEnabled -eq $false }
-            Write-Information -MessageData "Repositories that have Secret Protection disabled:" -InformationAction Continue
-            Write-Information -MessageData "[$($reposWithOutSecretProtection.Count) out of $($repoAdvancedSecurityStatusCollection.Count)]" -InformationAction Continue
+            Write-Information -MessageData "Repositories that have Secret Protection disabled:"
+            Write-Information -MessageData "[$($reposWithOutSecretProtection.Count) out of $($repoAdvancedSecurityStatusCollection.Count)]"
 
-            Write-Information -MessageData "Repositories that have Code Security disabled: " -InformationAction Continue
-            Write-Information -MessageData "[$($reposWithOutCodeSecurity.Count) out of $($repoAdvancedSecurityStatusCollection.Count)]" -InformationAction Continue
+            Write-Information -MessageData "Repositories that have Code Security disabled: "
+            Write-Information -MessageData "[$($reposWithOutCodeSecurity.Count) out of $($repoAdvancedSecurityStatusCollection.Count)]"
 
             # Return the result
             return  $repoAdvancedSecurityStatusCollection
