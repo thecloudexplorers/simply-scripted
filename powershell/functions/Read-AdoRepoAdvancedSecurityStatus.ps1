@@ -65,7 +65,8 @@
 .NOTES
     Endpoints used:
       - Enablement (org):
-        https://advsec.dev.azure.com/{organization}/_apis/management/enablement?includeAllProperties=true&api-version=7.2-preview.3
+        https://advsec.dev.azure.com/{organization}/_apis/management/enablement?
+        includeAllProperties=true&api-version=7.2-preview.3
       - Project details:
         https://dev.azure.com/{organization}/_apis/projects/{projectId}?api-version=7.0
       - Repository details:
@@ -93,9 +94,11 @@ function Read-AdoRepoAdvancedSecurityStatus {
     )
 
     # Get the current status of Advanced Security for the organization
-    # https://learn.microsoft.com/en-us/rest/api/azure/devops/advancedsecurity/org-enablement/get?view=azure-devops-rest-7.2&wt.mc_id=DT-MVP-5005327
+    # https://learn.microsoft.com/en-us/rest/api/azure/devops/advancedsecurity/org-enablement/get
+    # ?view=azure-devops-rest-7.2&wt.mc_id=DT-MVP-5005327
     # GET https://advsec.dev.azure.com/{organization}/_apis/management/enablement?api-version=7.2-preview.3
-    $enablementUri = "https://advsec.dev.azure.com/$Organization/_apis/management/enablement?includeAllProperties=true&api-version=7.2-preview.3"
+    $baseUri = "https://advsec.dev.azure.com/$Organization/_apis/management/enablement"
+    $enablementUri = "$baseUri?includeAllProperties=true&api-version=7.2-preview.3"
 
     try {
 
@@ -110,7 +113,8 @@ function Read-AdoRepoAdvancedSecurityStatus {
 
         # Check if response content returns a html page which usually indicates token expired
         if ($restResponse.Content -match '<html' -or $restResponse.RawContent -match 'Sign In') {
-            Write-Error "Access denied or token expired. Please verify your Bearer token is still valid." -ErrorAction Stop
+            $errorMessage = "Access denied or token expired. Please verify your Bearer token is still valid."
+            Write-Error $errorMessage -ErrorAction Stop
 
         } else {
             [System.Collections.ArrayList]$secretProtectionEnabledRepos = $restResponse.reposEnablementStatus
@@ -136,10 +140,12 @@ function Read-AdoRepoAdvancedSecurityStatus {
 
                 # Get Secret Protection Changed By Display Name
                 $secretProtectionChangedByDisplayName = $null
-                if ($currentRepo.secretProtectionFeatures.secretProtectionChangedBy -ne "00000000-0000-0000-0000-000000000000") {
-                    $identityUriTemplate = "https://vssps.dev.azure.com/{0}/_apis/identities/{1}?api-version=7.2-preview.1"
-                    $changedById = $currentRepo.secretProtectionFeatures.secretProtectionChangedBy
-                    $identityUri = $identityUriTemplate -f $Organization, $changedById
+                $secretProtectionChangedBy = $currentRepo.secretProtectionFeatures.secretProtectionChangedBy
+                if ($secretProtectionChangedBy -ne "00000000-0000-0000-0000-000000000000") {
+                    $identityBaseUri = "https://vssps.dev.azure.com/{0}/_apis/identities/{1}"
+                    $identityApiVersion = "api-version=7.2-preview.1"
+                    $identityUriTemplate = "$identityBaseUri?$identityApiVersion"
+                    $identityUri = $identityUriTemplate -f $Organization, $secretProtectionChangedBy
 
                     $identityInfo = Invoke-RestMethod -Uri $identityUri -Headers $AdoAuthenticationHeader -Method 'GET'
                     $secretProtectionChangedByDisplayName = $identityInfo.providerDisplayName
@@ -147,43 +153,56 @@ function Read-AdoRepoAdvancedSecurityStatus {
 
                 # Get Code Security Changed By Display Name
                 $codeSecurityChangedByDisplayName = $null
-                if ($currentRepo.codeSecurityFeatures.codeSecurityChangedBy -ne "00000000-0000-0000-0000-000000000000") {
-                    $identityUriTemplate = "https://vssps.dev.azure.com/{0}/_apis/identities/{1}?api-version=7.2-preview.1"
-                    $identityUri = $identityUriTemplate -f $Organization, $currentRepo.codeSecurityFeatures.codeSecurityChangedBy
+                $codeSecurityChangedBy = $currentRepo.codeSecurityFeatures.codeSecurityChangedBy
+                if ($codeSecurityChangedBy -ne "00000000-0000-0000-0000-000000000000") {
+                    $identityBaseUri = "https://vssps.dev.azure.com/{0}/_apis/identities/{1}"
+                    $identityApiVersion = "api-version=7.2-preview.1"
+                    $identityUriTemplate = "$identityBaseUri?$identityApiVersion"
+                    $identityUri = $identityUriTemplate -f $Organization, $codeSecurityChangedBy
 
                     $identityInfo = Invoke-RestMethod -Uri $identityUri -Headers $AdoAuthenticationHeader -Method 'GET'
                     $codeSecurityChangedByDisplayName = $identityInfo.providerDisplayName
                 }
 
                 # Add to result collection
+                $secretFeatures = $currentRepo.secretProtectionFeatures
+                $codeFeatures = $currentRepo.codeSecurityFeatures
+                
                 [System.Void]$repoAdvancedSecurityStatusCollection.Add([PSCustomObject]@{
                         ProjectId                = $projectId
                         ProjectName              = $projectInfo.name
                         RepositoryId             = $repoId
                         RepositoryName           = $repoInfo.name
                         SecretProtectionFeatures = [PSCustomObject]@{
-                            SecretProtectionEnabled                   = $currentRepo.secretProtectionFeatures.secretProtectionEnabled
-                            SecretProtectionEnablementLastChangedDate = $currentRepo.secretProtectionFeatures.secretProtectionEnablementLastChangedDate
-                            SecretProtectionChangedBy                 = $secretProtectionChangedByDisplayName
-                            BlockPushes                               = $currentRepo.secretProtectionFeatures.blockPushes
+                            SecretProtectionEnabled         = $secretFeatures.secretProtectionEnabled
+                            SecretProtectionEnablementLastChangedDate = `
+                                $secretFeatures.secretProtectionEnablementLastChangedDate
+                            SecretProtectionChangedBy       = $secretProtectionChangedByDisplayName
+                            BlockPushes                     = $secretFeatures.blockPushes
                         }
                         CodeSecurityFeatures     = [PSCustomObject]@{
-                            CodeSecurityEnabled                = $currentRepo.codeSecurityFeatures.codeSecurityEnabled
-                            CodeSecurityLastChangedDate        = $currentRepo.codeSecurityFeatures.codeSecurityLastChangedDate
+                            CodeSecurityEnabled                = $codeFeatures.codeSecurityEnabled
+                            CodeSecurityLastChangedDate        = $codeFeatures.codeSecurityLastChangedDate
                             CodeSecurityChangedBy              = $codeSecurityChangedByDisplayName
-                            DependencyScanningInjectionEnabled = $currentRepo.codeSecurityFeatures.dependencyScanningInjectionEnabled
+                            DependencyScanningInjectionEnabled = $codeFeatures.dependencyScanningInjectionEnabled
                         }
                     })
             }
 
             # Summary output
-            $reposWithOutSecretProtection = $repoAdvancedSecurityStatusCollection | Where-Object { $_.SecretProtectionFeatures.SecretProtectionEnabled -eq $false }
-            $reposWithOutCodeSecurity = $repoAdvancedSecurityStatusCollection | Where-Object { $_.CodeSecurityFeatures.CodeSecurityEnabled -eq $false }
+            $totalRepos = $repoAdvancedSecurityStatusCollection.Count
+            $secretProtectionFilter = { $_.SecretProtectionFeatures.SecretProtectionEnabled -eq $false }
+            $codeSecurityFilter = { $_.CodeSecurityFeatures.CodeSecurityEnabled -eq $false }
+            
+            $reposWithOutSecretProtection = $repoAdvancedSecurityStatusCollection | Where-Object $secretProtectionFilter
+            $reposWithOutCodeSecurity = $repoAdvancedSecurityStatusCollection | Where-Object $codeSecurityFilter
+            
             Write-Information -Message "Repositories that have Secret Protection disabled:"
-            Write-Information -Message "[$($reposWithOutSecretProtection.Count) out of $($repoAdvancedSecurityStatusCollection.Count)]"
-
-            Write-Information -Message "Repositories that have Code Security disabled: "
-            Write-Information -Message "[$($reposWithOutCodeSecurity.Count) out of $($repoAdvancedSecurityStatusCollection.Count)]"
+            Write-Information -Message "[$($reposWithOutSecretProtection.Count) out of $totalRepos]"
+            Write-Information -Message ""
+            
+            Write-Information -Message "Repositories that have Code Security disabled:"
+            Write-Information -Message "[$($reposWithOutCodeSecurity.Count) out of $totalRepos]"
 
             # Return the result
             return  $repoAdvancedSecurityStatusCollection
