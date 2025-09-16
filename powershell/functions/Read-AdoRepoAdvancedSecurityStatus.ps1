@@ -138,7 +138,8 @@ function Read-AdoRepoAdvancedSecurityStatus {
                 $secretProtectionChangedByDisplayName = $null
                 if ($currentRepo.secretProtectionFeatures.secretProtectionChangedBy -ne "00000000-0000-0000-0000-000000000000") {
                     $identityUriTemplate = "https://vssps.dev.azure.com/{0}/_apis/identities/{1}?api-version=7.2-preview.1"
-                    $identityUri = $identityUriTemplate -f $Organization, $currentRepo.secretProtectionFeatures.secretProtectionChangedBy
+                    $changedById = $currentRepo.secretProtectionFeatures.secretProtectionChangedBy
+                    $identityUri = $identityUriTemplate -f $Organization, $changedById
 
                     $identityInfo = Invoke-RestMethod -Uri $identityUri -Headers $AdoAuthenticationHeader -Method 'GET'
                     $secretProtectionChangedByDisplayName = $identityInfo.providerDisplayName
