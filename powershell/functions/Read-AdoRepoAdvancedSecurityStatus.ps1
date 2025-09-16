@@ -1,3 +1,86 @@
+<#
+.SYNOPSIS
+    Reads repository-level Advanced Security enablement for all repos in an
+    Azure DevOps organization.
+
+.DESCRIPTION
+    Queries the Azure DevOps Advanced Security organization enablement endpoint
+    to enumerate each repository's Advanced Security features. For every
+    repository, returns whether:
+      - Secret Protection is enabled and related metadata (last changed date,
+        changed by, block pushes)
+      - Code Security is enabled and related metadata (last changed date,
+        changed by, dependency scanning)
+
+    The function also expands project and repository names for convenience by
+    calling the Core and Git APIs.
+
+.PARAMETER Organization
+    The name of your Azure DevOps organization (e.g. 'devjevnl').
+
+.PARAMETER AdoAuthenticationHeader
+    A hashtable containing the Azure DevOps authentication headers for PAT
+    usage. Should include 'Content-Type' and 'Authorization' keys, e.g.:
+        $patAuthenticationHeader = @{
+            'Content-Type'  = 'application/json'
+            'Authorization' = 'Basic ' + $adoAuthToken
+        }
+
+.OUTPUTS
+    System.Object[]
+        An array of PSCustomObject entries with the following shape:
+        - ProjectId, ProjectName, RepositoryId, RepositoryName
+        - SecretProtectionFeatures: {
+            SecretProtectionEnabled,
+            SecretProtectionEnablementLastChangedDate,
+            SecretProtectionChangedBy,
+            BlockPushes
+          }
+        - CodeSecurityFeatures: {
+            CodeSecurityEnabled,
+            CodeSecurityLastChangedDate,
+            CodeSecurityChangedBy,
+            DependencyScanningInjectionEnabled
+          }
+
+.EXAMPLE
+    # Create PAT-based auth header and call with splatting
+    $adoAuthTokenParams = @{
+        PatToken          = $patTokenReadAdvancedSecurity
+        PatTokenOwnerName = $PatTokenOwnerName
+    }
+    $adoAuthToken = New-AdoAuthenticationToken @adoAuthTokenParams
+
+    $patAuthenticationHeader = @{
+        'Content-Type'  = 'application/json'
+        'Authorization' = 'Basic ' + $adoAuthToken
+    }
+
+    $params = @{
+        Organization            = 'devjevnl'
+        AdoAuthenticationHeader = $patAuthenticationHeader
+    }
+    Read-AdoRepoAdvancedSecurityStatus @params
+
+.NOTES
+    Endpoints used:
+      - Enablement (org):
+        https://advsec.dev.azure.com/{organization}/_apis/management/enablement?includeAllProperties=true&api-version=7.2-preview.3
+      - Project details:
+        https://dev.azure.com/{organization}/_apis/projects/{projectId}?api-version=7.0
+      - Repository details:
+        https://dev.azure.com/{organization}/{projectId}/_apis/git/repositories/{repoId}?api-version=7.0
+
+    Authentication:
+      - Uses PAT via Basic Authorization header
+
+    Version     : 1.0.0
+    Author      : Jev - @devjevnl | https://www.devjev.nl
+    Source      : https://github.com/thecloudexplorers/simply-scripted
+
+.LINK
+    https://learn.microsoft.com/en-us/rest/api/azure/devops/advancedsecurity/org-enablement/get
+#>
 function Read-AdoRepoAdvancedSecurityStatus {
     [CmdletBinding()]
     param (
