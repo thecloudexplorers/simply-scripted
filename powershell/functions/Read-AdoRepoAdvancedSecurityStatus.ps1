@@ -1,10 +1,10 @@
 <#
 .SYNOPSIS
-    Reads repository-level Advanced Security enablement for all repos in an
+    Reads repository-level Advanced Security status for all repos in an
     Azure DevOps organization.
 
 .DESCRIPTION
-    Queries the Azure DevOps Advanced Security organization enablement endpoint
+    Queries the Azure DevOps Advanced Security organization status endpoint
     to enumerate each repository's Advanced Security features. For every
     repository, returns whether:
       - Secret Protection is enabled and related metadata (last changed date,
