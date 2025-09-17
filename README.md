@@ -42,6 +42,7 @@ This repo provides the following PowerShell functions:
 - Confirm-AdoGroupMembership
 - Connect-AzInAppRegistrationContext
 - Connect-MgGraphWithCurrentAzContext
+- Convert-AdoYamlToJson
 - Get-FileHashDownload
 - Get-MgGraphToken
 
