@@ -1,95 +1,130 @@
 <#
-    .SYNOPSIS
-    Performs an assessment of Azure DevOps organization overview settings.
+.SYNOPSIS
+    Reads Azure DevOps organization general overview settings and metadata.
 
-    .DESCRIPTION
-    This function queries the internal Azure DevOps organization overview endpoint
-    and retrieves metadata including the description, timezone, region, geography,
-    and organization owner. It checks whether the description field is populated
-    and reports the other fields for governance and documentation purposes.
+.DESCRIPTION
+    Queries the Azure DevOps organization overview endpoint to retrieve
+    organizational metadata including description, timezone, region, geography,
+    and organization owner information. This function provides governance and
+    documentation capabilities by assessing whether critical organizational
+    settings are properly configured.
 
-    .PARAMETER Organization
-    The name of your Azure DevOps organization (e.g. 'contoso').
+    Returns a structured object containing all organization overview data for
+    programmatic consumption and reporting purposes.
 
-    .PARAMETER AccessToken
-    A valid Azure DevOps Bearer token with access to read organization-level settings.
+.PARAMETER Organization
+    The name of your Azure DevOps organization (e.g. 'devjevnl').
 
-    .EXAMPLE
-    Invoke-AdoOrganizationOverviewAssessment -Organization "demojev" -AccessToken $token
+.PARAMETER AdoAuthenticationHeader
+    A hashtable containing the Azure DevOps authentication headers for PAT
+    usage. Should include 'Content-Type' and 'Authorization' keys, e.g.:
+        $patAuthenticationHeader = @{
+            'Content-Type'  = 'application/json'
+            'Authorization' = 'Basic ' + $adoAuthToken
+        }
 
-    .NOTES
-    WARNING: This function uses an internal and undocumented API endpoint:
-             https://dev.azure.com/{org}/_settings/organizationOverview?__rt=fps&__ver=2
+.OUTPUTS
+    System.Management.Automation.PSCustomObject
+        A PSCustomObject with the following properties:
+        - Organization: String - The organization name
+        - Description: String - Organization description (may be null/empty)
+        - TimeZone: String - Display name of the organization's timezone
+        - Geography: String - Geographic region
+        - Region: String - Specific region within geography
+        - Owner: String - Display name of the organization owner
+        - DescriptionConfigured: Boolean - Whether description is properly set
 
+.EXAMPLE
+    # Create PAT-based auth header and call with splatting
+    $adoAuthTokenParams = @{
+        PatToken          = $patTokenReadOrganization
+        PatTokenOwnerName = $PatTokenOwnerName
+    }
+    $adoAuthToken = New-AdoAuthenticationToken @adoAuthTokenParams
+
+    $patAuthenticationHeader = @{
+        'Content-Type'  = 'application/json'
+        'Authorization' = 'Basic ' + $adoAuthToken
+    }
+
+    $params = @{
+        Organization            = 'devjevnl'
+        AdoAuthenticationHeader = $patAuthenticationHeader
+    }
+    Read-AdoOrganizationGeneralOverview @params
+
+.NOTES
+    Endpoints used:
+      - Organization Overview (internal):
+        https://dev.azure.com/{organization}/_settings/organizationOverview?__rt=fps&__ver=2
+
+    Authentication:
+      - Uses PAT via Basic Authorization header
+
+    WARNING: This function uses an internal and undocumented API endpoint.
              This endpoint is not part of the officially supported Azure DevOps REST API.
              Microsoft may change or remove it at any time without notice.
 
-             The function includes logic to detect expired or invalid Bearer tokens
-             based on HTML fallback content.
-
-    Version     : 0.5.1
+    Version     : 1.0.0
     Author      : Jev - @devjevnl | https://www.devjev.nl
     Source      : https://github.com/thecloudexplorers/simply-scripted
 
-    .LINK
+.LINK
     https://github.com/PoshCode/PowerShellPracticeAndStyle
     https://learn.microsoft.com/en-us/powershell/scripting/developer/cmdlet/strongly-encouraged-development-guidelines
 #>
 function Read-AdoOrganizationGeneralOverview {
     [CmdletBinding()]
+    [OutputType([System.Management.Automation.PSCustomObject])]
     param (
         [Parameter(Mandatory)]
-        [System.String] $Organization,
+        [string]$Organization,
 
         [Parameter(Mandatory)]
-        [System.String] $AccessToken
+        [ValidateNotNullOrEmpty()]
+        [System.Collections.Hashtable] $AdoAuthenticationHeader
     )
 
+    # Organization overview endpoint (internal API)
     $uri = "https://dev.azure.com/$Organization/_settings/organizationOverview?__rt=fps&__ver=2"
 
-    $headers = @{
-        Authorization = "Bearer $AccessToken"
-        Accept        = "application/json"
-    }
-
     try {
-        Write-Host
-        $rawResponse = Invoke-WebRequest -Uri $uri -Method Get -Headers $headers -UseBasicParsing
+        # Call the Organization Overview API
+        $invokeParams = @{
+            Uri             = $uri
+            Method          = 'GET'
+            Headers         = $AdoAuthenticationHeader
+            UseBasicParsing = $true
+        }
+        $rawResponse = Invoke-WebRequest @invokeParams
 
-        # Detect HTML response indicating token failure
+        # Check if response content returns a html page which usually indicates token expired
         if ($rawResponse.Content -match '<html' -or $rawResponse.RawContent -match 'Sign In') {
-            throw "Access denied or token expired. Please verify your Bearer token is still valid."
+            Write-Error "Access denied or token expired. Please verify your authentication token is still valid." -ErrorAction Stop
         }
 
-        # Parse JSON only if response is valid
+        # Parse JSON response
         $response = $rawResponse.Content | ConvertFrom-Json
 
+        # Extract organization data from the response structure
         $overviewData = $response.fps.dataProviders.data.'ms.vss-admin-web.organization-admin-overview-data-provider'
         $userInfo = $response.fps.dataProviders.data.'ms.vss-web.page-data'.user
 
-        $description = $overviewData.description
-        $timeZone = $overviewData.timeZone.displayName
-        $geography = $overviewData.geography
-        $region = $overviewData.region
-        $owner = $userInfo.displayName
-
-        Write-Host ""
-        Write-Host "===== Azure DevOps Organization Overview Assessment ====="
-        Write-Host ""
-
-        if ([string]::IsNullOrWhiteSpace($description)) {
-            Write-Host "Description: (not set)"
-        } else {
-            Write-Host "Description: $description"
+        # Build structured result object
+        $organizationOverview = [PSCustomObject]@{
+            Organization          = $Organization
+            Description           = $overviewData.description
+            TimeZone              = $overviewData.timeZone.displayName
+            Geography             = $overviewData.geography
+            Region                = $overviewData.region
+            Owner                 = $userInfo.displayName
+            DescriptionConfigured = -not [string]::IsNullOrWhiteSpace($overviewData.description)
         }
 
-        Write-Host "Time Zone : $timeZone"
-        Write-Host "Geography : $geography"
-        Write-Host "Region    : $region"
-        Write-Host "Owner     : $owner"
-        Write-Host ""
-        Write-Host "Assessment complete."
+        # Return the structured result
+        return $organizationOverview
+
     } catch {
-        Write-Error "Failed to retrieve organization overview: $($_.Exception.Message)"
+        Write-Error "Failed to retrieve organization overview: $($_.Exception.Message)" -ErrorAction Stop
     }
 }
