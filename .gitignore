@@ -8,6 +8,7 @@ package-lock.json
 package.json
 powershell/deploy.ps1
 references/deploy.ps1
+references/personal-scripts/deploy.ps1
 references/personal-scripts/powershell/deploy.ps1
 
 ### VisualStudioCode ###
