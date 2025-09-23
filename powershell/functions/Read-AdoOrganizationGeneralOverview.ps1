@@ -54,16 +54,17 @@
     Read-AdoOrganizationGeneralOverview @params
 
 .NOTES
+    WARNING:
+    This function uses an internal and undocumented API endpoint.
+    This endpoint is not part of the officially supported Azure DevOps REST API.
+    Microsoft may change or remove it at any time without notice.
+
     Endpoints used:
       - Organization Overview (internal):
         https://dev.azure.com/{organization}/_settings/organizationOverview?__rt=fps&__ver=2
 
     Authentication:
       - Uses PAT via Basic Authorization header
-
-    WARNING: This function uses an internal and undocumented API endpoint.
-             This endpoint is not part of the officially supported Azure DevOps REST API.
-             Microsoft may change or remove it at any time without notice.
 
     Version     : 1.0.0
     Author      : Jev - @devjevnl | https://www.devjev.nl
