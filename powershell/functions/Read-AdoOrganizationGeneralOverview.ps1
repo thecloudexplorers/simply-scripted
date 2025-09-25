@@ -79,7 +79,7 @@ function Read-AdoOrganizationGeneralOverview {
     [OutputType([System.Management.Automation.PSCustomObject])]
     param (
         [Parameter(Mandatory)]
-        [string]$Organization,
+        [System.String]$Organization,
 
         [Parameter(Mandatory)]
         [ValidateNotNullOrEmpty()]
