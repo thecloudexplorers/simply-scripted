@@ -1,97 +1,154 @@
 <#
 .SYNOPSIS
-    Reads and displays Azure DevOps organizations connected to an Entra ID tenant using the public API.
+    Reads Azure DevOps organizations connected to an Entra ID tenant.
 
 .DESCRIPTION
-    This function uses the Azure DevOps EnterpriseCatalog API to download a CSV file
-    listing all organizations connected to the specified Entra ID tenant.
-    It parses the CSV and displays each organization's name, URL, and owner.
-    Any organization with an error is flagged.
+    Queries the Azure DevOps EnterpriseCatalog API to retrieve all organizations
+    connected to the specified Entra ID (Azure AD) tenant. The function downloads
+    and parses CSV data containing organization details, ownership information,
+    and any connection errors. This function provides tenant-level governance
+    capabilities by identifying all Azure DevOps organizations within scope.
+
+    Returns a structured collection containing all organization connection data
+    for programmatic consumption and reporting purposes.
 
 .PARAMETER TenantId
-    The Entra ID (Azure AD) tenant ID used to scope the query.
+    The Entra ID tenant ID (GUID) for which to retrieve connected organizations.
 
-.PARAMETER AccessToken
-    A valid Azure DevOps Bearer token.
+.PARAMETER AdoAuthenticationHeader
+    A hashtable containing the Azure DevOps authentication headers for PAT usage.
+    Should include 'Content-Type' and 'Authorization' keys, e.g.:
+        $patAuthenticationHeader = @{
+            'Content-Type'  = 'application/json'
+            'Authorization' = 'Basic ' + $adoAuthToken
+        }
+
+.OUTPUTS
+    System.Collections.ArrayList
+        A collection of PSCustomObject entries with the following properties:
+        - OrganizationId: String - The unique organization identifier
+        - OrganizationName: String - The organization display name
+        - Url: String - The organization URL
+        - Owner: String - The organization owner display name
+        - ExceptionType: String - Error type if connection has issues
+        - ErrorMessage: String - Detailed error message if applicable
+        - HasError: Boolean - Whether this organization connection has errors
 
 .EXAMPLE
-    $orgListParams = @{
-        TenantId    = "a74be31f-7904-4c43-8ef5-c82967c8e559"
-        AccessToken = $token
+    # Create PAT-based auth header and call with splatting
+    $adoAuthTokenParams = @{
+        PatToken          = $patTokenReadTenant
+        PatTokenOwnerName = $PatTokenOwnerName
+    }
+    $adoAuthToken = New-AdoAuthenticationToken @adoAuthTokenParams
+
+    $patAuthenticationHeader = @{
+        'Content-Type'  = 'application/json'
+        'Authorization' = 'Basic ' + $adoAuthToken
     }
 
-    Read-AdoTenantOrganizationConnections @orgListParams
+    $params = @{
+        TenantId                = 'a74be31f-7904-4c43-8ef5-c82967c8e559'
+        AdoAuthenticationHeader = $patAuthenticationHeader
+    }
+    Read-AdoTenantOrganizationConnections @params
 
 .NOTES
-    API: https://aexprodweu1.vsaex.visualstudio.com/_apis/EnterpriseCatalog/Organizations?tenantId={tenantId}
+    WARNING:
+    This function uses an undocumented API endpoint that is not part of the
+    officially supported Azure DevOps REST API. While Microsoft has sanctioned
+    its use (see Developer Community link below), the endpoint may change or be
+    removed without notice.
 
-    Version     : 0.5.0
+    Endpoints used:
+      - EnterpriseCatalog Organizations:
+        https://aexprodweu1.vsaex.visualstudio.com/_apis/EnterpriseCatalog/Organizations?tenantId={tenantId}
+
+    Authentication:
+      - Uses PAT via Basic Authorization header
+
+    API Status:
+      - This endpoint is not part of the officially documented Azure DevOps REST
+        API, however it is sanctioned by Microsoft for use as confirmed in
+        Developer Community:
+        https://developercommunity.visualstudio.com/t/Unable-to-list-DevOps-accounts-using-a-E/10669967
+
+    Version     : 1.0.0
     Author      : Jev - @devjevnl | https://www.devjev.nl
     Source      : https://github.com/thecloudexplorers/simply-scripted
+
+.LINK
+    https://github.com/PoshCode/PowerShellPracticeAndStyle
+    https://learn.microsoft.com/en-us/powershell/scripting/developer/cmdlet/strongly-encouraged-development-guidelines
 #>
 function Read-AdoTenantOrganizationConnections {
     [CmdletBinding()]
+    [OutputType([System.Collections.ArrayList])]
     param (
         [Parameter(Mandatory)]
-        [string]$TenantId,
+        [ValidateNotNullOrEmpty()]
+        [System.String]$TenantId,
 
         [Parameter(Mandatory)]
-        [string]$AccessToken
+        [ValidateNotNullOrEmpty()]
+        [System.Collections.Hashtable]$AdoBearerBasedAuthenticationHeader
     )
 
     $uri = "https://aexprodweu1.vsaex.visualstudio.com/_apis/EnterpriseCatalog/Organizations?tenantId=$TenantId"
-    $headers = @{
-        Authorization = "Bearer $AccessToken"
-        Accept        = "text/csv"
-    }
 
+    # Result collection
+    $organizationCollection = [System.Collections.ArrayList]::new()
+
+    # Use an in-memory approach: Invoke-RestMethod doesn't parse CSV automatically so we still use WebRequest
+    $tempFile = $null
     try {
-        # Download CSV to temp path
         $tempFile = New-TemporaryFile
-        Invoke-WebRequest -Uri $uri -Headers $headers -OutFile $tempFile -UseBasicParsing
+        $invokeParams = @{
+            Uri             = $uri
+            Method          = 'GET'
+            Headers         = $AdoBearerBasedAuthenticationHeader
+            OutFile         = $tempFile
+            UseBasicParsing = $true
+            ErrorAction     = 'Stop'
+        }
+        Invoke-WebRequest @invokeParams | Out-Null
 
-        # Read and normalize CSV
-        $data = Import-Csv -Path $tempFile | ForEach-Object {
-            $cleaned = @{}
-            $_.PSObject.Properties | ForEach-Object {
-                $key = $_.Name.Trim()
-                $cleaned[$key] = $_.Value
-            }
-
-            [PSCustomObject]@{
-                OrganizationId   = $cleaned['Organization Id']
-                OrganizationName = $cleaned['Organization Name']
-                Url              = $cleaned['Url']
-                Owner            = $cleaned['Owner']
-                ExceptionType    = $cleaned['Exception Type']
-                ErrorMessage     = $cleaned['Error Message']
-            }
+        # Basic token/HTML check
+        $rawContent = Get-Content -Path $tempFile -Raw
+        if ($rawContent -match '<html' -or $rawContent -match 'Sign In') {
+            Write-Error 'Access denied or token expired. Verify authentication token.' -ErrorAction Stop
         }
 
-        Write-Host ""
-        Write-Host "===== Azure DevOps Tenant Organization Connections ====="
-        Write-Host ""
+        # Import CSV
+        $csv = Import-Csv -Path $tempFile
 
-        Write-Host "Total Organizations Connected to Tenant: $($data.Count)"
-        Write-Host ""
+        foreach ($row in $csv) {
+            # Normalize property names with spaces; keep original logical mapping
+            $orgId = $row.'Organization Id'
+            $orgName = $row.'Organization Name'
+            $orgUrl = $row.'Url'
+            $orgOwner = $row.'Owner'
+            $exceptionType = $row.'Exception Type'
+            $errorMessage = $row.'Error Message'
+            $hasError = [bool]([string]::IsNullOrWhiteSpace($exceptionType) -eq $false -or [string]::IsNullOrWhiteSpace($errorMessage) -eq $false)
 
-        foreach ($org in $data) {
-            Write-Host "Organization : $($org.OrganizationName)"
-            Write-Host "URL          : $($org.Url)"
-            Write-Host "Owner        : $($org.Owner)"
-
-            if ($org.ExceptionType -or $org.ErrorMessage) {
-                Write-Host "Error        : $($org.ExceptionType) - $($org.ErrorMessage)"
-            }
-
-            Write-Host ""
+            [void]$organizationCollection.Add([PSCustomObject]@{
+                    OrganizationId   = $orgId
+                    OrganizationName = $orgName
+                    Url              = $orgUrl
+                    Owner            = $orgOwner
+                    ExceptionType    = $exceptionType
+                    ErrorMessage     = $errorMessage
+                    HasError         = $hasError
+                })
         }
 
-        Write-Host "Assessment complete.`n"
-
-        # Clean up temp file
-        Remove-Item -Path $tempFile -Force
+        return $organizationCollection
     } catch {
-        Write-Error "Failed to download or process CSV: $($_.Exception.Message)"
+        Write-Error "Failed to retrieve tenant organization connections: $($_.Exception.Message)" -ErrorAction Stop
+    } finally {
+        if ($tempFile -and (Test-Path -Path $tempFile)) {
+            Remove-Item -Path $tempFile -Force -ErrorAction SilentlyContinue
+        }
     }
 }
