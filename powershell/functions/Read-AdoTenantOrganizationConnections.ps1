@@ -4,10 +4,11 @@
 
 .DESCRIPTION
     Queries the Azure DevOps EnterpriseCatalog API to retrieve all organizations
-    connected to the specified Entra ID (Azure AD) tenant. The function downloads
-    and parses CSV data containing organization details, ownership information,
-    and any connection errors. This function provides tenant-level governance
-    capabilities by identifying all Azure DevOps organizations within scope.
+    connected to the specified Entra ID (Azure AD) tenant. The function
+    downloads and parses CSV data containing organization details, ownership
+    information, and any connection errors. This function provides tenant-level
+    governance capabilities by identifying all Azure DevOps organizations within
+    scope.
 
     Returns a structured collection containing all organization connection data
     for programmatic consumption and reporting purposes.
@@ -15,13 +16,15 @@
 .PARAMETER TenantId
     The Entra ID tenant ID (GUID) for which to retrieve connected organizations.
 
-.PARAMETER AdoAuthenticationHeader
-    A hashtable containing the Azure DevOps authentication headers for PAT usage.
+.PARAMETER AdoBearerBasedAuthenticationHeader
+    A hashtable containing the Azure DevOps authentication headers for PAT
+    usage.
     Should include 'Content-Type' and 'Authorization' keys, e.g.:
         $patAuthenticationHeader = @{
             'Content-Type'  = 'application/json'
             'Authorization' = 'Basic ' + $adoAuthToken
         }
+    Note: Accept header is automatically set to 'text/csv' internally.
 
 .OUTPUTS
     System.Collections.ArrayList
@@ -48,8 +51,8 @@
     }
 
     $params = @{
-        TenantId                = 'a74be31f-7904-4c43-8ef5-c82967c8e559'
-        AdoAuthenticationHeader = $patAuthenticationHeader
+        TenantId                           = 'YOUR_TENANT_ID_HERE'
+        AdoBearerBasedAuthenticationHeader = $patAuthenticationHeader
     }
     Read-AdoTenantOrganizationConnections @params
 
@@ -86,8 +89,8 @@ function Read-AdoTenantOrganizationConnections {
     [OutputType([System.Collections.ArrayList])]
     param (
         [Parameter(Mandatory)]
-        [ValidateNotNullOrEmpty()]
-        [System.String]$TenantId,
+        [ValidatePattern('^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$')]
+        [string]$TenantId,
 
         [Parameter(Mandatory)]
         [ValidateNotNullOrEmpty()]
@@ -99,7 +102,7 @@ function Read-AdoTenantOrganizationConnections {
     # Result collection
     $organizationCollection = [System.Collections.ArrayList]::new()
 
-    # Use an in-memory approach: Invoke-RestMethod doesn't parse CSV automatically so we still use WebRequest
+    # Use temp file approach: Invoke-WebRequest for CSV download
     $tempFile = $null
     try {
         $tempFile = New-TemporaryFile
@@ -111,7 +114,12 @@ function Read-AdoTenantOrganizationConnections {
             UseBasicParsing = $true
             ErrorAction     = 'Stop'
         }
-        Invoke-WebRequest @invokeParams | Out-Null
+
+        <#
+        1> $null is used to suppress output to console of the Success stream while ensuring the remaining streams
+        are preserved for error handling.
+        #>
+        Invoke-RestMethod @invokeParams 1> $null
 
         # Basic token/HTML check
         $rawContent = Get-Content -Path $tempFile -Raw
