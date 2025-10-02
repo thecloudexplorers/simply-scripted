@@ -1,10 +1,10 @@
 {
   "manifestVersion": 1,
-  "id": "powershell-hello-world-advanced",
+  "id": "gitleaks-basic",
   "publisher": "DevJevNL",
-  "version": "1.4.0",
-  "name": "PowerShell Hello World Advanced",
-  "description": "Injects a PowerShell hello world after a Bash task.",
+  "version": "1.0.0",
+  "name": ".NET Assemble GitLeaks Basic",
+  "description": "Injects a GitLeaks task after the execution of the checkout task",
   "public": false,
   "categories": [
     "Azure Pipelines"
@@ -16,20 +16,20 @@
   ],
   "contributions": [
     {
-      "id": "powershell-hello-world-advanced-task",
+      "id": "gitleaks-basic-task",
       "type": "ms.azure-pipelines.pipeline-decorator",
       "targets": [
         "ms.azure-pipelines-agent-job.post-task-tasks"
       ],
       "properties": {
-        "template": "run-powershell-script.yml",
-        "targettask": "6C731C3C-3C68-459A-A5C9-BDE6E6595B5B"
+        "template": "run-gitleaks.yml",
+        "targettask": "6D15AF64-176C-496D-B583-FD2AE21D4DF4"
       }
     }
   ],
   "files": [
     {
-      "path": "run-powershell-script.yml",
+      "path": "run-gitleaks.yml",
       "addressable": true,
       "contentType": "text/plain"
     }

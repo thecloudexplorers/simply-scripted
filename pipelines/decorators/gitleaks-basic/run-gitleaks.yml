@@ -1,0 +1,11 @@
+steps:
+  - task: Gitleaks@3
+    inputs:
+      scanlocation: '$(Build.SourcesDirectory)'
+      configtype: 'predefined'
+      predefinedconfigfile: 'GitleaksUdmCombo.toml'
+      scanmode: 'all'
+      redact: false
+      uploadresults: false
+      reportformat: 'sarif'
+      verbose: true

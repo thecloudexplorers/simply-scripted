@@ -1,0 +1,36 @@
+{
+  "manifestVersion": 1,
+  "id": "gitleaks-advanced",
+  "publisher": "DevJevNL",
+  "version": "1.0.0",
+  "name": ".NET Assemble Gitleaks Advanced",
+  "description": "Injects GitLeaks after the execution of the checkout task checks if the GitLeaks is enabled and if so skips execution to prevent double runs.",
+  "public": false,
+  "categories": [
+    "Azure Pipelines"
+  ],
+  "targets": [
+    {
+      "id": "Microsoft.VisualStudio.Services"
+    }
+  ],
+  "contributions": [
+    {
+      "id": "gitleaks-advanced-task",
+      "type": "ms.azure-pipelines.pipeline-decorator",
+      "targets": [
+        "ms.azure-pipelines-agent-job.post-checkout-tasks"
+      ],
+      "properties": {
+        "template": "run-gitleaks.yml"
+      }
+    }
+  ],
+  "files": [
+    {
+      "path": "run-gitleaks.yml",
+      "addressable": true,
+      "contentType": "text/plain"
+    }
+  ]
+}

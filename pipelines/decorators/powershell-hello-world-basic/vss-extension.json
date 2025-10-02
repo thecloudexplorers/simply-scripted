@@ -1,9 +1,9 @@
 {
   "manifestVersion": 1,
-  "id": "pre-pipeline-decorator",
+  "id": "powershell-hello-world-decorator",
   "publisher": "DevJevNL",
   "version": "1.0.0",
-  "name": "Pre Pipeline Decorator",
+  "name": "PowerShell Hello .NET Assemble basic Decorator",
   "public": false,
   "targets": [
     {
@@ -16,7 +16,7 @@
   ],
   "contributions": [
     {
-      "id": "my-required-task",
+      "id": "powershell-required-task",
       "type": "ms.azure-pipelines.pipeline-decorator",
       "targets": [
         "ms.azure-pipelines-agent-job.pre-job-tasks"

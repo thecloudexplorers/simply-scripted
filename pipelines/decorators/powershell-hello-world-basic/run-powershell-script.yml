@@ -1,7 +1,7 @@
 steps:
   - task: PowerShell@2
-    displayName: 'Injected - Run PowerShell'
+    displayName: '.NET Assemble! Basic - Run PowerShell'
     inputs:
       targetType: 'inline'
       script: |
-        "Hello World!"
+        "Hello .NET Assemble! - Basic"
