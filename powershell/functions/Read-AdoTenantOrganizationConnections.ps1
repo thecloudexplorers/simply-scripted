@@ -10,49 +10,32 @@
     governance capabilities by identifying all Azure DevOps organizations within
     scope.
 
-    Returns a structured collection containing all organization connection data
-    for programmatic consumption and reporting purposes.
-
 .PARAMETER TenantId
-    The Entra ID tenant ID (GUID) for which to retrieve connected organizations.
+    The GUID of the Entra ID tenant (not the display name). This value is used
+    in the EnterpriseCatalog API request.
 
 .PARAMETER AdoBearerBasedAuthenticationHeader
-    A hashtable containing the Azure DevOps authentication headers for PAT
-    usage.
-    Should include 'Content-Type' and 'Authorization' keys, e.g.:
-        $patAuthenticationHeader = @{
-            'Content-Type'  = 'application/json'
-            'Authorization' = 'Basic ' + $adoAuthToken
-        }
-    Note: Accept header is automatically set to 'text/csv' internally.
+    A hashtable containing the Authorization header for the request, e.g.
+    @{ Authorization = "Bearer <access-token>" }. This header must be valid and
+    have the required permissions to query billing details.
 
 .OUTPUTS
     System.Collections.ArrayList
         A collection of PSCustomObject entries with the following properties:
-        - OrganizationId: String - The unique organization identifier
-        - OrganizationName: String - The organization display name
-        - Url: String - The organization URL
-        - Owner: String - The organization owner display name
-        - ExceptionType: String - Error type if connection has issues
-        - ErrorMessage: String - Detailed error message if applicable
-        - HasError: Boolean - Whether this organization connection has errors
+        - OrganizationId   : String - The unique organization identifier
+        - OrganizationName : String - The organization display name
+        - Url              : String - The organization URL
+        - Owner            : String - The organization owner display name
+        - ExceptionType    : String - Error type if connection has issues
+        - ErrorMessage     : String - Detailed error message if applicable
+        - HasError         : Boolean - Whether this organization connection has errors
 
 .EXAMPLE
     # Create PAT-based auth header and call with splatting
-    $adoAuthTokenParams = @{
-        PatToken          = $patTokenReadTenant
-        PatTokenOwnerName = $PatTokenOwnerName
-    }
-    $adoAuthToken = New-AdoAuthenticationToken @adoAuthTokenParams
-
-    $patAuthenticationHeader = @{
-        'Content-Type'  = 'application/json'
-        'Authorization' = 'Basic ' + $adoAuthToken
-    }
-
+    $bearerHeader = @{ Authorization = "Bearer $env:AZDEVOPS_ACCESS_TOKEN" }
     $params = @{
         TenantId                           = 'YOUR_TENANT_ID_HERE'
-        AdoBearerBasedAuthenticationHeader = $patAuthenticationHeader
+        AdoBearerBasedAuthenticationHeader = $bearerHeader
     }
     Read-AdoTenantOrganizationConnections @params
 
@@ -68,7 +51,7 @@
         https://aexprodweu1.vsaex.visualstudio.com/_apis/EnterpriseCatalog/Organizations?tenantId={tenantId}
 
     Authentication:
-      - Uses PAT via Basic Authorization header
+      - Uses Bearer token authentication via header.
 
     API Status:
       - This endpoint is not part of the officially documented Azure DevOps REST
@@ -76,13 +59,14 @@
         Developer Community:
         https://developercommunity.visualstudio.com/t/Unable-to-list-DevOps-accounts-using-a-E/10669967
 
-    Version     : 1.0.0
-    Author      : Jev - @devjevnl | https://www.devjev.nl
-    Source      : https://github.com/thecloudexplorers/simply-scripted
+    Version : 1.0.1
+    Author  : Jev - @devjevnl | https://www.devjev.nl
+    Source  : https://github.com/thecloudexplorers/simply-scripted
 
 .LINK
     https://github.com/PoshCode/PowerShellPracticeAndStyle
     https://learn.microsoft.com/en-us/powershell/scripting/developer/cmdlet/strongly-encouraged-development-guidelines
+#>
 #>
 function Read-AdoTenantOrganizationConnections {
     [CmdletBinding()]
@@ -90,11 +74,11 @@ function Read-AdoTenantOrganizationConnections {
     param (
         [Parameter(Mandatory)]
         [ValidatePattern('^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$')]
-        [string]$TenantId,
+        [string] $TenantId,
 
         [Parameter(Mandatory)]
         [ValidateNotNullOrEmpty()]
-        [System.Collections.Hashtable]$AdoBearerBasedAuthenticationHeader
+        [System.Collections.Hashtable] $AdoBearerBasedAuthenticationHeader
     )
 
     $uri = "https://aexprodweu1.vsaex.visualstudio.com/_apis/EnterpriseCatalog/Organizations?tenantId=$TenantId"
