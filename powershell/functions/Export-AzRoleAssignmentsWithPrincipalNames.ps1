@@ -29,7 +29,7 @@
     extends the query with logic to resolve principal names using Az cmdlets.
     Making the role assignments more human-readable.
 
-    Version : 1.0.0
+    Version : 0.0.1
     Author  : Jev - @devjevnl | https://www.devjev.nl
     Source  : https://github.com/thecloudexplorers/simply-scripted
 
@@ -73,7 +73,7 @@ authorizationresources
     try {
         $batchSize = 1000
         $skipResult = 0
-        [System.Collections.Generic.List[object]]$azGraphResults = @()
+        $azGraphResults = [System.Collections.Generic.List[object]]::new()
 
         if ($SubscriptionId) {
             Write-Information -MessageData  "Querying Azure Resource Graph for Role Assignments at Subscription scope [$SubscriptionId]"
@@ -117,8 +117,8 @@ authorizationresources
                 }
             }
 
-            # Add results from this batch
-            $azGraphResults += $graphResult.data
+            # Add results from this batch using AddRange to properly handle the array
+            $azGraphResults.AddRange($graphResult.data)
 
             # Break if we received fewer results than batch size (last page)
             if ($graphResult.data.Count -lt $batchSize) {
@@ -141,9 +141,7 @@ authorizationresources
     # keep track of principals which could not be resolved to a display name
     $unresolvedResultsCount = 0
 
-    $azGraphResults.ForEach{
-        $currentAssignment = $_
-
+    foreach ($currentAssignment in $azGraphResults) {
         # Update progress count
         $progressCount++
         $writeProgressParams = @{
@@ -173,7 +171,7 @@ authorizationresources
                 }
             }
 
-            if ($principal) {
+            if ($null -ne $principal) {
                 # Get display name or UPN
                 $principalName = $principal.DisplayName
                 if ([string]::IsNullOrEmpty($principalName)) {
@@ -233,5 +231,5 @@ authorizationresources
         Write-Information -MessageData  "  $($_.Name): $($_.Count)"
     }
 
-    Write-Information -MessageData  "`nUnresolved principals [$unresolvedResultsCount]"
+    Write-Information -MessageData  "`nUnresolved principal assignments [$unresolvedResultsCount]"
 }
