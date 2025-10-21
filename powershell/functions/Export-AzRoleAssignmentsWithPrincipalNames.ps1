@@ -71,45 +71,61 @@ authorizationresources
 
     # Execute the query, with optional subscription scoping
     try {
+        $batchSize = 1000
+        $skipResult = 0
+        [System.Collections.Generic.List[object]]$azGraphResults = @()
+
         if ($SubscriptionId) {
-            # A subscription ID is provided, scope the query to that subscription
-            $searchAzGraphParams = @{
-                Query        = $query
-                Subscription = $SubscriptionId
-                First        = 1000
-            }
             Write-Information -MessageData  "Querying Azure Resource Graph for Role Assignments at Subscription scope [$SubscriptionId]"
-            $azGraphResults = Search-AzGraph @searchAzGraphParams
         } else {
             Write-Information -MessageData  "Querying Azure Resource Graph for Role Assignments at Tenant scope"
-            $azGraphResults = Search-AzGraph -Query $query -UseTenantScope -First 1000
-            Start-Sleep -Seconds 3
         }
 
-        # Handle pagination if there are more results
-        while ($azGraphResults.SkipToken) {
-            Write-Information -MessageData  "Fetching next 1000 results..."
-            if ($SubscriptionId) {
-                # A subscription ID is provided, scope the query to that subscription
-                # 1000 results per page is the max allowed by the Search-AzGraph cmdlet
-                $searchAzGraphParams = @{
-                    Query        = $query
-                    Subscription = $SubscriptionId
-                    First        = 1000
-                    SkipToken    = $azGraphResults.SkipToken
+        # Handle pagination following Microsoft's recommended pattern
+        while ($true) {
+            if ($skipResult -gt 0) {
+                Write-Information -MessageData  "Fetching next $batchSize results..."
+                if ($SubscriptionId) {
+                    # A subscription ID is provided, scope the query to that subscription
+                    $searchAzGraphParams = @{
+                        Query        = $query
+                        Subscription = $SubscriptionId
+                        First        = $batchSize
+                        SkipToken    = $graphResult.SkipToken
+                    }
+                    $graphResult = Search-AzGraph @searchAzGraphParams
+                } else {
+                    # Use tenant scope
+                    $searchAzGraphParams = @{
+                        Query     = $query
+                        First     = $batchSize
+                        SkipToken = $graphResult.SkipToken
+                    }
+                    $graphResult = Search-AzGraph @searchAzGraphParams -UseTenantScope
                 }
-                $azGraphNextSetOfResults = Search-AzGraph @searchAzGraphParams
             } else {
-                # 1000 results per page is the max allowed by the Search-AzGraph cmdlet
-                $searchAzGraphParams = @{
-                    Query     = $query
-                    First     = 1000
-                    SkipToken = $azGraphResults.SkipToken
+                # First query
+                if ($SubscriptionId) {
+                    $searchAzGraphParams = @{
+                        Query        = $query
+                        Subscription = $SubscriptionId
+                        First        = $batchSize
+                    }
+                    $graphResult = Search-AzGraph @searchAzGraphParams
+                } else {
+                    $graphResult = Search-AzGraph -Query $query -UseTenantScope -First $batchSize
                 }
-                $azGraphNextSetOfResults = Search-AzGraph @searchAzGraphParams
             }
-            # Append next set of results to the existing results collection
-            $azGraphResults = $azGraphResults + $azGraphNextSetOfResults
+
+            # Add results from this batch
+            $azGraphResults += $graphResult.data
+
+            # Break if we received fewer results than batch size (last page)
+            if ($graphResult.data.Count -lt $batchSize) {
+                break
+            }
+
+            $skipResult += $skipResult + $batchSize
         }
 
         Write-Information -MessageData  "Total role assignments found [$($azGraphResults.Count)]"
