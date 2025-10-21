@@ -3,6 +3,7 @@
 # Edit at https://www.toptal.com/developers/gitignore?templates=windows,visualstudiocode
 
 ## Specific to this repo
+references/jevsPlayground.ps1
 node_modules/
 package-lock.json
 package.json
