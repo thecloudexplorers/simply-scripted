@@ -1,18 +1,18 @@
 #requires -Modules Az.Resources
 <#
-    .SYNOPSIS
+.SYNOPSIS
     Creates Entra ID App Registrations in bulk (application). And applies basic
     drift control
 
-    .DESCRIPTION
+.DESCRIPTION
     This function creates an Creates an Entra ID App Registration and a
     corresponding Enterprise application. It also applies drift control on the
     description field of the application and enterprise application.
 
-    .PARAMETER EnIdApps
+.PARAMETER EnIdApps
     A collection Entra ID Application objects to create
 
-    .EXAMPLE
+.EXAMPLE
     Object example:
     "enIdApplications": [
         {
@@ -34,13 +34,13 @@
     }
     New-InIdApps @InIdAppsArgs
 
-    .NOTES
+.NOTES
     Version     : 2.0.0
     Author      : Jev - @devjevnl | https://www.devjev.nl
     Source      : https://github.com/thecloudexplorers/simply-scripted
 
-    .LINK
-    https://learn.microsoft.com/en-us/powershell/module/Az.Resources/new-azadapplication
+.LINK
+    https://learn.microsoft.com/en-us/powershell/module/Az.Resources/new-azadapplication?wt.mc_id=DT-MVP-5005327
 #>
 
 function Set-EnIdApps {

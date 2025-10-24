@@ -38,8 +38,16 @@
     Read-AdoOrganizationGeneralBillingSettings @params
 
 .NOTES
-    API: https://azdevopscommerce.dev.azure.com/{orgId}/_apis/AzComm/BillingSetup?
-          api-version=7.1-preview.1
+    WARNING:
+    This function uses an internal and undocumented API endpoint.
+    This endpoint is not part of the officially supported Azure DevOps REST API.
+    Microsoft may change or remove it at any time without notice.
+
+    Endpoints used:
+    https://azdevopscommerce.dev.azure.com/{orgId}/_apis/AzComm/BillingSetup?api-version=7.1-preview.1
+
+    Authentication:
+      - Uses a Bearer token Authorization header
 
     Version : 0.6.1
     Author  : Jev - @devjevnl | https://www.devjev.nl

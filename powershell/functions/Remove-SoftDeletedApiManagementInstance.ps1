@@ -1,23 +1,25 @@
 #Requires -Modules Az
 <#
-    .SYNOPSIS
+.SYNOPSIS
     Use this function to purge a soft deleted API management instance
 
-    .DESCRIPTION
-    When you use the Azure portal or REST API version 2020-06-01-preview or later to delete an API Management instance,
-    it's soft-deleted and recoverable during a retention period. This function calls the API Management Purge operation
-    to permanently delete the concerned soft-deleted instance.
+.DESCRIPTION
+    When you use the Azure portal or REST API version 2020-06-01-preview or
+    later to delete an API Management instance, it's soft-deleted and
+    recoverable during a retention period. This function calls the API
+    Management Purge operation to permanently delete the concerned soft-deleted
+    instance.
 
-    .PARAMETER SubscriptionId
+.PARAMETER SubscriptionId
     Subscription Id of the concerning Api Management Instance
 
-    .PARAMETER Location
+.PARAMETER Location
     Azure location/region of the concerning Api Management Instance
 
-    .PARAMETER ApiManagementInstanceName
+.PARAMETER ApiManagementInstanceName
     Name of the concerning Api Management Instance
 
-    .EXAMPLE
+.EXAMPLE
     $apimArgs = @{
         SubscriptionId              = "d8852164-1d48-4887-82d2-022294a5b912"
         Location                    = "West Europe"
@@ -25,12 +27,13 @@
     }
     Remove-SoftDeletedApiManagementInstance @apimArgs
 
-    .NOTES
+.NOTES
+    Version     : 0.0.1
     Author      : Jev - @devjevnl | https://www.devjev.nl
     Source      : https://github.com/thecloudexplorers/simply-scripted
 
-    .LINK
-    https://docs.microsoft.com/en-us/azure/api-management/soft-delete
+.LINK
+    https://docs.microsoft.com/en-us/azure/api-management/soft-delete?wt.mc_id=DT-MVP-5005327
 #>
 
 

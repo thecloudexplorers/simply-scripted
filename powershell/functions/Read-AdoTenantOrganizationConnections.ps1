@@ -28,7 +28,8 @@
         - Owner            : String - The organization owner display name
         - ExceptionType    : String - Error type if connection has issues
         - ErrorMessage     : String - Detailed error message if applicable
-        - HasError         : Boolean - Whether this organization connection has errors
+        - HasError         : Boolean - Whether this organization connection has
+        errors
 
 .EXAMPLE
     # Create PAT-based auth header and call with splatting
@@ -47,8 +48,7 @@
     removed without notice.
 
     Endpoints used:
-      - EnterpriseCatalog Organizations:
-        https://aexprodweu1.vsaex.visualstudio.com/_apis/EnterpriseCatalog/Organizations?tenantId={tenantId}
+    https://aexprodweu1.vsaex.visualstudio.com/_apis/EnterpriseCatalog/Organizations?tenantId={tenantId}
 
     Authentication:
       - Uses Bearer token authentication via header.
@@ -64,9 +64,7 @@
     Source  : https://github.com/thecloudexplorers/simply-scripted
 
 .LINK
-    https://github.com/PoshCode/PowerShellPracticeAndStyle
-    https://learn.microsoft.com/en-us/powershell/scripting/developer/cmdlet/strongly-encouraged-development-guidelines
-#>
+    https://learn.microsoft.com/en-us/powershell/scripting/developer/cmdlet/strongly-encouraged-development-guidelines?wt.mc_id=DT-MVP-5005327
 #>
 function Read-AdoTenantOrganizationConnections {
     [CmdletBinding()]

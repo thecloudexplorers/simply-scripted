@@ -1,29 +1,29 @@
 #requires -Modules Az.Resources
 <#
-    .SYNOPSIS
+.SYNOPSIS
     Creates Entra ID Security Groups in bulk. And applies basic drift control
 
-    .DESCRIPTION
+.DESCRIPTION
     This function creates creates Entra ID Security Groups .
     It also applies drift control on the description field of the security
     groups in question.
 
-    .PARAMETER EnIdGroups
+.PARAMETER EnIdGroups
     A collection Entra ID Groups objects to create
 
-    .EXAMPLE
+.EXAMPLE
     $EnIdAppsArgs = @{
         InIdApps = [System.Object[]] $enIdApplicationsColl
     }
     New-InIdApps @InIdAppsArgs
 
-    .NOTES
+.NOTES
     Version     : 1.0.0
     Author      : Jev - @devjevnl | https://www.devjev.nl
     Source      : https://github.com/thecloudexplorers/simply-scripted
 
-    .LINK
-    https://learn.microsoft.com/en-us/powershell/module/Az.Resources/new-azadapplication
+.LINK
+    https://learn.microsoft.com/en-us/powershell/module/Az.Resources/new-azadapplication?wt.mc_id=DT-MVP-5005327
 #>
 
 function Set-EnIdGroups {
