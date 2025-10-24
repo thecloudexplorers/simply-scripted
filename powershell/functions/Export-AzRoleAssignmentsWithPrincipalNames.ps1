@@ -90,14 +90,20 @@
     https://github.com/thecloudexplorers/simply-scripted
 #>
 
-[Parameter(Mandatory = $false)]
-[System.String] $SubscriptionId
-)
+function Export-AzRoleAssignmentsWithPrincipalNames {
+    [CmdletBinding()]
+    param (
+        [Parameter(Mandatory)]
+        [System.String] $OutputPath,
 
-# Query to export all Azure role assignments using Azure Resource Graph
-# Courtesy of Jason Fritts
-# NOTE: projecting the id column is required to use  -SkipToken for pagination.
-$query = @"
+        [Parameter(Mandatory = $false)]
+        [System.String] $SubscriptionId
+    )
+
+    # Query to export all Azure role assignments using Azure Resource Graph
+    # Courtesy of Jason Fritts
+    # NOTE: projecting the id column is required to use  -SkipToken for pagination.
+    $query = @"
 authorizationresources
 | where type == "microsoft.authorization/roleassignments"
 | extend scope = tostring(properties['scope'])
@@ -115,166 +121,166 @@ authorizationresources
 | project id, createdOn, updatedOn, principalId, principalType, scope, roleName, roleDefinitionId
 "@
 
-# Execute the query, with optional subscription scoping
-try {
-    $batchSize = 1000
-    $skipResult = 0
-    $azGraphResults = [System.Collections.Generic.List[object]]::new()
-
-    if ($SubscriptionId) {
-        Write-Information -MessageData  "Querying Azure Resource Graph for Role Assignments at Subscription scope [$SubscriptionId]"
-    } else {
-        Write-Information -MessageData  "Querying Azure Resource Graph for Role Assignments at Tenant scope"
-    }
-
-    # Handle pagination following Microsoft's recommended pattern
-    while ($true) {
-        if ($skipResult -gt 0) {
-            Write-Information -MessageData  "Fetching next $batchSize results..."
-            if ($SubscriptionId) {
-                # A subscription ID is provided, scope the query to that subscription
-                $searchAzGraphParams = @{
-                    Query        = $query
-                    Subscription = $SubscriptionId
-                    First        = $batchSize
-                    SkipToken    = $graphResult.SkipToken
-                }
-                $graphResult = Search-AzGraph @searchAzGraphParams
-            } else {
-                # Use tenant scope
-                $searchAzGraphParams = @{
-                    Query     = $query
-                    First     = $batchSize
-                    SkipToken = $graphResult.SkipToken
-                }
-                $graphResult = Search-AzGraph @searchAzGraphParams -UseTenantScope
-            }
-        } else {
-            # First query
-            if ($SubscriptionId) {
-                $searchAzGraphParams = @{
-                    Query        = $query
-                    Subscription = $SubscriptionId
-                    First        = $batchSize
-                }
-                $graphResult = Search-AzGraph @searchAzGraphParams
-            } else {
-                $graphResult = Search-AzGraph -Query $query -UseTenantScope -First $batchSize
-            }
-        }
-
-        # Add results from this batch using AddRange to properly handle the array
-        $azGraphResults.AddRange($graphResult.data)
-
-        # Break if we received fewer results than batch size (last page)
-        if ($graphResult.data.Count -lt $batchSize) {
-            break
-        }
-
-        $skipResult += $skipResult + $batchSize
-    }
-
-    Write-Information -MessageData  "Total role assignments found [$($azGraphResults.Count)]"
-} catch {
-    Write-Error "Failed to query Azure Resource Graph: $_" -ErrorAction Stop
-}
-
-# Resolve principal names using Az cmdlets
-Write-Information -MessageData  "Resolving principal id's to display names"
-
-$resolvedResults = @()
-$progressCount = 0
-# keep track of principals which could not be resolved to a display name
-$unresolvedResultsCount = 0
-
-foreach ($currentAssignment in $azGraphResults) {
-    # Update progress count
-    $progressCount++
-    $writeProgressParams = @{
-        Activity        = "Resolving principal id's to display names"
-        Status          = "Processing $progressCount of $($azGraphResults.Count)"
-        PercentComplete = (($progressCount / $azGraphResults.Count) * 100)
-    }
-    Write-Progress @writeProgressParams
-
-    $principalName = $null
+    # Execute the query, with optional subscription scoping
     try {
-        $principal = $null
+        $batchSize = 1000
+        $skipResult = 0
+        $azGraphResults = [System.Collections.Generic.List[object]]::new()
 
-        # Try to resolve based on principal type
-        switch ($currentAssignment.principalType) {
-            'ServicePrincipal' {
-                $principal = Get-AzADServicePrincipal -ObjectId $currentAssignment.principalId -ErrorAction Stop
-            }
-            'User' {
-                $principal = Get-AzADUser -ObjectId $currentAssignment.principalId -ErrorAction Stop
-            }
-            'Group' {
-                $principal = Get-AzADGroup -ObjectId $currentAssignment.principalId -ErrorAction Stop
-            }
-            default {
-                Write-Warning -Message "Unsupported principal type [$($currentAssignment.principalType)] for principal ID [$($currentAssignment.principalId)]"
-            }
-        }
-
-        if ($null -ne $principal) {
-            # Get display name or UPN
-            $principalName = $principal.DisplayName
-            if ([string]::IsNullOrEmpty($principalName)) {
-                $principalName = $principal.UserPrincipalName
-            }
-        }
-    } catch {
-        if ($_.FullyQualifiedErrorId.StartsWith('Request_ResourceNotFound')) {
-            Write-Warning -Message "Could not resolve principal ID [$($currentAssignment.principalId)]"
-            Write-Warning -Message "$($_.Exception.Message)"
-            $principalName = "Not Found"
-            $unresolvedResultsCount++
+        if ($SubscriptionId) {
+            Write-Information -MessageData  "Querying Azure Resource Graph for Role Assignments at Subscription scope [$SubscriptionId]"
         } else {
-            Write-Error -Message "Unexpected error resolving principal ID [$($currentAssignment.principalId)]: $_" -ErrorAction Stop
+            Write-Information -MessageData  "Querying Azure Resource Graph for Role Assignments at Tenant scope"
+        }
+
+        # Handle pagination following Microsoft's recommended pattern
+        while ($true) {
+            if ($skipResult -gt 0) {
+                Write-Information -MessageData  "Fetching next $batchSize results..."
+                if ($SubscriptionId) {
+                    # A subscription ID is provided, scope the query to that subscription
+                    $searchAzGraphParams = @{
+                        Query        = $query
+                        Subscription = $SubscriptionId
+                        First        = $batchSize
+                        SkipToken    = $graphResult.SkipToken
+                    }
+                    $graphResult = Search-AzGraph @searchAzGraphParams
+                } else {
+                    # Use tenant scope
+                    $searchAzGraphParams = @{
+                        Query     = $query
+                        First     = $batchSize
+                        SkipToken = $graphResult.SkipToken
+                    }
+                    $graphResult = Search-AzGraph @searchAzGraphParams -UseTenantScope
+                }
+            } else {
+                # First query
+                if ($SubscriptionId) {
+                    $searchAzGraphParams = @{
+                        Query        = $query
+                        Subscription = $SubscriptionId
+                        First        = $batchSize
+                    }
+                    $graphResult = Search-AzGraph @searchAzGraphParams
+                } else {
+                    $graphResult = Search-AzGraph -Query $query -UseTenantScope -First $batchSize
+                }
+            }
+
+            # Add results from this batch using AddRange to properly handle the array
+            $azGraphResults.AddRange($graphResult.data)
+
+            # Break if we received fewer results than batch size (last page)
+            if ($graphResult.data.Count -lt $batchSize) {
+                break
+            }
+
+            $skipResult += $skipResult + $batchSize
+        }
+
+        Write-Information -MessageData  "Total role assignments found [$($azGraphResults.Count)]"
+    } catch {
+        Write-Error "Failed to query Azure Resource Graph: $_" -ErrorAction Stop
+    }
+
+    # Resolve principal names using Az cmdlets
+    Write-Information -MessageData  "Resolving principal id's to display names"
+
+    $resolvedResults = @()
+    $progressCount = 0
+    # keep track of principals which could not be resolved to a display name
+    $unresolvedResultsCount = 0
+
+    foreach ($currentAssignment in $azGraphResults) {
+        # Update progress count
+        $progressCount++
+        $writeProgressParams = @{
+            Activity        = "Resolving principal id's to display names"
+            Status          = "Processing $progressCount of $($azGraphResults.Count)"
+            PercentComplete = (($progressCount / $azGraphResults.Count) * 100)
+        }
+        Write-Progress @writeProgressParams
+
+        $principalName = $null
+        try {
+            $principal = $null
+
+            # Try to resolve based on principal type
+            switch ($currentAssignment.principalType) {
+                'ServicePrincipal' {
+                    $principal = Get-AzADServicePrincipal -ObjectId $currentAssignment.principalId -ErrorAction Stop
+                }
+                'User' {
+                    $principal = Get-AzADUser -ObjectId $currentAssignment.principalId -ErrorAction Stop
+                }
+                'Group' {
+                    $principal = Get-AzADGroup -ObjectId $currentAssignment.principalId -ErrorAction Stop
+                }
+                default {
+                    Write-Warning -Message "Unsupported principal type [$($currentAssignment.principalType)] for principal ID [$($currentAssignment.principalId)]"
+                }
+            }
+
+            if ($null -ne $principal) {
+                # Get display name or UPN
+                $principalName = $principal.DisplayName
+                if ([string]::IsNullOrEmpty($principalName)) {
+                    $principalName = $principal.UserPrincipalName
+                }
+            }
+        } catch {
+            if ($_.FullyQualifiedErrorId.StartsWith('Request_ResourceNotFound')) {
+                Write-Warning -Message "Could not resolve principal ID [$($currentAssignment.principalId)]"
+                Write-Warning -Message "$($_.Exception.Message)"
+                $principalName = "Not Found"
+                $unresolvedResultsCount++
+            } else {
+                Write-Error -Message "Unexpected error resolving principal ID [$($currentAssignment.principalId)]: $_" -ErrorAction Stop
+            }
+        }
+
+
+        # If still not resolved, use the principal ID
+        if ([string]::IsNullOrEmpty($principalName)) {
+            $principalName = $currentAssignment.principalId
+        }
+
+        $resolvedResults += [PSCustomObject]@{
+            CreatedOn        = $currentAssignment.createdOn
+            UpdatedOn        = $currentAssignment.updatedOn
+            PrincipalName    = $principalName
+            PrincipalId      = $currentAssignment.principalId
+            PrincipalType    = $currentAssignment.principalType
+            Scope            = $currentAssignment.scope
+            RoleName         = $currentAssignment.roleName
+            RoleDefinitionId = $currentAssignment.roleDefinitionId
         }
     }
 
+    Write-Progress -Activity "Resolving principal names" -Completed
 
-    # If still not resolved, use the principal ID
-    if ([string]::IsNullOrEmpty($principalName)) {
-        $principalName = $currentAssignment.principalId
+    # Export to CSV
+    Write-Information -MessageData  "Exporting data as csv at [$OutputPath]"
+
+    try {
+        $resolvedResults | Export-Csv -Path $OutputPath -NoTypeInformation -Encoding UTF8
+        Write-Information -MessageData  "Successfully exported [$($resolvedResults.Count)] role assignments to [$OutputPath]"
+    } catch {
+        Write-Error -Message "Failed to export to CSV [$_]"
     }
 
-    $resolvedResults += [PSCustomObject]@{
-        CreatedOn        = $currentAssignment.createdOn
-        UpdatedOn        = $currentAssignment.updatedOn
-        PrincipalName    = $principalName
-        PrincipalId      = $currentAssignment.principalId
-        PrincipalType    = $currentAssignment.principalType
-        Scope            = $currentAssignment.scope
-        RoleName         = $currentAssignment.roleName
-        RoleDefinitionId = $currentAssignment.roleDefinitionId
+    # Display summary
+    Write-Information -MessageData  "`nSummary:"
+    Write-Information -MessageData  "  Total role assignments [$($resolvedResults.Count)]"
+    Write-Information -MessageData  "  Unique principals [$((($resolvedResults | Select-Object -Unique PrincipalId).Count))]"
+    Write-Information -MessageData  "  Unique roles [$((($resolvedResults | Select-Object -Unique RoleName).Count))]"
+
+    Write-Information -MessageData  "`nTop 5 roles:"
+    $resolvedResults | Group-Object RoleName | Sort-Object Count -Descending | Select-Object -First 5 | ForEach-Object {
+        Write-Information -MessageData  "  $($_.Name): $($_.Count)"
     }
-}
 
-Write-Progress -Activity "Resolving principal names" -Completed
-
-# Export to CSV
-Write-Information -MessageData  "Exporting data as csv at [$OutputPath]"
-
-try {
-    $resolvedResults | Export-Csv -Path $OutputPath -NoTypeInformation -Encoding UTF8
-    Write-Information -MessageData  "Successfully exported [$($resolvedResults.Count)] role assignments to [$OutputPath]"
-} catch {
-    Write-Error -Message "Failed to export to CSV [$_]"
-}
-
-# Display summary
-Write-Information -MessageData  "`nSummary:"
-Write-Information -MessageData  "  Total role assignments [$($resolvedResults.Count)]"
-Write-Information -MessageData  "  Unique principals [$((($resolvedResults | Select-Object -Unique PrincipalId).Count))]"
-Write-Information -MessageData  "  Unique roles [$((($resolvedResults | Select-Object -Unique RoleName).Count))]"
-
-Write-Information -MessageData  "`nTop 5 roles:"
-$resolvedResults | Group-Object RoleName | Sort-Object Count -Descending | Select-Object -First 5 | ForEach-Object {
-    Write-Information -MessageData  "  $($_.Name): $($_.Count)"
-}
-
-Write-Information -MessageData  "`nUnresolved principal assignments [$unresolvedResultsCount]"
+    Write-Information -MessageData  "`nUnresolved principal assignments [$unresolvedResultsCount]"
 }
