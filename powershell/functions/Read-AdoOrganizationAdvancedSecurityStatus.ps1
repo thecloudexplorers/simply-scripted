@@ -54,11 +54,6 @@
     - Secret Protection (enableSecretProtectionOnCreate)
     - Code Security     (enableCodeSecurityOnCreate)
 
-    Response handling:
-    - 200 OK with JSON -> values parsed and returned
-    - Null/empty body  -> treated as not enabled
-    - HTML/Sign In     -> token expired or access denied
-
     Authentication:
     - Uses PAT via Basic Authorization header
 
