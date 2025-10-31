@@ -1,92 +1,108 @@
 <#
     .SYNOPSIS
-    Reads the general billing settings of an Azure DevOps organization.
+    Retrieves and validates general billing settings for an Azure DevOps org.
 
-    .DESCRIPTION
-    This function queries the Azure DevOps Commerce (AzComm) API to retrieve general billing
-    setup information such as billing status, linked subscription, and account information.
-    It also handles cases where billing is not configured.
+.DESCRIPTION
+    Queries the Azure DevOps Commerce (AzComm) API to obtain billing setup info
+    for the specified organization. Returns a PSCustomObject containing the
+    subscription id, subscription status, last updated timestamp and a computed
+    BillingType (Enterprise / Assignment / Not Configured). Detects HTML or
+    sign-in responses and surfaces an access denied / token expired error.
+    Informational messages are written for the current subscription, billing
+    status and last updated timestamp.
 
-    .PARAMETER OrganizationId
-    The GUID of the Azure DevOps organization (not the display name).
+.PARAMETER OrganizationId
+    The GUID of the Azure DevOps organization (not the display name). This value
+    is used in the AzComm BillingSetup API request.
 
-    .PARAMETER AccessToken
-    A valid Azure DevOps Bearer token with permission to query billing details.
+.PARAMETER AdoBearerBasedAuthenticationHeader
+    A hashtable containing the Authorization header for the request, e.g.
+    @{ Authorization = "Bearer <access-token>" }. This header must be valid and
+    have the required permissions to query billing details.
 
-    .EXAMPLE
-    $billingParams = @{
-        OrganizationId = "a6c61e95-bc6a-4998-b599-5c1add3fd48b"
-        AccessToken    = $token
+.OUTPUTS
+    System.Management.Automation.PSCustomObject
+    Properties:
+      - AzureSubscriptionId     : (string) Subscription ID used for billing.
+      - AzureSubscriptionStatus : (string) Billing subscription status.
+      - UpdatedDateTime         : (string/datetime) Last update timestamp.
+      - BillingType             : (string) Computed billing type: Enterprise,
+                                  Assignment or Not Configured.
+
+.EXAMPLE
+    $bearerHeader = @{ Authorization = "Bearer $env:AZDEVOPS_ACCESS_TOKEN" }
+    $params = @{
+        OrganizationId                      = "00000000-0000-0000-0000-000000000000"
+        AdoBearerBasedAuthenticationHeader  = $bearerHeader
     }
+    Read-AdoOrganizationGeneralBillingSettings @params
 
-    Read-AdoOrganizationGeneralBillingSettings @billingParams
+.NOTES
+    WARNING:
+    This function uses an internal and undocumented API endpoint.
+    This endpoint is not part of the officially supported Azure DevOps REST API.
+    Microsoft may change or remove it at any time without notice.
 
-    .NOTES
-    This function uses a documented but lesser-known API endpoint:
-    https://azdevopscommerce.dev.azure.com/{orgId}/_apis/AzComm/BillingSetup
+    Endpoints used:
+    https://azdevopscommerce.dev.azure.com/{orgId}/_apis/AzComm/BillingSetup?api-version=7.1-preview.1
 
-    Microsoft may restrict access based on user role or token scope.
+    Authentication:
+      - Uses a Bearer token Authorization header
 
-    Version     : 0.5.1
-    Author      : Jev - @devjevnl | https://www.devjev.nl
-    Source      : https://github.com/thecloudexplorers/simply-scripted
-
-    .LINK
-    https://learn.microsoft.com/en-us/rest/api/azure/devops/commerce/billing-setup/read?view=azure-devops-rest-7.1
+    Version : 0.6.1
+    Author  : Jev - @devjevnl | https://www.devjev.nl
+    Source  : https://github.com/thecloudexplorers/simply-scripted
 #>
 function Read-AdoOrganizationGeneralBillingSettings {
     [CmdletBinding()]
     param (
-        # The GUID of the Azure DevOps organization (not the name)
         [Parameter(Mandatory)]
-        [string]$OrganizationId,
+        [System.String] $OrganizationId,
 
-        # Valid Bearer token
         [Parameter(Mandatory)]
-        [string]$AccessToken
+        [System.Collections.Hashtable] $AdoBearerBasedAuthenticationHeader
     )
 
-    $uri = "https://azdevopscommerce.dev.azure.com/$OrganizationId/_apis/AzComm/BillingSetup?api-version=7.1-preview.1"
+    $billingSetupUri = "https://azdevopscommerce.dev.azure.com/$OrganizationId/_apis/AzComm/BillingSetup?api-version=7.1-preview.1"
 
-    $headers = @{
-        Authorization = "Bearer $AccessToken"
-        Accept        = "application/json"
+    $invokeParams = @{
+        Uri             = $billingSetupUri
+        Method          = 'GET'
+        Headers         = $AdoBearerBasedAuthenticationHeader
+        UseBasicParsing = $true
+        ErrorAction     = 'Stop'
     }
 
     try {
-        $rawResponse = Invoke-WebRequest -Uri $uri -Method Get -Headers $headers -UseBasicParsing
+        $restResponse = Invoke-RestMethod @invokeParams
 
-        # Detect expired token or redirect to login
-        if ($rawResponse.Content -match '<html' -or $rawResponse.RawContent -match 'Sign In') {
+        # Check if response content returns a html page which usually indicates token expired
+        if ($restResponse -match '<html' -or $restResponse.RawContent -match 'Sign In') {
             throw "Access denied or token expired. Please verify your Bearer token is still valid."
         }
 
-        # Parse JSON content
-        $response = $rawResponse.Content | ConvertFrom-Json
+        # console output in case information preference is set to include Information stream
+        Write-Information -MessageData "Current Azure Subscription used for billing: [$($restResponse.subscriptionId)]"
+        Write-Information -MessageData "Billing Status: [$($restResponse.subscriptionStatus)]"
+        Write-Information -MessageData "Last Updated: [$($restResponse.updatedDateTime)]"
 
-        Write-Host ""
-        Write-Host "===== Azure DevOps Billing Configuration Assessment ====="
-        Write-Host ""
-
-        # Basic identifiers
-        Write-Host "Organization Name     : $($response.currentOrganizationName)"
-        Write-Host "Subscription Status   : $($response.subscriptionStatus)"
-        Write-Host "Enterprise Billing    : $($response.isEnterpriseBillingEnabled)"
-        Write-Host "Assignment Billing    : $($response.isAssignmentBillingEnabled)"
-
-        # Check if billing is configured (based on key presence)
-        if ($response.PSObject.Properties.Name -contains 'billingPlanId') {
-            Write-Host "Billing Active        : $($response.isActive)"
-            Write-Host "Billing Plan ID       : $($response.billingPlanId)"
-            Write-Host "Subscription ID       : $($response.subscriptionId)"
-            Write-Host "Billing Account ID    : $($response.billingAccountId)"
-            Write-Host "Marketplace Publisher : $($response.marketplacePublisher)"
-        } else {
-            Write-Host "Billing is not currently configured for this organization."
+        # Determine billing type
+        $billingType = switch ($true) {
+            $restResponse.isEnterpriseBillingEnabled { 'Enterprise'; break }
+            $restResponse.isAssignmentBillingEnabled { 'Assignment'; break }
+            Default { 'Not Configured' }
         }
 
-        Write-Host ""
-        Write-Host "Assessment complete."
+        # Create result object
+        $result = [PSCustomObject]@{
+            AzureSubscriptionId     = $restResponse.subscriptionId
+            AzureSubscriptionStatus = $restResponse.subscriptionStatus
+            UpdatedDateTime         = $restResponse.updatedDateTime
+            BillingType             = $billingType
+        }
+
+        # return billing details
+        return $result
     } catch {
         Write-Error "Failed to retrieve billing configuration: $($_.Exception.Message)"
     }
