@@ -79,7 +79,7 @@
     Source      : https://github.com/thecloudexplorers/simply-scripted
 
 .LINK
-    https://learn.microsoft.com/en-us/rest/api/azure/devops/advancedsecurity/org-enablement/get
+    https://learn.microsoft.com/en-us/rest/api/azure/devops/advancedsecurity/org-enablement/get?wt.mc_id=DT-MVP-5005327
 #>
 function Read-AdoRepoAdvancedSecurityStatus {
     [CmdletBinding()]
