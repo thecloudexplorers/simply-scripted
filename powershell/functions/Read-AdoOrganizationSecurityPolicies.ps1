@@ -4,12 +4,12 @@
 
 .DESCRIPTION
     Queries the internal Azure DevOps organization policy endpoint to retrieve
-    effective values for security, privacy, user, and application connection
-    policies. This function provides visibility into organization-level
-    governance settings by parsing the internal policy data provider.
+    the effective security, privacy, user, and application-connection policy
+    values. It exposes organization-level governance settings by parsing data
+    from the internal policy provider.
 
 .PARAMETER OrganizationName
-    The name of your Azure DevOps organization (e.g. 'contoso').
+    The name of your Azure DevOps organization (e.g. 'devjevnl').
 
 .PARAMETER AdoBearerBasedAuthenticationHeader
     A hashtable containing the Authorization header for the request, e.g.
@@ -49,9 +49,6 @@
     Version : 0.6.0
     Author  : Jev - @devjevnl | https://www.devjev.nl
     Source  : https://github.com/thecloudexplorers/simply-scripted
-
-.LINK
-    https://learn.microsoft.com/en-us/powershell/scripting/developer/cmdlet/strongly-encouraged-development-guidelines?wt.mc_id=DT-MVP-5005327
 #>
 function Read-AdoOrganizationSecurityPolicies {
     [CmdletBinding()]
