@@ -80,6 +80,9 @@
 
 .LINK
     https://learn.microsoft.com/en-us/rest/api/azure/devops/advancedsecurity/org-enablement/get?wt.mc_id=DT-MVP-5005327
+    https://learn.microsoft.com/en-us/rest/api/azure/devops/core/projects/get?view=azure-devops-rest-7.1&wt.mc_id=DT-MVP-5005327
+    https://learn.microsoft.com/en-us/rest/api/azure/devops/git/repositories/get?view=azure-devops-rest-4.1&tabs=HTTP&wt.mc_id=DT-MVP-5005327
+    https://learn.microsoft.com/en-us/rest/api/azure/devops/ims/identities/read-identities?view=azure-devops-rest-7.2&tabs=HTTP&wt.mc_id=DT-MVP-5005327
 #>
 function Read-AdoRepoAdvancedSecurityStatus {
     [CmdletBinding()]
@@ -128,13 +131,17 @@ function Read-AdoRepoAdvancedSecurityStatus {
                 $secretFeatures = $currentRepo.secretProtectionFeatures
                 $codeFeatures = $currentRepo.codeSecurityFeatures
 
-                # Get project details
-                $projectUriTemplate = "https://dev.azure.com/{0}/_apis/projects/{1}?api-version=7.0"
+                # Get project with the specified id or name, optionally including capabilities.
+                # https://learn.microsoft.com/en-us/rest/api/azure/devops/core/projects/get?view=azure-devops-rest-7.1&wt.mc_id=DT-MVP-5005327
+                # GET https://dev.azure.com/{organization}/_apis/projects/{projectId}?api-version=7.1
+                $projectUriTemplate = "https://dev.azure.com/{0}/_apis/projects/{1}?api-version=7.1"
                 $projectUri = $projectUriTemplate -f $Organization, $projectId
                 $projectInfo = Invoke-RestMethod -Uri $projectUri -Headers $AdoAuthenticationHeader -Method 'GET'
 
                 # Get repository details
-                $repoUriTemplate = "https://dev.azure.com/{0}/{1}/_apis/git/repositories/{2}?api-version=7.0"
+                # https://learn.microsoft.com/en-us/rest/api/azure/devops/git/repositories/get?view=azure-devops-rest-4.1&tabs=HTTP&wt.mc_id=DT-MVP-5005327
+                # GET https://dev.azure.com/{organization}/{project}/_apis/git/repositories/{repositoryId}?api-version=4.1
+                $repoUriTemplate = "https://dev.azure.com/{0}/{1}/_apis/git/repositories/{2}?api-version=4.1"
                 $repoUri = $repoUriTemplate -f $Organization, $projectId, $repoId
 
                 $repoInfo = Invoke-RestMethod -Uri $repoUri -Headers $AdoAuthenticationHeader -Method 'GET'
@@ -142,6 +149,9 @@ function Read-AdoRepoAdvancedSecurityStatus {
                 # Get Secret Protection Changed By Display Name
                 $secretProtectionChangedByDisplayName = $null
                 if ($secretFeatures.secretProtectionChangedBy -ne "00000000-0000-0000-0000-000000000000") {
+                    # Resolve legacy identity information
+                    # https://learn.microsoft.com/en-us/rest/api/azure/devops/ims/identities/read-identities?view=azure-devops-rest-7.2&tabs=HTTP&wt.mc_id=DT-MVP-5005327
+                    # GET https://vssps.dev.azure.com/{organization}/_apis/identities?api-version=7.2-preview.1
                     $identityUriTemplate = "https://vssps.dev.azure.com/{0}/_apis/identities/{1}?api-version=7.2-preview.1"
                     $changedById = $secretFeatures.secretProtectionChangedBy
                     $identityUri = $identityUriTemplate -f $Organization, $changedById
@@ -153,6 +163,9 @@ function Read-AdoRepoAdvancedSecurityStatus {
                 # Get Code Security Changed By Display Name
                 $codeSecurityChangedByDisplayName = $null
                 if ($codeFeatures.codeSecurityChangedBy -ne "00000000-0000-0000-0000-000000000000") {
+                    # Resolve legacy identity information
+                    # https://learn.microsoft.com/en-us/rest/api/azure/devops/ims/identities/read-identities?view=azure-devops-rest-7.2&tabs=HTTP&wt.mc_id=DT-MVP-5005327
+                    # GET https://vssps.dev.azure.com/{organization}/_apis/identities?api-version=7.2-preview.1
                     $identityUriTemplate = "https://vssps.dev.azure.com/{0}/_apis/identities/{1}?api-version=7.2-preview.1"
                     $identityUri = $identityUriTemplate -f $Organization, $codeFeatures.codeSecurityChangedBy
 
