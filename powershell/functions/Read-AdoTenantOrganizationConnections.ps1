@@ -1,14 +1,13 @@
 <#
 .SYNOPSIS
-    Reads Azure DevOps organizations connected to an Entra ID tenant.
+    Reads Azure DevOps organizations connected to the provided Entra ID tenant.
 
 .DESCRIPTION
-    Queries the Azure DevOps EnterpriseCatalog API to retrieve all organizations
-    connected to the specified Entra ID (Azure AD) tenant. The function
-    downloads and parses CSV data containing organization details, ownership
-    information, and any connection errors. This function provides tenant-level
-    governance capabilities by identifying all Azure DevOps organizations within
-    scope.
+    Queries the Azure DevOps Enterprise Catalog API to retrieve all
+    organizations linked to the specified Entra ID tenant. It downloads and
+    parses the returned CSV, including organization details, ownership data,
+    and any connection errors. This enables tenant-level governance by
+    identifying all Azure DevOps organizations in scope.
 
 .PARAMETER TenantId
     The GUID of the Entra ID tenant (not the display name). This value is used
@@ -62,9 +61,6 @@
     Version : 1.0.1
     Author  : Jev - @devjevnl | https://www.devjev.nl
     Source  : https://github.com/thecloudexplorers/simply-scripted
-
-.LINK
-    https://learn.microsoft.com/en-us/powershell/scripting/developer/cmdlet/strongly-encouraged-development-guidelines?wt.mc_id=DT-MVP-5005327
 #>
 function Read-AdoTenantOrganizationConnections {
     [CmdletBinding()]

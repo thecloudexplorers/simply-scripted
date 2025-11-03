@@ -1,19 +1,18 @@
 <#
     .SYNOPSIS
-    Retrieves and validates general billing settings for an Azure DevOps org.
+    Retrieves Azure DevOps Organization billing settings for the specified Azure
+    DevOps organization.
 
 .DESCRIPTION
-    Queries the Azure DevOps Commerce (AzComm) API to obtain billing setup info
+    Queries the Azure DevOps Commerce API to obtain billing setup information
     for the specified organization. Returns a PSCustomObject containing the
     subscription id, subscription status, last updated timestamp and a computed
-    BillingType (Enterprise / Assignment / Not Configured). Detects HTML or
-    sign-in responses and surfaces an access denied / token expired error.
-    Informational messages are written for the current subscription, billing
-    status and last updated timestamp.
+    BillingType (Enterprise / Assignment / Not Configured).
 
 .PARAMETER OrganizationId
-    The GUID of the Azure DevOps organization (not the display name). This value
-    is used in the AzComm BillingSetup API request.
+    The GUID identifier of the Azure DevOps organization. This is NOT the
+    organization name! Use Get-AdoOrganizationId.ps1 to retrieve
+    it.
 
 .PARAMETER AdoBearerBasedAuthenticationHeader
     A hashtable containing the Authorization header for the request, e.g.
@@ -23,10 +22,10 @@
 .OUTPUTS
     System.Management.Automation.PSCustomObject
     Properties:
-      - AzureSubscriptionId     : (string) Subscription ID used for billing.
-      - AzureSubscriptionStatus : (string) Billing subscription status.
-      - UpdatedDateTime         : (string/datetime) Last update timestamp.
-      - BillingType             : (string) Computed billing type: Enterprise,
+      - AzureSubscriptionId     : String - Subscription ID used for billing.
+      - AzureSubscriptionStatus : String - Billing subscription status.
+      - UpdatedDateTime         : String - Last update timestamp.
+      - BillingType             : String - Computed billing type: Enterprise,
                                   Assignment or Not Configured.
 
 .EXAMPLE
@@ -49,7 +48,7 @@
     Authentication:
       - Uses a Bearer token Authorization header
 
-    Version : 0.6.1
+    Version : 1.0.0
     Author  : Jev - @devjevnl | https://www.devjev.nl
     Source  : https://github.com/thecloudexplorers/simply-scripted
 #>

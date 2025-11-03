@@ -9,10 +9,6 @@
     - Secret Protection
     - Code Security
 
-    Returns a hashtable with:
-    - isSecretProtectionPlanEnabled (bool)
-    - isCodeSecurityPlanEnabled     (bool)
-
 .PARAMETER Organization
     The name of your Azure DevOps organization (e.g. 'devjevnl').
 
@@ -24,6 +20,13 @@
             'Content-Type'  = 'application/json'
             'Authorization' = 'Basic ' + $adoAuthToken
         }
+.OUTPUTS
+    System.Collections.Hashtable
+        A hashtable with the following keys:
+        - isSecretProtectionPlanEnabled : Boolean - Whether the secret
+        protection plan is enabled
+        - isCodeSecurityPlanEnabled     : Boolean - Whether the code security
+        plan is enabled
 
 .EXAMPLE
     $adoAuthTokenParams = @{
@@ -47,25 +50,23 @@
     This function queries the Azure DevOps Advanced Security organization
     enablement endpoint to read the default plan enablement settings:
 
-    Endpoint:
+    Endpoint used:
     https://advsec.dev.azure.com/{organization}/_apis/management/enablement?api-version=7.2-preview.3
-
-    Determines organization-level defaults for:
-    - Secret Protection (enableSecretProtectionOnCreate)
-    - Code Security     (enableCodeSecurityOnCreate)
 
     Authentication:
     - Uses PAT via Basic Authorization header
 
-    Version     : 2.0.0
+    Version     : 1.0.0
     Author      : Jev - @devjevnl | https://www.devjev.nl
     Source      : https://github.com/thecloudexplorers/simply-scripted
 
 .LINK
     https://learn.microsoft.com/en-us/azure/devops/repos/security/configure-github-advanced-security-features?view=azure-devops&tabs=yaml&pivots=standalone-ghazdo&wt.mc_id=DT-MVP-5005327
+    https://learn.microsoft.com/en-us/rest/api/azure/devops/advancedsecurity/org-enablement/get?view=azure-devops-rest-7.2&wt.mc_id=DT-MVP-5005327
 #>
 function Read-AdoOrganizationAdvancedSecurityStatus {
     [CmdletBinding()]
+    [OutputType([System.Collections.Hashtable])]
     param (
         [Parameter(Mandatory)]
         [string]$Organization,
@@ -90,7 +91,7 @@ function Read-AdoOrganizationAdvancedSecurityStatus {
         }
         $restResponse = Invoke-RestMethod @invokeParams
 
-        $responseHashTable = @{
+        [System.Collections.Hashtable] $responseHashTable = @{
             isSecretProtectionPlanEnabled = $false
             isCodeSecurityPlanEnabled     = $false
         }
