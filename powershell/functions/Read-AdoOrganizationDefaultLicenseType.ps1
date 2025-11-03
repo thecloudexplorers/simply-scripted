@@ -4,19 +4,18 @@
     organization.
 
 .DESCRIPTION
-    This function queries the Azure DevOps Commerce API to retrieve the default
+    Queries the Azure DevOps Commerce API to obtain the default
     license type assigned to new users when they are added to an organization.
 
 .PARAMETER OrganizationId
-    The GUID identifier of the Azure DevOps organization.
-    This is not the organization name, but the unique identifier which can be
-    found in the organization settings or URL.
+    The GUID identifier of the Azure DevOps organization. This is NOT the
+    organization name! Use Get-AdoOrganizationId.ps1 to retrieve
+    it.
 
 .PARAMETER AdoBearerBasedAuthenticationHeader
-    A hashtable containing the Bearer token authentication header for Azure
-    DevOps.
-    Format: @{ Authorization = "Bearer <token>" }
-    The token must have permissions to read organization billing configuration.
+    A hashtable containing the Authorization header for the request, e.g.
+    @{ Authorization = "Bearer <access-token>" }. This header must be valid and
+    have the required permissions to read organization-level settings.
 
 .EXAMPLE
     $licenseParams = @{
@@ -25,13 +24,12 @@
     }
     Read-AdoOrganizationDefaultLicenseType @licenseParams
 
-.INPUTS
-    None. You cannot pipe objects to this function.
-
 .OUTPUTS
     System.String
-    Returns a string representing the default license type.
-    Stakeholder, Basic, Visual Studio Subscriber.
+        Returns a string representing the default license type.
+        - Stakeholder
+        - Basic
+        - Visual Studio Subscriber.
 
 .NOTES
     WARNING:
@@ -44,7 +42,7 @@
     Authentication:
       - Uses a Bearer token Authorization header
 
-    Version     : 0.7.0
+    Version     : 1.0.0
     Author      : Jev - @devjevnl | https://www.devjev.nl
     Source      : https://github.com/thecloudexplorers/simply-scripted
 #>
