@@ -1,53 +1,52 @@
 <#
-    .SYNOPSIS
-    Retrieves Azure DevOps organization-level pipeline settings.
+.SYNOPSIS
+    Retrieves Azure DevOps organization-level pipelines settings.
 
-    .DESCRIPTION
-    This function calls the internal Contribution HierarchyQuery endpoint used by the Azure DevOps portal
-    to retrieve pipeline security, policy, and control settings for the entire organization.
+.DESCRIPTION
+    This function calls the internal Contribution HierarchyQuery endpoint used
+    by the Azure DevOps portal to retrieve Azure DevOps Organization pipelines
+    settings of categories General, Triggers, and Task restrictions.
 
-    .PARAMETER Organization
+.PARAMETER Organization
     The name of your Azure DevOps organization (e.g. 'contoso').
 
-    .PARAMETER AccessToken
-    A valid Azure DevOps Bearer token with access to organization settings.
+.PARAMETER AdoBearerBasedAuthenticationHeader
+    A hashtable containing the Authorization header for the request, e.g.
+    @{ Authorization = "Bearer <access-token>" }. This header must be valid and
+    have the required permissions to read organization-level settings.
 
-    .EXAMPLE
-    Invoke-AdoPipelineSettingsQuery -Organization "demojev" -AccessToken $token
+.EXAMPLE
+    Invoke-AdoPipelineSettingsQuery -Organization "demojev" -AdoBearerBasedAuthenticationHeader $header
 
-    .NOTES
-    WARNING: This function uses an internal and undocumented API endpoint:
-             https://dev.azure.com/{org}/_apis/Contribution/HierarchyQuery?api-version=5.0-preview.1
+.NOTES
+    WARNING:
+    This function uses an internal and undocumented API endpoint that is not
+    part of the officially supported Azure DevOps REST API. Microsoft may change
+    or remove this endpoint at any time without notice.
 
-             Microsoft may change or remove this endpoint without notice.
+    Endpoints used:
+    https://dev.azure.com/{org}/_apis/Contribution/HierarchyQuery?api-version=5.0-preview.1
 
-    Version     : 0.5.1
+    Authentication:
+      - Uses Bearer token authentication via header.
+
+    Version     : 1.0.0
     Author      : Jev - @devjevnl | https://www.devjev.nl
     Source      : https://github.com/thecloudexplorers/simply-scripted
-
-    .LINK
-    https://learn.microsoft.com/en-us/powershell/scripting/developer/cmdlet/strongly-encouraged-development-guidelines
 #>
 function Read-AdoOrganizationPipelinesSettings {
     [CmdletBinding()]
     param (
-        # Azure DevOps organization name
         [Parameter(Mandatory)]
-        [Systrem.String]$Organization,
+        [System.String] $OrganizationName,
 
-        # Bearer token for authentication
         [Parameter(Mandatory)]
-        [Systrem.String]$AccessToken
+        [ValidateNotNullOrEmpty()]
+        [System.Collections.Hashtable] $AdoBearerBasedAuthenticationHeader
     )
 
     # Internal endpoint for querying pipeline settings via contribution data provider
-    $uri = "https://dev.azure.com/$Organization/_apis/Contribution/HierarchyQuery?api-version=5.0-preview.1"
-
-    # Auth and content headers
-    $headers = @{
-        Authorization  = "Bearer $AccessToken"
-        "Content-Type" = "application/json"
-    }
+    $uri = "https://dev.azure.com/$OrganizationName/_apis/Contribution/HierarchyQuery?api-version=5.0-preview.1"
 
     <#
     Request body to simulate portal request.
@@ -76,59 +75,87 @@ function Read-AdoOrganizationPipelinesSettings {
 
     try {
         # Get raw response so we can detect HTML fallback (expired token, etc.)
-        $rawResponse = Invoke-WebRequest -Uri $uri -Method Post -Headers $headers -Body $body -UseBasicParsing
+        $restResponse = Invoke-RestMethod -Uri $uri -Method Post -Headers $AdoBearerBasedAuthenticationHeader -Body $body -UseBasicParsing
 
         # Token validation: check for HTML content instead of JSON
-        if ($rawResponse.Content -match '<html' -or $rawResponse.RawContent -match 'Sign In') {
+        if ($restResponse.Content -match '<html' -or $restResponse.RawContent -match 'Sign In') {
             throw "Access denied or token expired. Please verify your Bearer token is still valid."
         }
 
-        # Convert and parse JSON content safely
-        $response = $rawResponse.Content | ConvertFrom-Json
-
         # Extract the specific data provider block from the response
-        $settings = $response.dataProviders.'ms.vss-build-web.pipelines-org-settings-data-provider'
+        $settings = $restResponse.dataProviders.'ms.vss-build-web.pipelines-org-settings-data-provider'
 
-        Write-Host ""
-        Write-Host "===== Azure DevOps Pipeline Settings Assessment ====="
-        Write-Host ""
+        # Create structured object for return value
+        $settingsObject = [System.Management.Automation.PSObject]@{
+            General          = [System.Management.Automation.PSObject]@{
+                DisableAnonymousAccessToBadges             = $settings.statusBadgesArePrivate
+                LimitVariablesThatCanBeSetAtQueueTime      = $settings.enforceSettableVar
+                LimitJobAuthorizationScopeNonRelease       = $settings.enforceJobAuthScope
+                LimitJobAuthorizationScopeRelease          = $settings.enforceJobAuthScopeForReleases
+                ProtectAccessToRepositoriesInYAMLPipelines = $settings.enforceReferencedRepoScopedToken
+                DisableStageChooser                        = $settings.disableStageChooser
+                DisableCreationOfClassicBuildPipelines     = $settings.disableClassicBuildPipelineCreation
+                DisableCreationOfClassicReleasePipelines   = $settings.disableClassicReleasePipelineCreation
+            }
+            TaskRestrictions = [System.Management.Automation.PSObject]@{
+                DisableBuiltInTasks                 = $settings.disableInBoxTasksVar
+                DisableMarketplaceTasks             = $settings.disableMarketplaceTasksVar
+                DisableNode6Tasks                   = $settings.disableNode6TasksVar
+                EnableShellTasksArgumentsValidation = $settings.enableShellTasksArgsSanitizing
+            }
+            Triggers         = [System.Management.Automation.PSObject]@{
+                LimitPRsFromForksGitHub     = $settings.forkProtectionEnabled
+                AllowBuildsFromForks        = $settings.buildsEnabledForForks
+                EnforceJobAuthForForks      = $settings.enforceJobAuthScopeForForks
+                BlockSecretsAccessFromForks = $settings.enforceNoAccessToSecretsFromForks
+                DisableImpliedYAMLCiTrigger = $settings.disableImpliedYAMLCiTrigger
+            }
+            Diagnostic       = [System.Management.Automation.PSObject]@{
+                AuditSettableVariableEnforcement               = $settings.auditEnforceSettableVar
+                TaskLockdownFeatureEnabled                     = $settings.isTaskLockdownFeatureEnabled
+                HasManagePipelinePoliciesPermission            = $settings.hasManagePipelinePoliciesPermission
+                RequireCommentsForPRs                          = $settings.isCommentRequiredForPullRequest
+                RequireCommentsNonTeamMembersOnly              = $settings.requireCommentsForNonTeamMembersOnly
+                RequireCommentsNonTeamMemberAndNonContributors = $settings.requireCommentsForNonTeamMemberAndNonContributors
+                AuditShellArgumentSanitization                 = $settings.enableShellTasksArgsSanitizingAudit
+            }
+        }
 
-        # Grouped, labeled, readable output
-        Write-Host "General:"
-        Write-Host " - Disable anonymous access to badges:                        $($settings.statusBadgesArePrivate)"
-        Write-Host " - Limit variables that can be set at queue time:             $($settings.enforceSettableVar)"
-        Write-Host " - Limit job authorization (non-release):                     $($settings.enforceJobAuthScope)"
-        Write-Host " - Limit job authorization (release):                         $($settings.enforceJobAuthScopeForReleases)"
-        Write-Host " - Protect access to repositories in YAML pipelines:          $($settings.enforceReferencedRepoScopedToken)"
-        Write-Host " - Disable stage chooser:                                     $($settings.disableStageChooser)"
-        Write-Host " - Disable creation of classic build pipelines:               $($settings.disableClassicBuildPipelineCreation)"
-        Write-Host " - Disable creation of classic release pipelines:             $($settings.disableClassicReleasePipelineCreation)"
+        # Output to console using Write-Information
+        Write-Information "`nGeneral:"
+        Write-Information " - Disable anonymous access to badges:                        [$($settingsObject.General.DisableAnonymousAccessToBadges)]"
+        Write-Information " - Limit variables that can be set at queue time:             [$($settingsObject.General.LimitVariablesThatCanBeSetAtQueueTime)]"
+        Write-Information " - Limit job authorization (non-release):                     [$($settingsObject.General.LimitJobAuthorizationScopeNonRelease)]"
+        Write-Information " - Limit job authorization (release):                         [$($settingsObject.General.LimitJobAuthorizationScopeRelease)]"
+        Write-Information " - Protect access to repositories in YAML pipelines:          [$($settingsObject.General.ProtectAccessToRepositoriesInYAMLPipelines)]"
+        Write-Information " - Disable stage chooser:                                     [$($settingsObject.General.DisableStageChooser)]"
+        Write-Information " - Disable creation of classic build pipelines:               [$($settingsObject.General.DisableCreationOfClassicBuildPipelines)]"
+        Write-Information " - Disable creation of classic release pipelines:             [$($settingsObject.General.DisableCreationOfClassicReleasePipelines)]"
 
-        Write-Host "`nTask Restrictions:"
-        Write-Host " - Disable built-in tasks:                                    $($settings.disableInBoxTasksVar)"
-        Write-Host " - Disable Marketplace tasks:                                 $($settings.disableMarketplaceTasksVar)"
-        Write-Host " - Disable Node 6 tasks:                                      $($settings.disableNode6TasksVar)"
-        Write-Host " - Enable shell tasks arguments validation:                   $($settings.enableShellTasksArgsSanitizing)"
+        Write-Information "`nTask Restrictions:"
+        Write-Information " - Disable built-in tasks:                                    [$($settingsObject.TaskRestrictions.DisableBuiltInTasks)]"
+        Write-Information " - Disable Marketplace tasks:                                 [$($settingsObject.TaskRestrictions.DisableMarketplaceTasks)]"
+        Write-Information " - Disable Node 6 tasks:                                      [$($settingsObject.TaskRestrictions.DisableNode6Tasks)]"
+        Write-Information " - Enable shell tasks arguments validation:                   [$($settingsObject.TaskRestrictions.EnableShellTasksArgumentsValidation)]"
 
-        Write-Host "`nTriggers:"
-        Write-Host " - Limit PRs from forks (GitHub):                             $($settings.forkProtectionEnabled)"
-        Write-Host " - Allow builds from forks:                                   $($settings.buildsEnabledForForks)"
-        Write-Host " - Enforce job auth for forks:                                $($settings.enforceJobAuthScopeForForks)"
-        Write-Host " - Block secrets access from forks:                           $($settings.enforceNoAccessToSecretsFromForks)"
-        Write-Host " - Disable implied YAML CI trigger:                           $($settings.disableImpliedYAMLCiTrigger)"
+        Write-Information "`nTriggers:"
+        Write-Information " - Limit PRs from forks (GitHub):                             [$($settingsObject.Triggers.LimitPRsFromForksGitHub)]"
+        Write-Information " - Allow builds from forks:                                   [$($settingsObject.Triggers.AllowBuildsFromForks)]"
+        Write-Information " - Enforce job auth for forks:                                [$($settingsObject.Triggers.EnforceJobAuthForForks)]"
+        Write-Information " - Block secrets access from forks:                           [$($settingsObject.Triggers.BlockSecretsAccessFromForks)]"
+        Write-Information " - Disable implied YAML CI trigger:                           [$($settingsObject.Triggers.DisableImpliedYAMLCiTrigger)]"
 
-        Write-Host "`nUnmapped / Diagnostic:"
-        Write-Host " - Audit settable variable enforcement:                       $($settings.auditEnforceSettableVar)"
-        Write-Host " - Task lockdown feature enabled:                             $($settings.isTaskLockdownFeatureEnabled)"
-        Write-Host " - Has pipeline policies permission:                          $($settings.hasManagePipelinePoliciesPermission)"
-        Write-Host " - Require comments for PRs:                                  $($settings.isCommentRequiredForPullRequest)"
-        Write-Host " - Require comments (non-team members):                       $($settings.requireCommentsForNonTeamMembersOnly)"
-        Write-Host " - Require comments (non-team/non-contributors):              $($settings.requireCommentsForNonTeamMemberAndNonContributors)"
-        Write-Host " - Audit shell argument sanitization:                         $($settings.enableShellTasksArgsSanitizingAudit)"
+        Write-Information "`nUnmapped / Diagnostic:"
+        Write-Information " - Audit settable variable enforcement:                       [$($settingsObject.Diagnostic.AuditSettableVariableEnforcement)]"
+        Write-Information " - Task lockdown feature enabled:                             [$($settingsObject.Diagnostic.TaskLockdownFeatureEnabled)]"
+        Write-Information " - Has pipeline policies permission:                          [$($settingsObject.Diagnostic.HasManagePipelinePoliciesPermission)]"
+        Write-Information " - Require comments for PRs:                                  [$($settingsObject.Diagnostic.RequireCommentsForPRs)]"
+        Write-Information " - Require comments (non-team members):                       [$($settingsObject.Diagnostic.RequireCommentsNonTeamMembersOnly)]"
+        Write-Information " - Require comments (non-team/non-contributors):              [$($settingsObject.Diagnostic.RequireCommentsNonTeamMemberAndNonContributors)]"
+        Write-Information " - Audit shell argument sanitization:                         [$($settingsObject.Diagnostic.AuditShellArgumentSanitization)]"
 
-
-        Write-Host ""
-        Write-Host "Assessment complete."
+        # Return the settings object
+        return $settingsObject
     } catch {
         Write-Error "Failed to retrieve pipeline settings: $($_.Exception.Message)"
     }
