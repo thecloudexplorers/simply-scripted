@@ -3,9 +3,15 @@
 # Edit at https://www.toptal.com/developers/gitignore?templates=windows,visualstudiocode
 
 ## Specific to this repo
+references/jevsPlayground.ps1
 node_modules/
 package-lock.json
 package.json
+powershell/deploy.ps1
+references/deploy.ps1
+references/personal-scripts/*
+references/personal-scripts/deploy.ps1
+references/personal-scripts/powershell/deploy.ps1
 
 ### VisualStudioCode ###
 .vscode/*
