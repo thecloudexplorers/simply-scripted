@@ -10,8 +10,9 @@
     BillingType (Enterprise / Assignment / Not Configured).
 
 .PARAMETER OrganizationId
-    The GUID of the Azure DevOps organization (not the display name). This value
-    is used in the AzComm BillingSetup API request.
+    The GUID identifier of the Azure DevOps organization. This is NOT the
+    organization name! Use Get-AdoOrganizationId.ps1 to retrieve
+    it.
 
 .PARAMETER AdoBearerBasedAuthenticationHeader
     A hashtable containing the Authorization header for the request, e.g.
