@@ -1,77 +1,85 @@
 <#
 .SYNOPSIS
-    Reads the default license type for new users in an Azure DevOps organization.
+    Reads the default license type for new users in an Azure DevOps
+    organization.
 
 .DESCRIPTION
-    This function queries the AzComm API to determine the default license type
-    assigned to new users (e.g. Basic, Stakeholder) and interprets the numeric value.
+    This function queries the Azure DevOps Commerce API to retrieve the default
+    license type assigned to new users when they are added to an organization.
 
 .PARAMETER OrganizationId
-    The GUID of the Azure DevOps organization (not the display name).
+    The GUID identifier of the Azure DevOps organization.
+    This is not the organization name, but the unique identifier which can be
+    found in the organization settings or URL.
 
-.PARAMETER AccessToken
-    A valid Azure DevOps Bearer token with permission to query billing configuration.
+.PARAMETER AdoBearerBasedAuthenticationHeader
+    A hashtable containing the Bearer token authentication header for Azure
+    DevOps.
+    Format: @{ Authorization = "Bearer <token>" }
+    The token must have permissions to read organization billing configuration.
 
 .EXAMPLE
     $licenseParams = @{
-        OrganizationId = "abb1a1e9-0668-4e42-a4cd-0ca46812949f"
-        AccessToken    = $token
+        OrganizationId                      = "abb1a1e9-0668-4e42-a4cd-0ca46812949f"
+        AdoBearerBasedAuthenticationHeader = @{ Authorization = "Bearer $token" }
     }
-
     Read-AdoOrganizationDefaultLicenseType @licenseParams
 
+.INPUTS
+    None. You cannot pipe objects to this function.
+
+.OUTPUTS
+    System.String
+    Returns a string representing the default license type.
+    Stakeholder, Basic, Visual Studio Subscriber.
+
 .NOTES
-    This function uses the internal Azure DevOps billing API:
-    https://azdevopscommerce.dev.azure.com/{orgId}/_apis/AzComm/DefaultLicenseType
+    WARNING:
+    This function uses an internal and undocumented API endpoint.
+    This endpoint is not part of the officially supported Azure DevOps REST API.
+    Microsoft may change or remove it at any time without notice.
 
-    Known values:
-    2 = Basic
-    5 = Stakeholder
+    https://azdevopscommerce.dev.azure.com/{orgId}/_apis/AzComm/DefaultLicenseType?api-version=7.1-preview.1"
 
-    Version     : 0.5.0
+    Authentication:
+      - Uses a Bearer token Authorization header
+
+    Version     : 0.7.0
     Author      : Jev - @devjevnl | https://www.devjev.nl
     Source      : https://github.com/thecloudexplorers/simply-scripted
-
-.LINK
-    https://learn.microsoft.com/en-us/rest/api/azure/devops/commerce/license?view=azure-devops-rest-7.1
 #>
 function Read-AdoOrganizationDefaultLicenseType {
     [CmdletBinding()]
     param (
-        # The GUID of the Azure DevOps organization (not the name)
         [Parameter(Mandatory)]
-        [string]$OrganizationId,
+        [System.String] $OrganizationId,
 
-        # Valid Bearer token
         [Parameter(Mandatory)]
-        [string]$AccessToken
+        [System.Collections.Hashtable] $AdoBearerBasedAuthenticationHeader
     )
 
-    $uri = "https://azdevopscommerce.dev.azure.com/$OrganizationId/_apis/AzComm/DefaultLicenseType?api-version=7.1-preview.1"
+    $defaultLicenseTypeUri = "https://azdevopscommerce.dev.azure.com/$OrganizationId/_apis/AzComm/DefaultLicenseType?api-version=7.1-preview.1"
 
-    $headers = @{
-        Authorization = "Bearer $AccessToken"
-        Accept        = "application/json"
+    $invokeParams = @{
+        Uri             = $defaultLicenseTypeUri
+        Method          = 'GET'
+        Headers         = $AdoBearerBasedAuthenticationHeader
+        UseBasicParsing = $true
+        ErrorAction     = 'Stop'
     }
 
     try {
-        $rawResponse = Invoke-WebRequest -Uri $uri -Method Get -Headers $headers -UseBasicParsing
+        $restResponse = Invoke-RestMethod @invokeParams
 
-        # Detect expired token or redirect to login
-        if ($rawResponse.Content -match '<html' -or $rawResponse.RawContent -match 'Sign In') {
+        # Check if response content returns a html page which usually indicates token expired
+        if ($restResponse -match '<html' -or $restResponse.RawContent -match 'Sign In') {
             throw "Access denied or token expired. Please verify your Bearer token is still valid."
         }
 
-        # Parse JSON content
-        $response = $rawResponse.Content | ConvertFrom-Json
-        $licenseId = $response.defaultLicenseType
+        Write-Information -MessageData "Default License Type Value: [$($restResponse.defaultLicenseType)]"
+        $licenseType = $restResponse.defaultLicenseType
 
-        Write-Host ""
-        Write-Host "===== Azure DevOps Default License Type Assessment ====="
-        Write-Host ""
-        Write-Host "Default License Type : [$licenseId]"
-        Write-Host ""
-        Write-Host "Assessment complete."
+        return $licenseType
     } catch {
         Write-Error "Failed to retrieve default license type: [$($_.Exception.Message)]"
     }
