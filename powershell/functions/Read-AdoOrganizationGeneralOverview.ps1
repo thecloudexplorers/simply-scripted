@@ -4,10 +4,9 @@
 
 .DESCRIPTION
     Queries the Azure DevOps organization overview endpoint to retrieve
-    organizational metadata including description, timezone, region, geography,
-    and organization owner information. This function provides governance and
-    documentation capabilities by assessing whether critical organizational
-    settings are properly configured.
+    organization level metadata, including description, time zone, region,
+    geography, and owner details. It exposes organization-level governance
+    settings by parsing data from the internal organization overview API.
 
     Returns a structured object containing all organization overview data for
     programmatic consumption and reporting purposes.
@@ -68,10 +67,6 @@
     Version     : 1.0.0
     Author      : Jev - @devjevnl | https://www.devjev.nl
     Source      : https://github.com/thecloudexplorers/simply-scripted
-
-.LINK
-    https://github.com/PoshCode/PowerShellPracticeAndStyle
-    https://learn.microsoft.com/en-us/powershell/scripting/developer/cmdlet/strongly-encouraged-development-guidelines
 #>
 function Read-AdoOrganizationGeneralOverview {
     [CmdletBinding()]
