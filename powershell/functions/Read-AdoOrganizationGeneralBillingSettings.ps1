@@ -1,5 +1,5 @@
 <#
-.SYNOPSIS
+    .SYNOPSIS
     Retrieves and validates general billing settings for an Azure DevOps org.
 
 .DESCRIPTION
