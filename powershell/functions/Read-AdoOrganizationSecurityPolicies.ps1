@@ -46,7 +46,7 @@
     Authentication:
       - Uses Bearer token authentication via header.
 
-    Version : 0.6.0
+    Version : 1.0.0
     Author  : Jev - @devjevnl | https://www.devjev.nl
     Source  : https://github.com/thecloudexplorers/simply-scripted
 #>
