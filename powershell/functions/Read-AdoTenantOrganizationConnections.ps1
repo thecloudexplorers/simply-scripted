@@ -61,9 +61,6 @@
     Version : 1.0.1
     Author  : Jev - @devjevnl | https://www.devjev.nl
     Source  : https://github.com/thecloudexplorers/simply-scripted
-
-.LINK
-    https://learn.microsoft.com/en-us/powershell/scripting/developer/cmdlet/strongly-encouraged-development-guidelines?wt.mc_id=DT-MVP-5005327
 #>
 function Read-AdoTenantOrganizationConnections {
     [CmdletBinding()]
