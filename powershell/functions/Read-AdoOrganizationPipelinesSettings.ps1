@@ -16,7 +16,11 @@
     have the required permissions to read organization-level settings.
 
 .EXAMPLE
-    Invoke-AdoPipelineSettingsQuery -Organization "demojev" -AdoBearerBasedAuthenticationHeader $header
+    $params = @{
+        Organization  = "demojev"
+        AdoBearerBasedAuthenticationHeader = $header
+    }
+    Invoke-AdoPipelineSettingsQuery @params
 
 .NOTES
     WARNING:
@@ -46,7 +50,7 @@ function Read-AdoOrganizationPipelinesSettings {
     )
 
     # Internal endpoint for querying pipeline settings via contribution data provider
-    $uri = "https://dev.azure.com/$OrganizationName/_apis/Contribution/HierarchyQuery?api-version=5.0-preview.1"
+    $contributionHierarchyQueryUri = "https://dev.azure.com/$OrganizationName/_apis/Contribution/HierarchyQuery?api-version=5.0-preview.1"
 
     <#
     Request body to simulate portal request.
@@ -75,7 +79,14 @@ function Read-AdoOrganizationPipelinesSettings {
 
     try {
         # Get raw response so we can detect HTML fallback (expired token, etc.)
-        $restResponse = Invoke-RestMethod -Uri $uri -Method Post -Headers $AdoBearerBasedAuthenticationHeader -Body $body -UseBasicParsing
+        $invokeParams = @{
+            Uri             = $contributionHierarchyQueryUri
+            Method          = 'POST'
+            Headers         = $AdoBearerBasedAuthenticationHeader
+            Body            = $body
+            UseBasicParsing = $true
+        }
+        $restResponse = Invoke-RestMethod @invokeParams
 
         # Token validation: check for HTML content instead of JSON
         if ($restResponse.Content -match '<html' -or $restResponse.RawContent -match 'Sign In') {
@@ -122,37 +133,37 @@ function Read-AdoOrganizationPipelinesSettings {
         }
 
         # Output to console using Write-Information
-        Write-Information "`nGeneral:"
-        Write-Information " - Disable anonymous access to badges:                        [$($settingsObject.General.DisableAnonymousAccessToBadges)]"
-        Write-Information " - Limit variables that can be set at queue time:             [$($settingsObject.General.LimitVariablesThatCanBeSetAtQueueTime)]"
-        Write-Information " - Limit job authorization (non-release):                     [$($settingsObject.General.LimitJobAuthorizationScopeNonRelease)]"
-        Write-Information " - Limit job authorization (release):                         [$($settingsObject.General.LimitJobAuthorizationScopeRelease)]"
-        Write-Information " - Protect access to repositories in YAML pipelines:          [$($settingsObject.General.ProtectAccessToRepositoriesInYAMLPipelines)]"
-        Write-Information " - Disable stage chooser:                                     [$($settingsObject.General.DisableStageChooser)]"
-        Write-Information " - Disable creation of classic build pipelines:               [$($settingsObject.General.DisableCreationOfClassicBuildPipelines)]"
-        Write-Information " - Disable creation of classic release pipelines:             [$($settingsObject.General.DisableCreationOfClassicReleasePipelines)]"
+        Write-Information -MessageData "`nGeneral:"
+        Write-Information -MessageData " - Disable anonymous access to badges:                        [$($settingsObject.General.DisableAnonymousAccessToBadges)]"
+        Write-Information -MessageData " - Limit variables that can be set at queue time:             [$($settingsObject.General.LimitVariablesThatCanBeSetAtQueueTime)]"
+        Write-Information -MessageData " - Limit job authorization (non-release):                     [$($settingsObject.General.LimitJobAuthorizationScopeNonRelease)]"
+        Write-Information -MessageData " - Limit job authorization (release):                         [$($settingsObject.General.LimitJobAuthorizationScopeRelease)]"
+        Write-Information -MessageData " - Protect access to repositories in YAML pipelines:          [$($settingsObject.General.ProtectAccessToRepositoriesInYAMLPipelines)]"
+        Write-Information -MessageData " - Disable stage chooser:                                     [$($settingsObject.General.DisableStageChooser)]"
+        Write-Information -MessageData " - Disable creation of classic build pipelines:               [$($settingsObject.General.DisableCreationOfClassicBuildPipelines)]"
+        Write-Information -MessageData " - Disable creation of classic release pipelines:             [$($settingsObject.General.DisableCreationOfClassicReleasePipelines)]"
 
-        Write-Information "`nTask Restrictions:"
-        Write-Information " - Disable built-in tasks:                                    [$($settingsObject.TaskRestrictions.DisableBuiltInTasks)]"
-        Write-Information " - Disable Marketplace tasks:                                 [$($settingsObject.TaskRestrictions.DisableMarketplaceTasks)]"
-        Write-Information " - Disable Node 6 tasks:                                      [$($settingsObject.TaskRestrictions.DisableNode6Tasks)]"
-        Write-Information " - Enable shell tasks arguments validation:                   [$($settingsObject.TaskRestrictions.EnableShellTasksArgumentsValidation)]"
+        Write-Information -MessageData "`nTask Restrictions:"
+        Write-Information -MessageData " - Disable built-in tasks:                                    [$($settingsObject.TaskRestrictions.DisableBuiltInTasks)]"
+        Write-Information -MessageData " - Disable Marketplace tasks:                                 [$($settingsObject.TaskRestrictions.DisableMarketplaceTasks)]"
+        Write-Information -MessageData " - Disable Node 6 tasks:                                      [$($settingsObject.TaskRestrictions.DisableNode6Tasks)]"
+        Write-Information -MessageData " - Enable shell tasks arguments validation:                   [$($settingsObject.TaskRestrictions.EnableShellTasksArgumentsValidation)]"
 
-        Write-Information "`nTriggers:"
-        Write-Information " - Limit PRs from forks (GitHub):                             [$($settingsObject.Triggers.LimitPRsFromForksGitHub)]"
-        Write-Information " - Allow builds from forks:                                   [$($settingsObject.Triggers.AllowBuildsFromForks)]"
-        Write-Information " - Enforce job auth for forks:                                [$($settingsObject.Triggers.EnforceJobAuthForForks)]"
-        Write-Information " - Block secrets access from forks:                           [$($settingsObject.Triggers.BlockSecretsAccessFromForks)]"
-        Write-Information " - Disable implied YAML CI trigger:                           [$($settingsObject.Triggers.DisableImpliedYAMLCiTrigger)]"
+        Write-Information -MessageData "`nTriggers:"
+        Write-Information -MessageData " - Limit PRs from forks (GitHub):                             [$($settingsObject.Triggers.LimitPRsFromForksGitHub)]"
+        Write-Information -MessageData " - Allow builds from forks:                                   [$($settingsObject.Triggers.AllowBuildsFromForks)]"
+        Write-Information -MessageData " - Enforce job auth for forks:                                [$($settingsObject.Triggers.EnforceJobAuthForForks)]"
+        Write-Information -MessageData " - Block secrets access from forks:                           [$($settingsObject.Triggers.BlockSecretsAccessFromForks)]"
+        Write-Information -MessageData " - Disable implied YAML CI trigger:                           [$($settingsObject.Triggers.DisableImpliedYAMLCiTrigger)]"
 
-        Write-Information "`nUnmapped / Diagnostic:"
-        Write-Information " - Audit settable variable enforcement:                       [$($settingsObject.Diagnostic.AuditSettableVariableEnforcement)]"
-        Write-Information " - Task lockdown feature enabled:                             [$($settingsObject.Diagnostic.TaskLockdownFeatureEnabled)]"
-        Write-Information " - Has pipeline policies permission:                          [$($settingsObject.Diagnostic.HasManagePipelinePoliciesPermission)]"
-        Write-Information " - Require comments for PRs:                                  [$($settingsObject.Diagnostic.RequireCommentsForPRs)]"
-        Write-Information " - Require comments (non-team members):                       [$($settingsObject.Diagnostic.RequireCommentsNonTeamMembersOnly)]"
-        Write-Information " - Require comments (non-team/non-contributors):              [$($settingsObject.Diagnostic.RequireCommentsNonTeamMemberAndNonContributors)]"
-        Write-Information " - Audit shell argument sanitization:                         [$($settingsObject.Diagnostic.AuditShellArgumentSanitization)]"
+        Write-Information -MessageData "`nUnmapped / Diagnostic:"
+        Write-Information -MessageData " - Audit settable variable enforcement:                       [$($settingsObject.Diagnostic.AuditSettableVariableEnforcement)]"
+        Write-Information -MessageData " - Task lockdown feature enabled:                             [$($settingsObject.Diagnostic.TaskLockdownFeatureEnabled)]"
+        Write-Information -MessageData " - Has pipeline policies permission:                          [$($settingsObject.Diagnostic.HasManagePipelinePoliciesPermission)]"
+        Write-Information -MessageData " - Require comments for PRs:                                  [$($settingsObject.Diagnostic.RequireCommentsForPRs)]"
+        Write-Information -MessageData " - Require comments (non-team members):                       [$($settingsObject.Diagnostic.RequireCommentsNonTeamMembersOnly)]"
+        Write-Information -MessageData " - Require comments (non-team/non-contributors):              [$($settingsObject.Diagnostic.RequireCommentsNonTeamMemberAndNonContributors)]"
+        Write-Information -MessageData " - Audit shell argument sanitization:                         [$($settingsObject.Diagnostic.AuditShellArgumentSanitization)]"
 
         # Return the settings object
         return $settingsObject
