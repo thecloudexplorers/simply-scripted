@@ -8,7 +8,7 @@
     settings of categories General, Triggers, and Task restrictions.
 
 .PARAMETER Organization
-    The name of your Azure DevOps organization (e.g. 'contoso').
+    The name of your Azure DevOps organization (e.g. 'devjevnl').
 
 .PARAMETER AdoBearerBasedAuthenticationHeader
     A hashtable containing the Authorization header for the request, e.g.
