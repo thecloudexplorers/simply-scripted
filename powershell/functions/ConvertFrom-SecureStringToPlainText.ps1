@@ -54,8 +54,8 @@
     Source      : https://github.com/thecloudexplorers/simply-scripted
 
 .LINK
-    https://docs.microsoft.com/en-us/dotnet/api/system.security.securestring
-    https://docs.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.marshal
+    https://docs.microsoft.com/en-us/dotnet/api/system.security.securestring?wt.mc_id=DT-MVP-5005327
+    https://docs.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.marshal?wt.mc_id=DT-MVP-5005327
 #>
 function ConvertFrom-SecureStringToPlainText {
     [CmdletBinding()]
