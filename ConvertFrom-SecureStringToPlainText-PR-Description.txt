@@ -1,0 +1,18 @@
+Summary
+This PR adds a new PowerShell function to convert SecureString objects to plain text strings in a safe and controlled manner.
+
+Changes
+- Added ConvertFrom-SecureStringToPlainText.ps1 function
+- Implements secure conversion of SecureString to plain text using .NET methods
+- Handles credential extraction and memory management
+- Returns plain text string representation of secured data
+- Comprehensive comment-based help documentation aligned with repository standards
+
+Features
+- Converts SecureString objects to plain text strings
+- Provides safe memory handling during conversion process
+- Supports pipeline input for SecureString objects
+- Includes proper error handling for invalid inputs
+- Returns string output for use in automation scenarios
+- Implements secure disposal of temporary credentials
+- Compatible with PowerShell 5.1 and PowerShell 7+
