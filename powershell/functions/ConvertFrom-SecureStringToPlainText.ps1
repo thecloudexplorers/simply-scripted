@@ -58,6 +58,8 @@
     https://docs.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.marshal
 #>
 function ConvertFrom-SecureStringToPlainText {
+    [CmdletBinding()]
+    [OutputType([System.String])]
     param(
         [Parameter(Mandatory)]
         [System.Security.SecureString] $SecureString
@@ -68,7 +70,7 @@ function ConvertFrom-SecureStringToPlainText {
         $basicString = [System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($SecureString)
 
         # Convert the BSTR (basic String) to a regular string
-        $plainTextString = [System.Runtime.InteropServices.Marshal]::PtrToStringBSTR($basicString)
+        [System.String] $plainTextString = [System.Runtime.InteropServices.Marshal]::PtrToStringBSTR($basicString)
 
         return $plainTextString
     } finally {
