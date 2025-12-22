@@ -6,12 +6,24 @@
   "[markdown]": {
     "editor.rulers": [
       {
-        "column": 80,
+        "column": 120,
         "color": "#5BA150"
       }
     ]
   },
   "[powershell]": {
+    "editor.rulers": [
+      {
+        "column": 80,
+        "color": "#5BA150"
+      },
+      {
+        "column": 120,
+        "color": "#0277BD"
+      }
+    ]
+  },
+  "[bicep]": {
     "editor.rulers": [
       {
         "column": 80,
