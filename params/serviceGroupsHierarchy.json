@@ -1,0 +1,88 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "tier01ServiceGroups": {
+      "value": [
+        {
+          "id": "ContosoCorp.Departments",
+          "displayName": "Departments"
+        },
+        {
+          "id": "ContosoCorp.Workloads",
+          "displayName": "Workloads"
+        },
+        {
+          "id": "ContosoCorp.MissionCritical",
+          "displayName": "Mission Critical"
+        },
+        {
+          "id": "ContosoCorp.Vendors",
+          "displayName": "Vendors"
+        },
+        {
+          "id": "ContosoCorp.LicenseTypes",
+          "displayName": "LicenseTypes"
+        }
+      ]
+    },
+    "tier02ServiceGroups": {
+      "value": [
+        {
+          "id": "ContosoCorp.Departments.HumanResources",
+          "displayName": "Human Resources",
+          "parentId": "ContosoCorp.Departments"
+        },
+        {
+          "id": "ContosoCorp.Departments.Finance",
+          "displayName": "Finance",
+          "parentId": "ContosoCorp.Departments"
+        },
+        {
+          "id": "ContosoCorp.Workloads.TailwindTraders",
+          "displayName": "Tailwind Traders",
+          "parentId": "ContosoCorp.Workloads"
+        },
+        {
+          "id": "ContosoCorp.Workloads.Fabrikam",
+          "displayName": "Fabrikam",
+          "parentId": "ContosoCorp.Workloads"
+        },
+        {
+          "id": "ContosoCorp.MissionCritical.CrmPlatform",
+          "displayName": "CRM Platform",
+          "parentId": "ContosoCorp.MissionCritical"
+        },
+        {
+          "id": "ContosoCorp.MissionCritical.DataPlatform",
+          "displayName": "Data Platform",
+          "parentId": "ContosoCorp.MissionCritical"
+        }
+      ]
+    },
+    "tier03ServiceGroups": {
+      "value": []
+    },
+    "tier04ServiceGroups": {
+      "value": []
+    },
+    "tier05ServiceGroups": {
+      "value": []
+    },
+    "tier06ServiceGroups": {
+      "value": []
+    },
+    "tier07ServiceGroups": {
+      "value": []
+    },
+    "tier08ServiceGroups": {
+      "value": []
+    },
+    "tier09ServiceGroups": {
+      "value": []
+    },
+    "tier10ServiceGroups": {
+      "value": []
+    }
+  }
+}
