@@ -5,7 +5,8 @@
 
 <#
     .SYNOPSIS
-    Resets the tenant management group configuration toward a root-only baseline.
+    Resets the tenant management group configuration toward a root-only
+    baseline.
 
     .DESCRIPTION
     This script performs three clean-up actions for Azure management groups:
@@ -23,7 +24,7 @@
     $parameters = @{
         TenantRootManagementGroupId = 'contoso-root'
     }
-    Clean-AzureOrganizationPlatformStructure @parameters
+    Remove-ManagementGroupStructure @parameters
 
     Sets the default management group to contoso-root, moves subscriptions under
     it, and removes non-root management groups where possible.
