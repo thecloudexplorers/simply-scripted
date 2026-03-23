@@ -41,7 +41,7 @@ function Remove-AzADAppRegistration {
     [CmdletBinding(SupportsShouldProcess)]
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', 'ExcludeFilter', Justification = 'False positive for $ExcludeFilter')]
     param (
-        [Parameter(Mandatory = $true)]
+        [Parameter(Mandatory)]
         [Microsoft.Azure.Commands.Profile.Models.PSAzureTenant]$Tenant,
 
         [String[]]$ExcludeFilter
