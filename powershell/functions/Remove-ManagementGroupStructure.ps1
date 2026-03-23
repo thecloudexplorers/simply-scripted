@@ -36,98 +36,100 @@
     Requires permissions to read subscriptions, update management group
     settings, move subscriptions, and delete management groups.
 
-.NOTES
+    .NOTES
     Version     : 1.0.0
     Author      : Jev - @devjevnl | https://www.devjev.nl
     Source      : https://github.com/thecloudexplorers/simply-scripted
 #>
 
-[CmdletBinding()]
-param (
-    [Parameter(Mandatory)]
-    [ValidateNotNullOrEmpty()]
-    [System.String] $TenantRootManagementGroupId
-)
+function Remove-ManagementGroupStructure {
+    [CmdletBinding()]
+    param (
+        [Parameter(Mandatory)]
+        [ValidateNotNullOrEmpty()]
+        [System.String] $TenantRootManagementGroupId
+    )
 
-#region - Reset the default management group to root
-$managementGroupsProviderUri = "https://management.azure.com/providers/Microsoft.Management/managementGroups/$TenantRootManagementGroupId/settings/default?api-version=2020-05-01"
+    #region - Reset the default management group to root
+    $managementGroupsProviderUri = "https://management.azure.com/providers/Microsoft.Management/managementGroups/$TenantRootManagementGroupId/settings/default?api-version=2020-05-01"
 
-# creating authentication header
-$token = (Get-AzAccessToken).Token
-$headers = @{
-    Authorization  = "Bearer $token"
-    'Content-Type' = 'application/json'
-}
+    # creating authentication header
+    $token = (Get-AzAccessToken).Token
+    $headers = @{
+        Authorization  = "Bearer $token"
+        'Content-Type' = 'application/json'
+    }
 
-# creating the request body
-$requestBody = '{
+    # creating the request body
+    $requestBody = '{
      "properties": {
           "defaultManagementGroup": "/providers/Microsoft.Management/managementGroups/' + $TenantRootManagementGroupId + '",
           "requireAuthorizationForGroupCreation": true
      }
 }'
 
-$defaultMgResponse = Invoke-RestMethod -Method Get -Uri $managementGroupsProviderUri -Headers $headers
+    $defaultMgResponse = Invoke-RestMethod -Method Get -Uri $managementGroupsProviderUri -Headers $headers
 
-if ($defaultMgResponse.properties.defaultManagementGroup -ne $TenantRootManagementGroupId) {
-    Write-Host "Default management group is [$($defaultMgResponse.properties.defaultManagementGroup)] resetting to root management group"
-    Invoke-RestMethod -Method 'PUT' -Uri $managementGroupsProviderUri -Headers $headers -Body $requestBody
-} else {
-    Write-Host "Default management group is already set to tenant root management group"
-}
-#endregion
-
-#region - moving the existing subscriptions to the tenant management group root
-Write-Host "Moving all subscriptions to Tenant Root Management group"
-$listSubscriptionsQuery = 'resourcecontainers | where type == "microsoft.resources/subscriptions"'
-$graphResultSubscriptions = Search-AzGraph -Query $listSubscriptionsQuery
-
-$graphResultSubscriptions.ForEach{
-    $currentSub = $_
-
-    if ($currentSub.properties.managementGroupAncestorsChain.Count -gt 1 -or $currentSub.properties.managementGroupAncestorsChain.name -ne $TenantRootManagementGroupId) {
-        Write-Host " Moving subscription [$($currentSub.name)] under Tenant Root Management group"
-        New-AzManagementGroupSubscription -GroupName $TenantRootManagementGroupId -SubscriptionId $currentSub.subscriptionId 3>&1 > $null
-        Write-Host "  subscription moved"
+    if ($defaultMgResponse.properties.defaultManagementGroup -ne $TenantRootManagementGroupId) {
+        Write-Host "Default management group is [$($defaultMgResponse.properties.defaultManagementGroup)] resetting to root management group"
+        Invoke-RestMethod -Method 'PUT' -Uri $managementGroupsProviderUri -Headers $headers -Body $requestBody
     } else {
-        Write-Host " Skipping, subscription [$($currentSub.name)] is already under the Tenant Root Management group"
+        Write-Host "Default management group is already set to tenant root management group"
     }
-}
+    #endregion
 
-Write-Host "Moving of subscriptions has been completed`n"
-#endregion
+    #region - moving the existing subscriptions to the tenant management group root
+    Write-Host "Moving all subscriptions to Tenant Root Management group"
+    $listSubscriptionsQuery = 'resourcecontainers | where type == "microsoft.resources/subscriptions"'
+    $graphResultSubscriptions = Search-AzGraph -Query $listSubscriptionsQuery
+
+    $graphResultSubscriptions.ForEach{
+        $currentSub = $_
+
+        if ($currentSub.properties.managementGroupAncestorsChain.Count -gt 1 -or $currentSub.properties.managementGroupAncestorsChain.name -ne $TenantRootManagementGroupId) {
+            Write-Host " Moving subscription [$($currentSub.name)] under Tenant Root Management group"
+            New-AzManagementGroupSubscription -GroupName $TenantRootManagementGroupId -SubscriptionId $currentSub.subscriptionId 3>&1 > $null
+            Write-Host "  subscription moved"
+        } else {
+            Write-Host " Skipping, subscription [$($currentSub.name)] is already under the Tenant Root Management group"
+        }
+    }
+
+    Write-Host "Moving of subscriptions has been completed`n"
+    #endregion
 
 
-#region - removing all management groups
-$listManagementGroups = @'
+    #region - removing all management groups
+    $listManagementGroups = @'
 resourcecontainers
 | where type =~ 'microsoft.management/managementgroups'
 | project name, properties.displayName
 | order by ['name'] desc
 '@
 
-$graphResultManagementGroups = Search-AzGraph -Query $listManagementGroups -UseTenantScope
-$allManagementGroups = $graphResultManagementGroups | Where-Object { $_.name -ne $TenantRootManagementGroupId }
-
-# delete all management groups until no remain
-while ($allManagementGroups.Count -gt 1) {
-
-    $allManagementGroups.ForEach{
-        $currentMg = $_
-        try {
-            Write-Host "Removing management group [$($currentMg.name)]"
-            Remove-AzManagementGroup -GroupName $currentMg.name 3>&1 > $null
-            Write-Host " group removed"
-        } catch {
-            # swallow the exception
-            Write-Host "Failed removing [$($currentMg.name)]."
-        }
-    }
-
-    # get any remaining management groups that could not be deleted due to inheritance
     $graphResultManagementGroups = Search-AzGraph -Query $listManagementGroups -UseTenantScope
     $allManagementGroups = $graphResultManagementGroups | Where-Object { $_.name -ne $TenantRootManagementGroupId }
-}
-#endregion
 
-Write-Host "All done!!"
+    # delete all management groups until no remain
+    while ($allManagementGroups.Count -gt 1) {
+
+        $allManagementGroups.ForEach{
+            $currentMg = $_
+            try {
+                Write-Host "Removing management group [$($currentMg.name)]"
+                Remove-AzManagementGroup -GroupName $currentMg.name 3>&1 > $null
+                Write-Host " group removed"
+            } catch {
+                # swallow the exception
+                Write-Host "Failed removing [$($currentMg.name)]."
+            }
+        }
+
+        # get any remaining management groups that could not be deleted due to inheritance
+        $graphResultManagementGroups = Search-AzGraph -Query $listManagementGroups -UseTenantScope
+        $allManagementGroups = $graphResultManagementGroups | Where-Object { $_.name -ne $TenantRootManagementGroupId }
+    }
+    #endregion
+
+    Write-Host "All done!!"
+}
