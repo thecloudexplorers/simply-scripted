@@ -18,12 +18,12 @@
     .PARAMETER Type
     Log issue type to emit. Valid values are Warning, Error, and Information.
 
-    .PARAMETER FormatType
-    Optional Azure DevOps formatting command used for informational messages.
+    .PARAMETER AdoFormatType
+    Optional Azure DevOps formatting command for informational output.
     Valid values are Group, Warning, Error, Debug, Section, Command, and Endgroup.
 
-    .PARAMETER Action
-    Optional PowerShell action preference used for Warning or Error output.
+    .PARAMETER ErrorAction
+    Optional action preference for warning and error output.
     Valid values are Continue, Stop, SilentlyContinue, and Inquire.
 
     .EXAMPLE
