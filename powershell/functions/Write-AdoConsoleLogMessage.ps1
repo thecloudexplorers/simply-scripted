@@ -20,24 +20,40 @@
 
     .PARAMETER AdoFormatType
     Optional Azure DevOps formatting command for informational output.
-    Valid values are Group, Warning, Error, Debug, Section, Command, and Endgroup.
+    Valid values are Group, Warning, Error, Debug, Section, Command, and
+    Endgroup.
 
     .PARAMETER ErrorAction
     Optional action preference for warning and error output.
     Valid values are Continue, Stop, SilentlyContinue, and Inquire.
 
     .EXAMPLE
-    Write-ConsoleLogMessage -Message "Starting deployment" -Type Information -FormatType Section
+    $parameters = @{
+        Message       = 'Starting deployment'
+        Type          = 'Information'
+        AdoFormatType = 'Section'
+    }
+    Write-ConsoleLogMessage @parameters
 
     Writes a section-formatted informational message to the Azure DevOps console.
 
     .EXAMPLE
-    Write-ConsoleLogMessage -Message "Validation found non-blocking issues" -Type Warning -Action Continue
+    $parameters = @{
+        Message     = 'Validation found non-blocking issues'
+        Type        = 'Warning'
+        ErrorAction = 'Continue'
+    }
+    Write-ConsoleLogMessage @parameters
 
     Writes a warning issue entry and continues execution.
 
     .EXAMPLE
-    Write-ConsoleLogMessage -Message "Deployment failed" -Type Error -Action Stop
+    $parameters = @{
+        Message     = 'Deployment failed'
+        Type        = 'Error'
+        ErrorAction = 'Stop'
+    }
+    Write-ConsoleLogMessage @parameters
 
     Writes an error issue entry and stops execution.
 
