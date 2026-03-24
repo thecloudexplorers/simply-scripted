@@ -1,7 +1,7 @@
 #Requires -PSEdition Core
 #Requires -Modules Az.Accounts
 #Requires -Modules Az.Resources
-#Requires -Modules Az.ResourceGraphs
+#Requires -Modules Az.ResourceGraph
 
 <#
     .SYNOPSIS
@@ -51,12 +51,16 @@ function Remove-ManagementGroupStructure {
     )
 
     #region - Reset the default management group to root
-    $managementGroupsProviderUri = "https://management.azure.com/providers/Microsoft.Management/managementGroups/$TenantRootManagementGroupId/settings/default?api-version=2020-05-01"
+    $managementGroupsProviderUri = "https://management.azure.com/providers/Microsoft.Management/" +
+    "managementGroups/$TenantRootManagementGroupId/" +
+    "settings/default?api-version=2020-05-01"
 
-    # creating authentication header
-    $token = (Get-AzAccessToken).Token
+    # Creating authentication header by getting the current token and decoding it to be used in the REST API call
+    $currentToken = Get-AzAccessToken
+    $token = $currentToken.Token | ConvertFrom-SecureString -AsPlainText
+    $tokenType = $currentToken.Type
     $headers = @{
-        Authorization  = "Bearer $token"
+        Authorization  = "$tokenType $token"
         'Content-Type' = 'application/json'
     }
 
@@ -81,7 +85,8 @@ function Remove-ManagementGroupStructure {
     #region - moving the existing subscriptions to the tenant management group root
     Write-Host "Moving all subscriptions to Tenant Root Management group"
     $listSubscriptionsQuery = 'resourcecontainers | where type == "microsoft.resources/subscriptions"'
-    $graphResultSubscriptions = Search-AzGraph -Query $listSubscriptionsQuery
+    $graphResultSubscriptions = Search-AzGraph -Query $listSubscriptionsQuery -UseTenantScope
+    Write-Host "Identified [$($graphResultSubscriptions.Count)] subscriptions in the tenant'"
 
     $graphResultSubscriptions.ForEach{
         $currentSub = $_
@@ -122,6 +127,7 @@ resourcecontainers
             } catch {
                 # swallow the exception
                 Write-Host "Failed removing [$($currentMg.name)]."
+                Write-Warning -Message "$($_.Exception.Message)"
             }
         }
 
