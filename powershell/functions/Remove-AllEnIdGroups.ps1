@@ -2,24 +2,20 @@
 #Requires -Modules Az.Resources
 <#
     .SYNOPSIS
-    Removes Entra ID groups from a tenant, excluding specified group names.
+    Removes Entra ID groups from the tenant in the current context, excluding specified group names.
 
     .DESCRIPTION
-    Remove-AzADCustomGroup retrieves groups from the provided tenant context,
+    Remove-AzADCustomGroup retrieves groups from the current tenant context,
     excludes groups listed in ExcludeFilter, and removes the remaining groups.
 
     The function supports ShouldProcess, so -WhatIf and -Confirm can be used
     for safe execution.
-
-    .PARAMETER Tenant
-    Tenant context used for group cleanup.
 
     .PARAMETER ExcludeFilter
     Array of group display names that must be excluded from removal.
 
     .EXAMPLE
     $parameters = @{
-        Tenant        = (Get-AzContext).Tenant
         ExcludeFilter = @("Canary Platform", "Test Group")
         WhatIf        = $true
     }
@@ -39,13 +35,11 @@
 function Remove-AzADCustomGroup {
     [CmdletBinding(SupportsShouldProcess)]
     param (
-        [Parameter(Mandatory)]
-        [Microsoft.Azure.Commands.Profile.Models.PSAzureTenant]$Tenant,
-
-        [Parameter(Mandatory)]
-        [System.String[]]$ExcludeFilter
+        [ValidateNotNullOrEmpty()]
+        [System.String[]] $ExcludeFilter
     )
 
+    Write-Host "Start cleaning App registrations"
     # Get list of all security groups and exclude one in ExcludeFilter
     $groupsToRemove = Get-AzADGroup | Where-Object { $_.DisplayName -notin $ExcludeFilter }
 
@@ -53,13 +47,12 @@ function Remove-AzADCustomGroup {
     foreach ($group in $groupsToRemove) {
         Write-Host "Removing group: $($group.DisplayName)" -ForegroundColor Cyan
         try {
+            # Support -WhatIf and -Confirm parameters for safe execution
             if ($PSCmdlet.ShouldProcess( $group, "Remove-AzADGroup")) {
                 $group | Remove-AzADGroup
-            } else {
-                $group | Remove-AzADGroup -WhatIf
             }
         } catch {
-            Write-Host "An error occurred while removing Azure AD groups: [$($_.Exception.Message)]" -ForegroundColor Red
+            Write-Host "An error occurred while removing Azure AD groups: [$($_.Exception.Message)]" -ForegroundColor Red -ErrorAction Continue
         }
     }
     Write-Host "Removed $($groupsToRemove.Count) groups." -ForegroundColor Green
