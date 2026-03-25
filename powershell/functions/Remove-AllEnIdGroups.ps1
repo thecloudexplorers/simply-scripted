@@ -5,7 +5,7 @@
     Removes Entra ID groups from the tenant in the current context, excluding specified group names.
 
     .DESCRIPTION
-    Remove-AzADCustomGroup retrieves groups from the current tenant context,
+    Remove-AllEnIdGroups retrieves groups from the current tenant context,
     excludes groups listed in ExcludeFilter, and removes the remaining groups.
 
     The function supports ShouldProcess, so -WhatIf and -Confirm can be used
@@ -19,7 +19,7 @@
         ExcludeFilter = @("Canary Platform", "Test Group")
         WhatIf        = $true
     }
-    Remove-AzADCustomGroup @parameters
+    Remove-AllEnIdGroups @parameters
 
     Shows which groups would be removed without making changes.
 
@@ -32,7 +32,7 @@
     Source      : https://github.com/thecloudexplorers/simply-scripted
 
 #>
-function Remove-AzADCustomGroup {
+function Remove-AllEnIdGroups {
     [CmdletBinding(SupportsShouldProcess)]
     param (
         [ValidateNotNullOrEmpty()]
