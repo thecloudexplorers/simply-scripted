@@ -5,7 +5,7 @@
     Removes Entra ID app registrations in a tenant, excluding specified app IDs.
 
     .DESCRIPTION
-    Remove-AzADAppRegistration queries applications in Microsoft Graph for the
+    Remove-AllEnIdAppRegistrations queries applications in Microsoft Graph for the
     provided tenant and removes app registrations that are not part of the
     ExcludeFilter list.
 
@@ -20,7 +20,7 @@
         ExcludeFilter = @("AppId1", "AppId2")
         WhatIf        = $true
     }
-    Remove-AzADAppRegistration @parameters
+    Remove-AllEnIdAppRegistrations @parameters
 
     Shows which app registrations would be removed without making changes.
 
@@ -33,34 +33,33 @@
     Source      : https://github.com/thecloudexplorers/simply-scripted
 
 #>
-function Remove-AzADAppRegistration {
+function Remove-AllEnIdAppRegistrations {
     [CmdletBinding(SupportsShouldProcess)]
     param (
         [ValidateNotNullOrEmpty()]
-        [String[]] $ExcludeFilter
+        [System.String[]] $ExcludeFilter
     )
 
     Write-Host "Start cleaning App registrations"
 
-    # Prepare OData filter expression to pass it to Get-MgApplication -Filter parameter to make filter in one call
-    # https://learn.microsoft.com/en-us/graph/filter-query-parameter?tabs=http
-    $filter = "NOT(id in ($($ExcludeFilter | Join-String -SingleQuote -Separator ',')))"
+    $currentToken = Get-AzAccessToken -ResourceUrl "https://graph.microsoft.com/"
+    Connect-MgGraph -AccessToken $currentToken.Token
 
-    # Use Advanced query parameters to return filtered applications
+    # Retrieve all app registrations and exclude those matching ExcludeFilter display names
     # https://learn.microsoft.com/en-us/graph/aad-advanced-queries?tabs=http
-    $appsToRemoveFiltered = Get-MgApplication -Filter $filter -ConsistencyLevel eventual -CountVariable 1
+    $appsToRemoveFiltered = Get-MgApplication -All | Where-Object { $_.DisplayName -notin $ExcludeFilter }
 
-    # Iterate through the filtered list of AAD Apps registered and remove each App
+    # Iterate through the filtered list of Entra ID Apps and remove each App
     foreach ($app in $appsToRemoveFiltered) {
-        Write-Host "Removing AppRegistration: $($app.DisplayName)" -ForegroundColor Cyan
+        Write-Host "Removing AppRegistration [$($app.DisplayName)]" -ForegroundColor Cyan
         try {
             # Support -WhatIf and -Confirm parameters for safe execution
-            if ($PSCmdlet.ShouldProcess( $app, "Remove-AzADAppRegistration")) {
+            if ($PSCmdlet.ShouldProcess( $app.DisplayName, "Remove-AllEnIdAppRegistrations")) {
                 $app | Remove-AzADApplication
             }
         } catch {
-            Write-Host "An error occurred while removing Azure AD App: [$($_.Exception.Message)]" -ForegroundColor Red -ErrorAction Continue
+            Write-Host "An error occurred while removing Entra ID App [$($app.DisplayName)]: [$($_.Exception.Message)]" -ForegroundColor Red -ErrorAction Continue
         }
     }
-    Write-Host "Removed $($appsToRemoveFiltered.Count) AAD Apps registered." -ForegroundColor Green
+    Write-Host "Removed $($appsToRemoveFiltered.Count) Entra ID Apps" -ForegroundColor Green
 }
