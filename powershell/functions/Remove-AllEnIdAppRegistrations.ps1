@@ -12,15 +12,11 @@
     The function supports ShouldProcess, so you can run with -WhatIf and
     -Confirm for safe execution.
 
-    .PARAMETER Tenant
-    Tenant context to target for app registration cleanup.
-
     .PARAMETER ExcludeFilter
     Optional array of application object IDs to exclude from removal.
 
     .EXAMPLE
     $parameters = @{
-        Tenant        = (Get-AzContext).Tenant
         ExcludeFilter = @("AppId1", "AppId2")
         WhatIf        = $true
     }
@@ -40,34 +36,31 @@
 function Remove-AzADAppRegistration {
     [CmdletBinding(SupportsShouldProcess)]
     param (
-        [Parameter(Mandatory)]
-        [Microsoft.Azure.Commands.Profile.Models.PSAzureTenant]$Tenant,
-
-        [String[]]$ExcludeFilter
+        [ValidateNotNullOrEmpty()]
+        [String[]] $ExcludeFilter
     )
 
-    Write-Host "Start cleaning App registration in Tenant: [$($Tenant.Id)]"
+    Write-Host "Start cleaning App registrations"
 
-    # prepare OData filter expression to pass it to Get-MgApplication -Filter parameter to make filter in one call
+    # Prepare OData filter expression to pass it to Get-MgApplication -Filter parameter to make filter in one call
     # https://learn.microsoft.com/en-us/graph/filter-query-parameter?tabs=http
     $filter = "NOT(id in ($($ExcludeFilter | Join-String -SingleQuote -Separator ',')))"
 
-    # use Advanced query parameters to return filtered applications
+    # Use Advanced query parameters to return filtered applications
     # https://learn.microsoft.com/en-us/graph/aad-advanced-queries?tabs=http
     $appsToRemoveFiltered = Get-MgApplication -Filter $filter -ConsistencyLevel eventual -CountVariable 1
 
-    # iterate through the filtered list of AAD Apps registered and remove each App
+    # Iterate through the filtered list of AAD Apps registered and remove each App
     foreach ($app in $appsToRemoveFiltered) {
-        Write-Host "Removing AppRegistration: $($app.DisplayName)"
+        Write-Host "Removing AppRegistration: $($app.DisplayName)" -ForegroundColor Cyan
         try {
+            # Support -WhatIf and -Confirm parameters for safe execution
             if ($PSCmdlet.ShouldProcess( $app, "Remove-AzADAppRegistration")) {
                 $app | Remove-AzADApplication
-            } else {
-                $app | Remove-AzADApplication -WhatIf
             }
         } catch {
-            Write-Warning -Message "An error occurred while removing Azure AD App: [$($_.Exception.Message)]"
+            Write-Host "An error occurred while removing Azure AD App: [$($_.Exception.Message)]" -ForegroundColor Red -ErrorAction Continue
         }
     }
-    Write-Host "Removed $($appsToRemoveFiltered.Count) AAD Apps registered."
+    Write-Host "Removed $($appsToRemoveFiltered.Count) AAD Apps registered." -ForegroundColor Green
 }
