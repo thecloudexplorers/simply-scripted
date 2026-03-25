@@ -41,19 +41,19 @@ function Remove-AllEnIdGroups {
 
     Write-Host "Start cleaning App registrations"
     # Get list of all security groups and exclude one in ExcludeFilter
-    $groupsToRemove = Get-AzADGroup | Where-Object { $_.DisplayName -notin $ExcludeFilter }
+    [System.Object[]] $groupsToRemove = Get-AzADGroup | Where-Object { $_.DisplayName -notin $ExcludeFilter }
 
     # Iterate through the filtered list of security groups and remove each group
     foreach ($group in $groupsToRemove) {
-        Write-Host "Removing group: $($group.DisplayName)" -ForegroundColor Cyan
+        Write-Host "Removing group [$($group.DisplayName)]" -ForegroundColor Cyan
         try {
             # Support -WhatIf and -Confirm parameters for safe execution
-            if ($PSCmdlet.ShouldProcess( $group, "Remove-AzADGroup")) {
+            if ($PSCmdlet.ShouldProcess($group.DisplayName, "Remove-AllEnIdGroups")) {
                 $group | Remove-AzADGroup
             }
         } catch {
             Write-Host "An error occurred while removing Azure AD groups: [$($_.Exception.Message)]" -ForegroundColor Red -ErrorAction Continue
         }
     }
-    Write-Host "Removed $($groupsToRemove.Count) groups." -ForegroundColor Green
+    Write-Host "Removed [$($groupsToRemove.Count)] groups." -ForegroundColor Green
 }
