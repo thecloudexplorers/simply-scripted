@@ -39,7 +39,7 @@ function Remove-AllEnIdGroups {
         [System.String[]] $ExcludeFilter
     )
 
-    Write-Host "Start cleaning App registrations"
+    Write-Host "Start cleaning App registrations" -ForegroundColor Cyan
     # Get list of all security groups and exclude one in ExcludeFilter
     [System.Object[]] $groupsToRemove = Get-AzADGroup | Where-Object { $_.DisplayName -notin $ExcludeFilter }
 
