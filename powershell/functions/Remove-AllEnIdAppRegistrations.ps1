@@ -40,10 +40,10 @@ function Remove-AllEnIdAppRegistrations {
         [System.String[]] $ExcludeFilter
     )
 
-    Write-Host "Start cleaning App registrations"
+    Write-Host "Start cleaning App registrations" -ForegroundColor Cyan
 
     $currentToken = Get-AzAccessToken -ResourceUrl "https://graph.microsoft.com/"
-    Connect-MgGraph -AccessToken $currentToken.Token
+    Connect-MgGraph -AccessToken $currentToken.Token -NoWelcome
 
     # Retrieve all app registrations and exclude those matching ExcludeFilter display names
     # https://learn.microsoft.com/en-us/graph/aad-advanced-queries?tabs=http
@@ -54,7 +54,7 @@ function Remove-AllEnIdAppRegistrations {
         Write-Host "Removing AppRegistration [$($app.DisplayName)]" -ForegroundColor Cyan
         try {
             # Support -WhatIf and -Confirm parameters for safe execution
-            if ($PSCmdlet.ShouldProcess( $app.DisplayName, "Remove-AllEnIdAppRegistrations")) {
+            if ($PSCmdlet.ShouldProcess($app.DisplayName, "Remove-AllEnIdAppRegistrations")) {
                 $app | Remove-AzADApplication
             }
         } catch {
