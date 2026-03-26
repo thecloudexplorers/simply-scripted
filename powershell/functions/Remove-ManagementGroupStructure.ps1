@@ -43,7 +43,7 @@
 #>
 
 function Remove-ManagementGroupStructure {
-    [CmdletBinding()]
+    [CmdletBinding(SupportsShouldProcess)]
     param (
         [Parameter(Mandatory)]
         [ValidateNotNullOrEmpty()]
@@ -76,7 +76,9 @@ function Remove-ManagementGroupStructure {
 
     if ($defaultMgResponse.properties.defaultManagementGroup -ne $TenantRootManagementGroupId) {
         Write-Host "Default management group is [$($defaultMgResponse.properties.defaultManagementGroup)] resetting to root management group"
-        Invoke-RestMethod -Method 'PUT' -Uri $managementGroupsProviderUri -Headers $headers -Body $requestBody
+        if ($PSCmdlet.ShouldProcess($TenantRootManagementGroupId, 'Set default management group')) {
+            Invoke-RestMethod -Method 'PUT' -Uri $managementGroupsProviderUri -Headers $headers -Body $requestBody
+        }
     } else {
         Write-Host "Default management group is already set to tenant root management group"
     }
@@ -86,21 +88,23 @@ function Remove-ManagementGroupStructure {
     Write-Host "Moving all subscriptions to Tenant Root Management group"
     $listSubscriptionsQuery = 'resourcecontainers | where type == "microsoft.resources/subscriptions"'
     $graphResultSubscriptions = Search-AzGraph -Query $listSubscriptionsQuery -UseTenantScope
-    Write-Host "Identified [$($graphResultSubscriptions.Count)] subscriptions in the tenant'"
+    Write-Host "Identified [$($graphResultSubscriptions.Count)] subscriptions in the tenant'" -ForegroundColor Cyan
 
     $graphResultSubscriptions.ForEach{
         $currentSub = $_
 
         if ($currentSub.properties.managementGroupAncestorsChain.Count -gt 1 -or $currentSub.properties.managementGroupAncestorsChain.name -ne $TenantRootManagementGroupId) {
-            Write-Host " Moving subscription [$($currentSub.name)] under Tenant Root Management group"
-            New-AzManagementGroupSubscription -GroupName $TenantRootManagementGroupId -SubscriptionId $currentSub.subscriptionId 3>&1 > $null
-            Write-Host "  subscription moved"
+            Write-Host " Moving subscription [$($currentSub.name)] under Tenant Root Management group" -ForegroundColor Cyan
+            if ($PSCmdlet.ShouldProcess($currentSub.name, 'Move subscription to tenant root management group')) {
+                New-AzManagementGroupSubscription -GroupName $TenantRootManagementGroupId -SubscriptionId $currentSub.subscriptionId 3>&1 > $null
+                Write-Host "  subscription moved" -ForegroundColor Green
+            }
         } else {
-            Write-Host " Skipping, subscription [$($currentSub.name)] is already under the Tenant Root Management group"
+            Write-Host " Skipping, subscription [$($currentSub.name)] is already under the Tenant Root Management group" -ForegroundColor Yellow
         }
     }
 
-    Write-Host "Moving of subscriptions has been completed`n"
+    Write-Host "Moving of subscriptions has been completed`n" -ForegroundColor Green
     #endregion
 
 
@@ -121,15 +125,21 @@ resourcecontainers
         $allManagementGroups.ForEach{
             $currentMg = $_
             try {
-                Write-Host "Removing management group [$($currentMg.name)]"
-                Remove-AzManagementGroup -GroupName $currentMg.name 3>&1 > $null
-                Write-Host " group removed"
+                Write-Host "Removing management group [$($currentMg.name)]" -ForegroundColor Cyan
+                if ($PSCmdlet.ShouldProcess($currentMg.name, 'Remove management group')) {
+                    Remove-AzManagementGroup -GroupName $currentMg.name 3>&1 > $null
+                    Write-Host " group removed" -ForegroundColor Green
+                }
             } catch {
                 # swallow the exception
-                Write-Host "Failed removing [$($currentMg.name)]."
+                Write-Host "Failed removing [$($currentMg.name)]." -ForegroundColor Yellow
                 Write-Warning -Message "$($_.Exception.Message)"
             }
         }
+
+        # If WhatIf is active, resources are never deleted so the loop would never
+        # terminate; break after a single simulated pass instead.
+        if ($WhatIfPreference) { break }
 
         # get any remaining management groups that could not be deleted due to inheritance
         $graphResultManagementGroups = Search-AzGraph -Query $listManagementGroups -UseTenantScope
@@ -137,5 +147,5 @@ resourcecontainers
     }
     #endregion
 
-    Write-Host "All done!!"
+    Write-Host "All done!!" -ForegroundColor Green
 }
