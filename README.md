@@ -4,6 +4,13 @@ This repo is a collection of automation snippets for Azure, Azure DevOps, and su
 Bicep controllers and modules, PowerShell deployment scripts and functions, and Azure DevOps pipeline decorator
 examples.
 
+## Prerequisites
+
+- [PowerShell 7+](https://learn.microsoft.com/en-us/powershell/scripting/install/installing-powershell)
+- [Azure PowerShell module (`Az`)](https://learn.microsoft.com/en-us/powershell/azure/install-az-ps)
+- [Bicep CLI](https://learn.microsoft.com/en-us/azure/azure-resource-manager/bicep/install)
+- [Azure CLI](https://learn.microsoft.com/en-us/cli/azure/install-azure-cli) (optional, for some deployment scripts)
+
 ## Bicep controllers (composed deployments)
 - [iac/az-controllers/bastionJumpBox.bicep](iac/az-controllers/bastionJumpBox.bicep) - Bastion host, jump box VM, NICs,
   vNet/subnets, NSGs, PIP, and Key Vault with secrets. - QuickStart guide in
@@ -16,29 +23,34 @@ examples.
   Service Groups (preview) in up to ten tiers. Details in
   [iac/az-controllers/serviceGroupsHierarchy.md](iac/az-controllers/serviceGroupsHierarchy.md).
 
-Sample parameter files live in [params](params) (for example
-[params/serviceGroupsHierarchy.json](params/serviceGroupsHierarchy.json)).
+Sample parameter files live in [params](params):
+- [params/bastionJumpBox.json](params/bastionJumpBox.json)
+- [params/managementGroupsHierarchy.json](params/managementGroupsHierarchy.json)
+- [params/serverVm.json](params/serverVm.json)
+- [params/serviceGroupsHierarchy.json](params/serviceGroupsHierarchy.json)
 
 ## Bicep modules (building blocks)
-Located under [iac/az-modules](iac/az-modules), covering:
+Located under [iac/az-modules](iac/az-modules), organised by resource provider:
 - **Microsoft.Management**:
-  [managementGroup.bicep](iac/az-modules/managementGroup.bicep),
-  [serviceGroup.bicep](iac/az-modules/serviceGroup.bicep)
+  [childManagementGroup.bicep](iac/az-modules/Microsoft.Management/managementgroups/childManagementGroup.bicep),
+  [childServiceGroup.bicep](iac/az-modules/Microsoft.Management/serviceGroups/childServiceGroup.bicep)
 - **Microsoft.Network**:
-  [virtualNetwork.bicep](iac/az-modules/virtualNetwork.bicep),
-  [subnet.bicep](iac/az-modules/subnet.bicep),
-  [networkSecurityGroup.bicep](iac/az-modules/networkSecurityGroup.bicep),
-  [publicIPAddress.bicep](iac/az-modules/publicIPAddress.bicep),
-  [networkInterface.bicep](iac/az-modules/networkInterface.bicep),
-  [bastionHost.bicep](iac/az-modules/bastionHost.bicep)
+  [smallNetwork.bicep](iac/az-modules/Microsoft.Network/virtualNetworks/smallNetwork.bicep),
+  [standardSubnet.bicep](iac/az-modules/Microsoft.Network/virtualNetworks/subnets/standardSubnet.bicep),
+  [bastionNsg.bicep](iac/az-modules/Microsoft.Network/networkSecurityGroups/bastionNsg.bicep),
+  [jumpVmNsg.bicep](iac/az-modules/Microsoft.Network/networkSecurityGroups/jumpVmNsg.bicep),
+  [standardPip.bicep](iac/az-modules/Microsoft.Network/publicIPAddresses/standardPip.bicep),
+  [simpleNic.bicep](iac/az-modules/Microsoft.Network/networkInterfaces/simpleNic.bicep),
+  [basicBastionHost.bicep](iac/az-modules/Microsoft.Network/bastionHosts/basicBastionHost.bicep),
+  [developerBastionHost.bicep](iac/az-modules/Microsoft.Network/bastionHosts/developerBastionHost.bicep)
 - **Microsoft.Compute**:
-  [virtualMachine.bicep](iac/az-modules/virtualMachine.bicep)
-- **Microsoft.KeyVault**: [vault.bicep](iac/az-modules/vault.bicep),
-  [secret.bicep](iac/az-modules/secret.bicep)
+  [jumpBoxVm.bicep](iac/az-modules/Microsoft.Compute/virtualMachines/jumpBoxVm.bicep),
+  [serverVm.bicep](iac/az-modules/Microsoft.Compute/virtualMachines/serverVm.bicep)
+- **Microsoft.KeyVault**:
+  [standardVault.bicep](iac/az-modules/Microsoft.KeyVault/vaults/standardVault.bicep),
+  [standardSecret.bicep](iac/az-modules/Microsoft.KeyVault/vaults/secrets/standardSecret.bicep)
 - **Microsoft.ContainerRegistry**:
-  [registry.bicep](iac/az-modules/registry.bicep)
-- **Utilities**: [resourceId.bicep](iac/az-modules/resourceId.bicep),
-  [timestamp.bicep](iac/az-modules/timestamp.bicep)
+  [basicRegistry.bicep](iac/az-modules/Microsoft.ContainerRegistry/registries/basicRegistry.bicep)
 
 ## PowerShell
 Deployment helpers for standing up the labs, managing configuration, and reusable functions for Azure/Entra, Azure
@@ -74,6 +86,10 @@ Function library in [powershell/functions](powershell/functions):
 - [Read-AdoOrganizationSecurityPolicies.ps1](powershell/functions/Read-AdoOrganizationSecurityPolicies.ps1)
 - [Read-AdoRepoAdvancedSecurityStatus.ps1](powershell/functions/Read-AdoRepoAdvancedSecurityStatus.ps1)
 - [Read-AdoTenantOrganizationConnections.ps1](powershell/functions/Read-AdoTenantOrganizationConnections.ps1)
+- [Remove-AllEnIdAppRegistrations.ps1](powershell/functions/Remove-AllEnIdAppRegistrations.ps1)
+- [Remove-AllEnIdGroups.ps1](powershell/functions/Remove-AllEnIdGroups.ps1)
+- [Remove-AzRogueRoleAssignments.ps1](powershell/functions/Remove-AzRogueRoleAssignments.ps1)
+- [Remove-ManagementGroupStructure.ps1](powershell/functions/Remove-ManagementGroupStructure.ps1)
 - [Remove-SoftDeletedApiManagementInstance.ps1](powershell/functions/Remove-SoftDeletedApiManagementInstance.ps1)
 - [Set-AdoAuditStream.ps1](powershell/functions/Set-AdoAuditStream.ps1)
 - [Set-AzRoleAssignments.ps1](powershell/functions/Set-AzRoleAssignments.ps1)
@@ -82,6 +98,18 @@ Function library in [powershell/functions](powershell/functions):
 - [Test-AdoServiceConnection.ps1](powershell/functions/Test-AdoServiceConnection.ps1)
 
 ## Azure DevOps pipeline samples
-Decorator examples under [pipelines/decorators](pipelines/decorators) demonstrate injecting tasks (Hello World,
-Gitleaks, Microsoft Security DevOps) via vss-extension.json plus YAML snippets. Token replacement pipeline sample in
+Decorator examples under [pipelines/decorators](pipelines/decorators) demonstrate injecting tasks via
+`vss-extension.json` plus YAML snippets. Four examples are available:
+
+- **powershell-hello-world-basic** — Injects a PowerShell "Hello World" task into every pipeline run.
+- **powershell-hello-world-advanced** — Injects a PowerShell "Hello World" task after a Bash task.
+- **microsoft-security-devops-basic** — Always injects the [Microsoft Security DevOps](https://learn.microsoft.com/en-us/azure/defender-for-cloud/azure-devops-extension) task into all pipelines.
+- **microsoft-security-devops-advanced** — Injects the Microsoft Security DevOps task only when it is not already present in the pipeline.
+
+Token replacement pipeline sample in
 [pipelines/replaceConfigurationFilesTokens](pipelines/replaceConfigurationFilesTokens/readme.md).
+
+## References
+Historical and supplementary material in [references](references):
+- [Read-AdoOrganizationAdvancedSecurityUsage.ps1](references/Read-AdoOrganizationAdvancedSecurityUsage.ps1) — Script for reading ADO Advanced Security usage data.
+- [pre-defender-for-devops](references/pre-defender-for-devops) — Earlier Defender for DevOps pipeline decorator example (pre-`microsoft-security-devops` extension).
