@@ -1,0 +1,38 @@
+# Scheduled pipeline for notifyStaleBranches.ps1 only. Scans the repositories configured in
+# notifyStaleBranches.config.json (edit that file to change scan scope; no pipeline changes needed).
+# The inactivity threshold is set with -InactiveDays in the step below.
+# All scanned repositories must live in this same ADO project - the pipeline's scoped OAuth token
+# cannot access other projects.
+#
+# Requires the pipeline's build service identity to have Reader access to every repository listed
+# in notifyStaleBranches.config.json.
+
+trigger: none
+pr: none
+
+# Cron fields: minute hour day month day-of-week (UTC). Mon/Wed/Fri approximates
+# "every 2 days, weekdays only" while staying within a 5-field weekday-restricted schedule.
+schedules:
+  - cron: "0 7 * * 1,3,5"
+    displayName: Every 2 days, weekdays only (Mon/Wed/Fri, 07:00 UTC)
+    branches:
+      include:
+        - main
+    always: true
+
+pool:
+  vmImage: ubuntu-latest
+
+steps:
+  - checkout: self
+    fetchDepth: 1
+    persistCredentials: false
+
+  - pwsh: >-
+      ./powershell/notifyStaleBranches.ps1
+      -RootRepoLocation "$(Pipeline.Workspace)/s"
+      -InactiveDays 21
+      -OrganizationUrl "$(System.CollectionUri)"
+      -Project "$(System.TeamProject)"
+      -AccessToken "$(System.AccessToken)"
+    displayName: Notify authors of stale feature branches
