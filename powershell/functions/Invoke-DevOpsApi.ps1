@@ -54,7 +54,7 @@ function Invoke-DevOpsApi {
         [Parameter(ParameterSetName = 'WithoutBody')]
         [Parameter(Mandatory, ParameterSetName = 'WithBody')]
         [ValidateSet('GET', 'POST', 'PUT', 'PATCH', 'DELETE')]
-        [System.String] $Method = 'GET',
+        [System.String] $Method
 
         [Parameter(Mandatory, ParameterSetName = 'WithBody')]
         [System.Object] $Body,
