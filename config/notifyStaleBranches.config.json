@@ -1,0 +1,13 @@
+{
+  "repositories": [
+    "application-landing-zone",
+    "azure-control-plane"
+  ],
+  "branchPrefixes": [
+    "feature",
+    "hotfix"
+  ],
+  "email": {
+    "senderAddress": ""
+  }
+}
