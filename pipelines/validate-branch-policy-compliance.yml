@@ -1,0 +1,21 @@
+# Reusable step list enforcing branch naming convention, lowercase-only naming, and "not behind target"
+# freshness for pull requests. Include this in a pipeline that is configured as a required Build
+# Validation policy (Repos > Branches > branch policies > Build Validation), otherwise the
+# System.PullRequest.* variables passed to the script are never populated and validation fails.
+#
+# trigger/pr are set to none so this never runs on a plain push; a required Build Validation
+# policy still queues it for PRs regardless of the pr trigger setting below.
+trigger: none
+pr: none
+
+steps:
+  - checkout: self
+    fetchDepth: 0 # full history required for the ahead/behind comparison below
+    persistCredentials: true
+
+  - pwsh: >-
+      ./powershell/validateBranchPolicyCompliance.ps1
+      -RootRepoLocation "$(Pipeline.Workspace)/s"
+      -SourceBranch "$(System.PullRequest.SourceBranch)"
+      -TargetBranch "$(System.PullRequest.TargetBranch)"
+    displayName: Validate branch naming, casing, destination, and freshness

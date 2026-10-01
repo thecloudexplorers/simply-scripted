@@ -1,0 +1,24 @@
+{
+  "gitRemote": "origin",
+  "branchNaming": {
+    "format": "<type>/<user-tag>/<work-item-id>-<description>",
+    "allowedTypes": [
+      "feature",
+      "hotfix"
+    ],
+    // User tag segment: lowercase letters, digits, and hyphens only.
+    "userTagPattern": "^[a-z0-9-]+$",
+    // Work-item ID segment: one or more digits only.
+    "workItemIdPattern": "^[0-9]+$",
+    // Description segment: lowercase letters, digits, and hyphens only.
+    "descriptionPattern": "^[a-z0-9-]+$"
+  },
+  "allowedTargets": {
+    "feature": [
+      "*"
+    ],
+    "hotfix": [
+      "*"
+    ]
+  }
+}
