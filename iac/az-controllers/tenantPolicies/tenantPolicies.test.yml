@@ -1,0 +1,64 @@
+# Test pipeline for tenantPolicies.bicep. Deploys one of the happy-flow sample parameter files from
+# .tests at management group scope, as a what-if by default.
+#
+# Requires an Azure Resource Manager service connection with permission to deploy policy assignments
+# at the management group (for example Resource Policy Contributor), and the management groups named in
+# the TargetScope values of the chosen parameter file must exist. Edit the sample file or add your own
+# to deploy to other management groups.
+#
+# The parameter file selects the template with its `using` statement, so no template file is passed.
+# Bicep parameter files need Azure PowerShell 10.4.0 or later and Bicep CLI 0.22 or later.
+
+trigger: none
+pr: none
+
+pool:
+  vmImage: ubuntu-latest
+
+parameters:
+  - name: serviceConnection
+    type: string
+    displayName: Azure Resource Manager service connection
+  - name: managementGroupId
+    type: string
+    displayName: Management group id the deployment is created at
+  - name: location
+    type: string
+    displayName: Location of the deployment metadata
+    default: westeurope
+  - name: parameterFile
+    type: string
+    displayName: Sample parameter file from .tests
+    default: happy-minimal.bicepparam
+    values:
+      - happy-minimal.bicepparam
+      - happy-diagnostic-initiative.bicepparam
+      - happy-multiple-scopes.bicepparam
+      - happy-empty.bicepparam
+  - name: whatIf
+    type: boolean
+    displayName: Run as what-if, no changes are made
+    default: true
+
+steps:
+  - checkout: self
+    fetchDepth: 1
+    persistCredentials: false
+
+  - task: AzurePowerShell@5
+    displayName: Deploy tenantPolicies.bicep (${{ parameters.parameterFile }})
+    inputs:
+      pwsh: true
+      azureSubscription: ${{ parameters.serviceConnection }}
+      ScriptType: InlineScript
+      azurePowerShellVersion: LatestVersion
+      errorActionPreference: stop
+      Inline: |
+        $deploymentArguments = @{
+          Name                  = "tenantPolicies-$(Build.BuildId)"
+          Location              = "${{ parameters.location }}"
+          ManagementGroupId     = "${{ parameters.managementGroupId }}"
+          TemplateParameterFile = "$(Build.SourcesDirectory)/iac/az-controllers/tenantPolicies/.tests/${{ parameters.parameterFile }}"
+          WhatIf                = [System.Convert]::ToBoolean("${{ parameters.whatIf }}")
+        }
+        New-AzManagementGroupDeployment @deploymentArguments
