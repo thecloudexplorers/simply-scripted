@@ -1,0 +1,138 @@
+{
+  "name": "devjevnl-remediate-diagnostic-settings",
+  "properties": {
+    "description": "This policy initiative remediates diagnostic settings ensuring the correct log analytics workspace is used for audit logging",
+    "displayName": "DevJevnl Remediate diagnostic settings",
+    "metadata": {
+      "category": "Monitoring",
+      "version": "1.1.0"
+    },
+    "parameters": {
+      "logAnalytics": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Log Analytics",
+          "description": "Resource ID of the Log Analytics workspace that receives the diagnostic settings",
+          "strongType": "omsWorkspace",
+          "assignPermissions": true
+        }
+      },
+      "logsEnabled": {
+        "type": "boolean",
+        "metadata": {
+          "displayName": "Enable logs",
+          "description": "Enable logs"
+        },
+        "defaultValue": true
+      },
+      "metricsEnabled": {
+        "type": "boolean",
+        "metadata": {
+          "displayName": "Enable metrics",
+          "description": "Enable Metrics"
+        },
+        "defaultValue": false
+      }
+    },
+    "policyDefinitionGroups": [],
+    "policyDefinitions": [
+      {
+        "policyDefinitionReferenceId": "storage-blob",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/b4fe1a3b-0715-4c6c-a5ea-ffc33cf823cb",
+        "parameters": {
+          "logAnalytics": {
+            "value": "[parameters('logAnalytics')]"
+          },
+          "metricsEnabled": {
+            "value": "[parameters('metricsEnabled')]"
+          },
+          "logsEnabled": {
+            "value": "[parameters('logsEnabled')]"
+          }
+        },
+        "groupNames": []
+      },
+      {
+        "policyDefinitionReferenceId": "storage-file",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/25a70cc8-2bd4-47f1-90b6-1478e4662c96",
+        "parameters": {
+          "logAnalytics": {
+            "value": "[parameters('logAnalytics')]"
+          },
+          "metricsEnabled": {
+            "value": "[parameters('metricsEnabled')]"
+          },
+          "logsEnabled": {
+            "value": "[parameters('logsEnabled')]"
+          }
+        },
+        "groupNames": []
+      },
+      {
+        "policyDefinitionReferenceId": "storage-queue",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/7bd000e3-37c7-4928-9f31-86c4b77c5c45",
+        "parameters": {
+          "logAnalytics": {
+            "value": "[parameters('logAnalytics')]"
+          },
+          "metricsEnabled": {
+            "value": "[parameters('metricsEnabled')]"
+          },
+          "logsEnabled": {
+            "value": "[parameters('logsEnabled')]"
+          }
+        },
+        "groupNames": []
+      },
+      {
+        "policyDefinitionReferenceId": "storage-table",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/2fb86bf3-d221-43d1-96d1-2434af34eaa0",
+        "parameters": {
+          "logAnalytics": {
+            "value": "[parameters('logAnalytics')]"
+          },
+          "metricsEnabled": {
+            "value": "[parameters('metricsEnabled')]"
+          },
+          "logsEnabled": {
+            "value": "[parameters('logsEnabled')]"
+          }
+        },
+        "groupNames": []
+      },
+      {
+        "policyDefinitionReferenceId": "key-vault",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/951af2fa-529b-416e-ab6e-066fd85ac459",
+        "parameters": {
+          "logAnalytics": {
+            "value": "[parameters('logAnalytics')]"
+          },
+          "AllMetricsEnabled": {
+            "value": "[string(parameters('metricsEnabled'))]"
+          },
+          "AuditEventEnabled": {
+            "value": "[string(parameters('logsEnabled'))]"
+          }
+        },
+        "groupNames": []
+      },
+      {
+        "policyDefinitionReferenceId": "virtual-network",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/3234ff41-8bec-40a3-b5cb-109c95f1c8ce",
+        "parameters": {
+          "logAnalytics": {
+            "value": "[parameters('logAnalytics')]"
+          },
+          "metricsEnabled": {
+            "value": "[parameters('metricsEnabled')]"
+          },
+          "categoryGroup": {
+            "value": "allLogs"
+          }
+        },
+        "groupNames": []
+      }
+    ],
+    "policyType": "Custom"
+  }
+}
